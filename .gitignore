@@ -1,0 +1,31 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+plinko_app/build/
+plinko_app/.dart_tool/
+plinko_app/.flutter-plugins
+plinko_app/.flutter-plugins-dependencies
+plinko_app/.packages
+
+# IDE
+.idea/
+.vscode/settings.json
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Sessions HTML générées (les .md sont suffisants)
+sessions/*.html
+specs/*.html
+Informations\ générales/*.html
+
+# Python
+__pycache__/
+*.pyc
+
+# Logs
+*.log
