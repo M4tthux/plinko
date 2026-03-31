@@ -7,7 +7,7 @@ import 'ui/reward_overlay.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-03-31 · build 15';
+const String kBuildTime = '2026-04-01 · build 23';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,11 +51,28 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0a0a18),
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Jeu Flame
+          // Background image — visible dans les zones letterbox autour du jeu
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/background.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // Jeu Flame — fond sombre opaque rendu par Flame
           GameWidget(game: _game),
+
+          // Cadre plateau néon (PNG avec alpha — contain pour garder les proportions portrait)
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/plateau.png',
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
+            ),
+          ),
 
           // Instructions
           const Positioned(

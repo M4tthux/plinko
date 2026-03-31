@@ -48,7 +48,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
   final Map<int, int> _pegCooldownFrames = {};
 
   @override
-  Color backgroundColor() => const Color(0xFF0a0a18);
+  Color backgroundColor() => const Color(0xFF08040f); // fond sombre opaque
 
   // ── Chargement initial ───────────────────────────────────────────────────
 
@@ -61,11 +61,11 @@ class PlinkoGame extends FlameGame with TapCallbacks {
       await TrajectoryLoader.load();
     }
 
-    // Configurer la caméra
+    // Configurer la caméra — fixe, centrée sur tout le plateau
     camera.viewfinder.zoom = PlinkoConfig.zoom;
     camera.viewfinder.anchor = Anchor.center;
     camera.viewfinder.position =
-        Vector2(PlinkoConfig.worldWidth / 2, 10);
+        Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
 
     // Précalculer les positions des picots (utilisées en mode physique fallback)
     _buildPegPositions();
@@ -73,7 +73,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     // Assignation initiale des lots (décor avant le premier lancer)
     _assignSlotsDecor();
 
-    // Plateau visuel
+    // Fond sombre opaque (requis pour que le canvas Flame soit opaque sur Chrome Web)
     await world.add(BoardBuilder.buildBackground());
     await world.addAll(BoardBuilder.buildWalls());
     await world.addAll(BoardBuilder.buildPegs());
@@ -369,19 +369,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   /// Caméra qui suit la bille avec lerp.
   void _followBall() {
-    final ball = _currentBall;
-    if (ball == null) return;
-
-    final targetY = (ball.position.y + PlinkoConfig.cameraLeadY)
-        .clamp(5.0, PlinkoConfig.worldHeight - 4.0);
-
-    final current = camera.viewfinder.position;
-    final targetX = PlinkoConfig.worldWidth / 2;
-
-    camera.viewfinder.position = Vector2(
-      current.x + (targetX - current.x) * PlinkoConfig.cameraLerp,
-      current.y + (targetY - current.y) * PlinkoConfig.cameraLerp,
-    );
+    // Caméra fixe — plateau toujours visible en entier (board frame PNG overlay).
   }
 
   /// Vérifie si la bille a atterri et notifie le widget Flutter.
@@ -425,7 +413,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     _physicsFrame = 0;
     _pegCooldownFrames.clear();
     debugTargetNotifier.value = null;
-    camera.viewfinder.position = Vector2(PlinkoConfig.worldWidth / 2, 10);
+    camera.viewfinder.position = Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
   }
 
   // ── Reconstruction du plateau (appelée par ConfigPanel) ──────────────────

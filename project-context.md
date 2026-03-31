@@ -222,8 +222,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🟢 Design néon validé | Plateau néon cyan→violet validé (Session 11). Overlay "Perdu" validé. Win/jackpot overlay à tester. |
-| **Dev** | 🟡 1 tâche En test | Overlay win/jackpot — code ok, à valider visuellement |
+| **Design & UI** | 🔴 Bloqué | Assets intégrés (fond, cadre, picots sprite). Canvas Flame transparent (checkered) — bloque toute validation visuelle. |
+| **Dev** | 🔴 Bug bloquant | Canvas transparent sur Chrome Web — backgroundColor() non fiable sur Flutter Web. Background PositionComponent présent mais pas suffisant. À investiguer. |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
 
@@ -269,4 +269,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-03-31 — Session 11 : refonte design néon validée (plateau cyan→violet, cases pill-shape), table de lots réelle chargée (Perdu 33% → 500€ 0.5%), replayStride=3, overlay "Perdu" validé visuellement. Prochaine session : design (nouvelle conversation) — valider overlay win/jackpot + itérations visuelles.*
+*Dernière mise à jour : 2026-04-01 — Session Design Assets : refonte design avec assets Gemini (background.png, plateau.png, rond.png). Bille dorée, picots cyan sprite, cases coupe verre. Problème bloquant : canvas Flame transparent (checkered) sur Chrome Web. Cause identifiée (backgroundColor() non fiable), fix partiel (Background PositionComponent restauré + simplifié). Toujours transparent au build 23. À résoudre en prochaine session.*
