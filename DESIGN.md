@@ -63,11 +63,21 @@
 - Jackpot central : or `#f0c040`, gras
 - Autres cases : blanc `#e0e0f0`
 
-### Overlay récompense (état actuel)
-- Fond : Surface `#1a1a2e` avec opacité
-- Animation : fade-in + scale
-- Jackpot : version or spectaculaire
-- **À refondre** : visuel end game (feux d'artifice, halo, icône €) — Haute priorité backlog
+### Overlay récompense — brief validé (2026-03-31)
+
+**Direction : L'Explosion Contrôlée** — l'impact physique de la bille déclenche la célébration.
+
+| État | Animation | Couleur |
+|---|---|---|
+| **Perte** | Fade doux, plateau s'assombrit, message rassurant centré | Pas de rouge — neutre |
+| **Gain normal** | Flash blanc court → confettis depuis la case vers le haut → montant scale+bounce → halo | Cyan `#00c8ff` |
+| **Jackpot** | Flash long → toutes cases s'éteignent sauf la gagnante → fontaine particules or → halo pulse 3× → montant tremble 1s puis se stabilise | Or `#f0c040` exclusif |
+
+**Règles d'animation :**
+- Zéro effet pendant le vol de la bille — tout commence à l'atterrissage
+- Confettis partent depuis la case gagnante (pas du haut de l'écran)
+- Le montant est toujours le centre visuel — les effets l'entourent, jamais devant
+- Jackpot : toutes les autres cases s'éteignent avant la révélation (focus total)
 
 ---
 
