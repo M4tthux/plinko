@@ -59,7 +59,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | `funnelZoneWidth` | 2.5 | Zone entonnoir latéral |
 | `funnelForce` | 30.0 | Force entonnoir |
 | `slotCount` | **7** | Cases : 10/50/100/500/100/50/10 pts |
-| `replayStride` | **4** | Vitesse replay — ajusté Session 8 (5=trop lent, 4=bon compromis) |
+| `replayStride` | **3** | Vitesse replay — ajusté Session 11 (4=trop lent, 3=bon rythme) |
 | `cameraLerp` | 0.08 | Fluidité caméra |
 | `cameraLeadY` | 3.0 | Avance caméra vers le bas |
 | `launchMin/Max` | 1.0 / 17.0 | Zone de lancer clampée |
@@ -82,8 +82,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - One-shot — une seule partie par session
 - Pas de sons pour le MVP
 - Pas de trajectoire prévisionnelle — lancer à l'aveugle
-- Jackpot unique centré : 1000€ en case centrale uniquement
-- Valeurs par défaut : 1€(30%), 2€(25%), 5€(20%), 10€(13%), 20€(7%), 50€(3%), 1000€(2%)
+- Jackpot unique centré : 500€ en case centrale uniquement
+- Table de lots réelle (Session 11) : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot)
 - Ambiance : futuriste / arcade — néons, fond sombre, bille lumineuse
 
 ### Process (depuis migration Claude Code — 2026-03-31)
@@ -174,6 +174,13 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | 2026-03-31 | Process | **Git à initialiser** : première action de la prochaine session avant tout nouveau code. |
 | 2026-03-31 | Process | **Skills manquants identifiés** : plinko-flutter-run (relance serveur), plinko-regen-trajectories (script Python auto), decisions-log.md (séparer historique des décisions actives). |
 | 2026-03-31 | Process | **Workflow hybride validé** : Claude Code pour dev/fichiers/terminal — Chat (Cowork/Claude.ai) pour design visuel, screenshots, game design. Bridge = fichiers projet partagés. |
+| 2026-03-31 | Dev | **Dev Session 10 — Refonte visuelle end game** : `reward_overlay.dart` v3 — flash blanc, confettis bas→haut (win), feux d'artifice (jackpot), halo pulse ×3, montant shake 1s, dim cases non-gagnantes (board.dart). Couleurs DESIGN.md : or `#f0c040`, surface `#1a1a2e`. |
+| 2026-03-31 | Dev | **isLoss ajouté** à `PrizeLot` + `LandedResult` — prépare le tableau de lots avec perte. Mode perte : overlay neutre, fade doux, pas de particules. |
+| 2026-03-31 | Dev | **highlightedSlotIndex** dans `PlinkoConfig` — jackpot dim toutes cases sauf la gagnante pendant l'overlay. |
+| 2026-03-31 | Dev | **Session 11 — Refonte design néon** : picots ronds avec gradient cyan→violet (4 tons par rangée), fond pyramide glow, cases pill-shape avec gradient + bordure néon. `board.dart` refactorisé. |
+| 2026-03-31 | Dev | **Session 11 — Table de lots réelle** : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot). `plinko_config.dart` mis à jour. |
+| 2026-03-31 | Dev | **Session 11 — replayStride** 4→3. Validé par Matthieu comme bon rythme. |
+| 2026-03-31 | Design | **Session 11 — Design validé visuellement** : plateau néon cyan→violet, overlay "Perdu" mode perte confirmé (carte grise, "Pas de chance cette fois…", sans particules). |
 
 ---
 
@@ -187,8 +194,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ### Dev — En test (valider en prochaine session)
 - *(aucune tâche en test)*
 
-### Dev — En cours
-- **Visuel end game** : brief validé (Direction B — L'Explosion Contrôlée). Implémentation dans `reward_overlay.dart` — prochaine session dev
+### Dev — En test (valider visuellement en prochaine session)
+- **Overlay win/jackpot** : mode "Perdu" validé (Session 11). Overlay win (flash blanc + confettis) et jackpot (feux d'artifice or) non encore testés visuellement — code correct, à valider.
 
 ### Dev — Backlog prioritaire
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) : à retirer avant prod — Basse priorité
@@ -215,8 +222,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🟡 En cours | DESIGN.md créé. Brief visuel end game validé (Direction B). Implémentation à venir. |
-| **Dev** | 🟡 1 tâche En cours | Visuel end game — brief validé, implémentation prochaine session |
+| **Design & UI** | 🟢 Design néon validé | Plateau néon cyan→violet validé (Session 11). Overlay "Perdu" validé. Win/jackpot overlay à tester. |
+| **Dev** | 🟡 1 tâche En test | Overlay win/jackpot — code ok, à valider visuellement |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
 
@@ -250,7 +257,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | `sessions/2026-03-26_dev-session-1b.md` | Log Dev Session 1b — Flutter, forge2d, Notion |
 | `sessions/2026-03-27_dev-session-2.md` | Log Dev Session 2 — tuning plateau |
 | `plinko_app/lib/ui/config_panel.dart` | ConfigPanel — sliders live, validation physique, bouton Appliquer, sauvegarde configs nommées |
-| `plinko_app/lib/ui/reward_overlay.dart` | Overlay récompense — fade-in + scale, jackpot or, tap pour fermer |
+| `plinko_app/lib/ui/reward_overlay.dart` | Overlay récompense v3 — flash blanc, confettis, pulse ×3 jackpot, shake, mode perte |
 | `sessions/2026-03-27_dev-session-3.md` | Log Dev Session 3 — bugfix physique, replay, trajectoires |
 | `sessions/2026-03-27_dev-session-3b.md` | Log Dev Session 3b — ConfigPanel, bug const→final, bug bocal identifié |
 | `sessions/2026-03-28_dev-session-4.md` | Log Dev Session 4 — fix orbite+bocal, trajectories.json, overlay récompense, sauvegarde configs |
@@ -262,4 +269,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-03-31 — Session Migration + Design : infrastructure Claude Code complète, brainstorm.skill, DESIGN.md, brief visuel end game validé (Direction B). Prochaine session : implémentation reward_overlay.dart.*
+*Dernière mise à jour : 2026-03-31 — Session 11 : refonte design néon validée (plateau cyan→violet, cases pill-shape), table de lots réelle chargée (Perdu 33% → 500€ 0.5%), replayStride=3, overlay "Perdu" validé visuellement. Prochaine session : design (nouvelle conversation) — valider overlay win/jackpot + itérations visuelles.*
