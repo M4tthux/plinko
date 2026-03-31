@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Flutter Web (Plinko App)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8080"],
+      "port": 8080,
+      "cwd": "plinko_app"
+    },
+    {
+      "name": "Docs Renderer (render_docs.py)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["scripts/render_docs.py"],
+      "port": null
+    }
+  ]
+}
