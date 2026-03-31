@@ -63,13 +63,14 @@ class PlinkoConfig {
   /// Liste des lots configurables. La somme des probabilities doit être 100.
   /// Le lot avec isJackpot = true est toujours placé en case centrale.
   static List<PrizeLot> lots = [
-    PrizeLot(name: '1000€',  probability: 2,  isJackpot: true),
-    PrizeLot(name: '50€',    probability: 3),
-    PrizeLot(name: '20€',    probability: 7),
-    PrizeLot(name: '10€',    probability: 13),
-    PrizeLot(name: '5€',     probability: 20),
-    PrizeLot(name: '2€',     probability: 25),
-    PrizeLot(name: '1€',     probability: 30),
+    PrizeLot(name: '500€',  probability: 0.5,  isJackpot: true),
+    PrizeLot(name: '50€',   probability: 2.5),
+    PrizeLot(name: '25€',   probability: 4.0),
+    PrizeLot(name: '10€',   probability: 8.0),
+    PrizeLot(name: '5€',    probability: 12.0),
+    PrizeLot(name: '2€',    probability: 18.0),
+    PrizeLot(name: '1€',    probability: 22.0),
+    PrizeLot(name: 'Perdu', probability: 33.0, isLoss: true),
   ];
 
   /// Assignation actuelle des lots aux cases pour la partie en cours.
@@ -105,7 +106,7 @@ class PlinkoConfig {
 
   // ─── [TUNABLE] Replay ─────────────────────────────────────────────────────
   /// Ticks entre chaque frame de replay. 2=rapide, 4=normal, 6=lent.
-  static int replayStride = 4; // 5 un cran trop lent, 4 = bon compromis vitesse/lisibilité
+  static int replayStride = 3; // 4 = trop lent, 3 = bon rythme
 
   // ─── Caméra ───────────────────────────────────────────────────────────────
   static const double cameraLeadY = 3.0;
@@ -115,6 +116,11 @@ class PlinkoConfig {
   /// Si true, bypasse TrajectoryLoader → toutes les billes en mode physique fallback.
   /// Permet de tester l'anti-orbite sans manipuler les fichiers.
   static bool forcePhysicsMode = false;
+
+  // ─── Highlight case gagnante ──────────────────────────────────────────────
+  /// Index de la case à mettre en évidence après atterrissage (jackpot).
+  /// null = toutes les cases normales. Mis à jour par PlinkoGame, remis à null dans dismissReward.
+  static int? highlightedSlotIndex;
 
   // ─── Validation (utilisée par ConfigPanel) ────────────────────────────────
   /// Vérifie que la bille peut physiquement passer entre les picots.

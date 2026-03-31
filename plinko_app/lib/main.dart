@@ -7,7 +7,7 @@ import 'ui/reward_overlay.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-03-29 · build 14';
+const String kBuildTime = '2026-03-31 · build 15';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -98,6 +98,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
               return RewardOverlay(
                 prizeName: result.prizeName,
                 isJackpot: result.isJackpot,
+                isLoss: result.isLoss,
                 onDismiss: _game.dismissReward,
               );
             },

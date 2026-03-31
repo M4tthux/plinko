@@ -38,10 +38,15 @@ class _LotRow {
   TextEditingController nameCtrl;
   TextEditingController probCtrl;
   bool isJackpot;
+  bool isLoss;
 
-  _LotRow({required String name, required double probability, required this.isJackpot})
-      : nameCtrl = TextEditingController(text: name),
-        probCtrl = TextEditingController(text: probability.toStringAsFixed(1));
+  _LotRow({
+    required String name,
+    required double probability,
+    required this.isJackpot,
+    this.isLoss = false,
+  }) : nameCtrl = TextEditingController(text: name),
+       probCtrl = TextEditingController(text: probability.toStringAsFixed(1));
 
   double get probability => double.tryParse(probCtrl.text) ?? 0.0;
 
@@ -114,6 +119,7 @@ class _ConfigPanelState extends State<ConfigPanel> {
               name: l.name,
               probability: l.probability,
               isJackpot: l.isJackpot,
+              isLoss: l.isLoss,
             ))
         .toList();
   }
@@ -155,6 +161,7 @@ class _ConfigPanelState extends State<ConfigPanel> {
               name: r.nameCtrl.text.trim().isEmpty ? '?' : r.nameCtrl.text.trim(),
               probability: r.probability,
               isJackpot: r.isJackpot,
+              isLoss: r.isLoss,
             ))
         .toList();
     widget.game.refreshLotLabels();

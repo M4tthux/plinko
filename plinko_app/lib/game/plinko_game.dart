@@ -397,15 +397,22 @@ class PlinkoGame extends FlameGame with TapCallbacks {
           ? PlinkoConfig.currentSlotAssignment[slotIdx]
           : null;
 
+      // Jackpot → highlight la case gagnante (toutes les autres s'estompent)
+      if (lot?.isJackpot ?? false) {
+        PlinkoConfig.highlightedSlotIndex = slotIdx;
+      }
+
       landedSlotNotifier.value = LandedResult(
         prizeName: lot?.name ?? '?',
         isJackpot: lot?.isJackpot ?? false,
+        isLoss: lot?.isLoss ?? false,
       );
     }
   }
 
   /// Appelée par RewardOverlay quand l'utilisateur tape pour fermer.
   void dismissReward() {
+    PlinkoConfig.highlightedSlotIndex = null;
     landedSlotNotifier.value = null;
     _resetBall();
   }

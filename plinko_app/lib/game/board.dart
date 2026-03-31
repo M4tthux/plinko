@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart' show Colors, TextStyle, FontWeight, TextSpan, TextPainter, TextDirection, Color, RadialGradient, Alignment;
+import 'package:flutter/material.dart' show Colors, TextStyle, FontWeight, TextSpan, TextPainter, TextDirection, Color, RadialGradient, LinearGradient, Alignment, Shadow;
 import '../config/plinko_config.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -58,47 +58,64 @@ class Background extends PositionComponent {
     final h    = PlinkoConfig.worldHeight;
     final rect = Rect.fromLTWH(0, 0, w, h);
 
-    // Base quasi-noire
-    canvas.drawRect(rect, Paint()..color = const Color(0xFF06060f));
+    // ── Base noir profond ─────────────────────────────────────────────────────
+    canvas.drawRect(rect, Paint()..color = const Color(0xFF0a0812));
 
-    // Dégradé radial — cœur violet profond
+    // ── Dégradé radial — halo violet centré en haut ───────────────────────────
     final gradient = RadialGradient(
-      center: const Alignment(0.0, -0.2),
-      radius: 0.80,
-      colors: const [Color(0xFF180d38), Color(0xFF06060f)],
+      center: const Alignment(0.0, -0.35),
+      radius: 0.75,
+      colors: const [Color(0xFF1e0d40), Color(0xFF0a0812)],
       stops:  const [0.0, 1.0],
     );
     canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
 
-    // Nébuleuses
-    for (final n in bgNebulae) {
-      final color = _nebulaColors[n[4].toInt()];
-      canvas.drawCircle(
-        Offset(n[0], n[1]), n[2],
-        Paint()
-          ..color      = color.withOpacity(n[3])
-          ..maskFilter = MaskFilter.blur(BlurStyle.normal, n[2] * 0.6),
-      );
-    }
+    // ── Glow pyramidal derrière les picots ────────────────────────────────────
+    // Triangle : apex centré en haut des picots, base = largeur totale en bas des picots.
+    final apexX  = w / 2;
+    final apexY  = PlinkoConfig.pegStartY - 1.0;
+    final baseY  = PlinkoConfig.slotBaseY - PlinkoConfig.slotWallHeight - 0.5;
+    final baseHW = w * 0.52; // demi-largeur de la base
 
-    // Étoiles
+    final pyramid = Path()
+      ..moveTo(apexX, apexY)
+      ..lineTo(apexX - baseHW, baseY)
+      ..lineTo(apexX + baseHW, baseY)
+      ..close();
+
+    // Couche glow large (flou important)
+    canvas.drawPath(pyramid, Paint()
+      ..color      = const Color(0xFF7c5cbf).withOpacity(0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5));
+
+    // Couche glow serrée (plus intense au centre)
+    final innerPyramid = Path()
+      ..moveTo(apexX, apexY)
+      ..lineTo(apexX - baseHW * 0.55, baseY)
+      ..lineTo(apexX + baseHW * 0.55, baseY)
+      ..close();
+    canvas.drawPath(innerPyramid, Paint()
+      ..color      = const Color(0xFF9d7de8).withOpacity(0.18)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2));
+
+    // ── Étoiles ───────────────────────────────────────────────────────────────
     for (final s in bgStars) {
       final color = _starColors[s[4].toInt()];
       if (s[2] > 0.06) {
         canvas.drawCircle(Offset(s[0], s[1]), s[2] * 2.5,
           Paint()
-            ..color      = color.withOpacity(s[3] * 0.25)
+            ..color      = color.withOpacity(s[3] * 0.20)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.12),
         );
       }
       canvas.drawCircle(Offset(s[0], s[1]), s[2],
-        Paint()..color = color.withOpacity(s[3]),
+        Paint()..color = color.withOpacity(s[3] * 0.6),
       );
     }
 
-    // Scanlines ultra-légères
+    // ── Scanlines ultra-légères ───────────────────────────────────────────────
     final scanPaint = Paint()
-      ..color       = const Color(0xFF00c8ff).withOpacity(0.012)
+      ..color       = const Color(0xFF7c5cbf).withOpacity(0.008)
       ..strokeWidth = 0.03
       ..style       = PaintingStyle.stroke;
     for (double y = 0; y < h; y += 0.22) {
@@ -169,42 +186,30 @@ class Peg extends PositionComponent {
   final Color _color;
 
   Peg(Vector2 pegPosition, {Color? color})
-      : _color = color ?? const Color(0xFF00c8ff),
+      : _color = color ?? const Color(0xFF9d7de8),
         super(position: pegPosition, anchor: Anchor.center);
 
   @override
   void render(Canvas canvas) {
-    final r    = PlinkoConfig.pegRadius;
-    final capW = r * 1.3;
-    final capH = r * 2.8;
+    final r = PlinkoConfig.pegRadius;
 
-    final capsule = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset.zero, width: capW, height: capH),
-      Radius.circular(capW / 2),
-    );
-
-    // Halo néon (capsule plus large)
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset.zero, width: capW * 3.0, height: capH * 2.2),
-        Radius.circular(capW),
-      ),
+    // Halo atmosphérique — resserré, ne dépasse pas le rayon physique utile
+    canvas.drawCircle(
+      Offset.zero,
+      r * 1.7,
       Paint()
         ..color      = _color.withOpacity(0.22)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5),
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.7),
     );
 
-    // Corps capsule
-    canvas.drawRRect(capsule, Paint()..color = _color);
+    // Corps du picot — rayon physique exact
+    canvas.drawCircle(Offset.zero, r, Paint()..color = _color);
 
-    // Reflet interne
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(-capW * 0.12, -capH * 0.22),
-        width:  capW * 0.42,
-        height: capH * 0.30,
-      ),
-      Paint()..color = Colors.white.withOpacity(0.55),
+    // Reflet (petit point blanc en haut à gauche)
+    canvas.drawCircle(
+      Offset(-r * 0.28, -r * 0.28),
+      r * 0.28,
+      Paint()..color = Colors.white.withOpacity(0.65),
     );
   }
 }
@@ -256,59 +261,75 @@ class SlotLabel extends PositionComponent {
           anchor: Anchor.center,
         );
 
-  // Couleur par palier de gain — purement visuel
+  // Deux couleurs : or pour jackpot, cyan pour tout le reste.
   static Color _tierColor(String label, bool isJackpot) {
-    if (isJackpot) return const Color(0xFFFFD700);
-    final val = double.tryParse(label.replaceAll('€', '').trim()) ?? 0;
-    if (val <= 2)  return const Color(0xFF00e676); // vert   — petits lots
-    if (val <= 10) return const Color(0xFFc6ff00); // lime   — lots moyens
-    if (val <= 50) return const Color(0xFFffa726); // orange — grands lots
-    return const Color(0xFFff4488);                // rose   — très grands lots
+    if (isJackpot) return const Color(0xFFf0c040); // or — DESIGN.md
+    return const Color(0xFF00c8ff);                 // cyan électrique
   }
 
   static Color _tierGlow(String label, bool isJackpot) {
-    if (isJackpot) return const Color(0xFFFFA500);
-    final val = double.tryParse(label.replaceAll('€', '').trim()) ?? 0;
-    if (val <= 2)  return const Color(0xFF00c853);
-    if (val <= 10) return const Color(0xFF76ff03);
-    if (val <= 50) return const Color(0xFFff6d00);
-    return const Color(0xFFe91e63);
+    if (isJackpot) return const Color(0xFFf0c040);
+    return const Color(0xFF00c8ff);
   }
 
   @override
   void render(Canvas canvas) {
     final label     = PlinkoConfig.slotLabelAt(_index);
     final isJackpot = PlinkoConfig.slotIsJackpot(_index);
+    final color     = _tierColor(label, isJackpot);
 
-    final color  = _tierColor(label, isJackpot);
-    final color2 = _tierGlow(label, isJackpot);
+    final w = _w - 0.08;
+    final h = _h - 0.08;
+    final radius = Radius.circular(h * 0.32); // coins arrondis "pill"
 
-    // ── Fond de case — angles droits ──────────────────────────────────────────
-    final bgRect = Rect.fromCenter(
-      center: Offset.zero,
-      width:  _w - 0.10,
-      height: _h - 0.06,
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset.zero, width: w, height: h),
+      radius,
     );
-    canvas.drawRect(bgRect, Paint()..color = const Color(0xFF0d0d28));
-    canvas.drawRect(
-      bgRect,
+
+    // ── Glow externe (halo coloré derrière la case) ───────────────────────────
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset.zero, width: w + 0.15, height: h + 0.15),
+        Radius.circular(h * 0.36),
+      ),
       Paint()
-        ..color       = color.withOpacity(isJackpot ? 0.70 : 0.45)
+        ..color      = color.withOpacity(isJackpot ? 0.45 : 0.20)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, isJackpot ? 0.35 : 0.20),
+    );
+
+    // ── Fond dégradé vertical ─────────────────────────────────────────────────
+    final gradRect = Rect.fromCenter(center: Offset.zero, width: w, height: h);
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end:   Alignment.bottomCenter,
+          colors: [
+            color.withOpacity(isJackpot ? 0.28 : 0.16),
+            const Color(0xFF08081a),
+          ],
+        ).createShader(gradRect),
+    );
+
+    // ── Bordure néon ──────────────────────────────────────────────────────────
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..color       = color.withOpacity(isJackpot ? 0.90 : 0.60)
         ..style       = PaintingStyle.stroke
-        ..strokeWidth = 0.055,
-    );
-    // Glow intérieur
-    canvas.drawRect(
-      bgRect,
-      Paint()
-        ..color      = color.withOpacity(isJackpot ? 0.10 : 0.06)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.3),
+        ..strokeWidth = isJackpot ? 0.07 : 0.045,
     );
 
-    // ── Label complet centré ("1€", "50€", "1000€") ──────────────────────────
-    // fontSize uniforme à 0.40 — valeur confirmée correctement centrée par le jackpot.
-    // Taille légèrement réduite pour les labels longs (4+ chars).
-    final fontSize = label.length > 3 ? 0.40 : 0.44;
+    // ── Dim si une autre case est en surbrillance (jackpot) ───────────────────
+    final highlighted = PlinkoConfig.highlightedSlotIndex;
+    if (highlighted != null && _index != highlighted) {
+      canvas.drawRRect(rrect, Paint()..color = const Color(0xCC000000));
+    }
+
+    // ── Label centré ──────────────────────────────────────────────────────────
+    final fontSize = label.length > 4 ? 0.36 : (label.length > 3 ? 0.40 : 0.46);
     final tp = TextPainter(
       text: TextSpan(
         text: label,
@@ -316,13 +337,15 @@ class SlotLabel extends PositionComponent {
           color:      color,
           fontSize:   fontSize,
           fontWeight: FontWeight.w900,
-          height:     1.0, // supprime le leading supplémentaire qui décale vers le haut
+          height:     1.0,
+          shadows: [
+            Shadow(color: color.withOpacity(0.9), blurRadius: 0.12),
+          ],
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
 
-    // Centrage horizontal + vertical
     tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
   }
 }
@@ -333,13 +356,15 @@ class SlotLabel extends PositionComponent {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class BoardBuilder {
-  static const _pegColors = [
-    Color(0xFF00c8ff),
-    Color(0xFF7c5cbf),
-    Color(0xFF00ff88),
-    Color(0xFFff4488),
-    Color(0xFFffaa00),
-  ];
+  /// Couleur d'un picot selon sa rangée — dégradé cyan (haut) → violet (bas).
+  static Color _rowColor(int row) {
+    final total = PlinkoConfig.pegRowCount; // 14
+    if (row < total ~/ 4)     return const Color(0xFF00e5ff); // cyan vif   — top
+    if (row < total ~/ 2)     return const Color(0xFF9d7de8); // violet clair
+    if (row < total * 3 ~/ 4) return const Color(0xFF7c5cbf); // violet moyen
+    return const Color(0xFF5a3d9a);                            // violet sombre — bottom
+  }
+
 
   static Background buildBackground() => Background();
 
@@ -365,8 +390,8 @@ class BoardBuilder {
       // offsetX centré : garantit la symétrie quelle que soit la valeur de pegSpacingX
       final offsetX =
           isOdd ? PlinkoConfig.pegOffsetOdd : PlinkoConfig.pegOffsetEven;
-      final y = PlinkoConfig.pegStartY + row * PlinkoConfig.pegSpacingY;
-      final color = _pegColors[row % _pegColors.length];
+      final y     = PlinkoConfig.pegStartY + row * PlinkoConfig.pegSpacingY;
+      final color = _rowColor(row);
 
       for (int col = 0; col < colCount; col++) {
         final x = offsetX + col * PlinkoConfig.pegEffectiveSpacingX;
