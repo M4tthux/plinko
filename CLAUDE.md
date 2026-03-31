@@ -33,6 +33,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - Claude ne suppose pas — il pose des questions si quelque chose est ambigu
 - Claude itère en delta — ne réécrit pas tout à chaque feedback
 - Claude met à jour `project-context.md` et crée un log `sessions/` en fin de session
+- **Toute décision validée en cours de session** → écrire dans `project-context.md` immédiatement, sans attendre la fin
+- **Session > 45 min** → checkpoint automatique (écriture fichiers + proposition de commit) sans que Matthieu ait à le demander
 - Ne pas pousser en production sans validation explicite de Matthieu
 
 ---

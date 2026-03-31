@@ -187,14 +187,16 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ### Dev — En test (valider en prochaine session)
 - *(aucune tâche en test)*
 
+### Dev — En cours
+- **Visuel end game** : brief validé (Direction B — L'Explosion Contrôlée). Implémentation dans `reward_overlay.dart` — prochaine session dev
+
 ### Dev — Backlog prioritaire
-- **Visuel end game** : overlay récompense refonte (feux d'artifice, halo, icône €, jackpot or) — Haute priorité
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) : à retirer avant prod — Basse priorité
 
 ### Backlog — à cadrer en session dédiée
 - **Lourdeur bille** : gravity=18.0 actuelle — augmenter dans le générateur Python et régénérer ? Ou ajuster replayStride ? À qualifier : chute trop lente ou rebonds trop élastiques ?
 - **Jackpot unique** : fixer la règle dans `_assignSlots()` — slot central toujours = jackpot, hardcodé. Court à implémenter.
-- **Émotion win/lose** : direction visuelle à cadrer (sobre vs spectaculaire) avant de développer. Particules ? Animation bille ? Countdown ?
+- **Skills manquants** : plinko-flutter-run (relance serveur Flutter) + plinko-regen-trajectories (script Python auto)
 - **Build iOS** : nécessite Mac + Xcode + compte Apple Developer. Sans Mac → services CI cloud (Codemagic, Bitrise). Préparer guide étapes quand Matthieu sera équipé.
 - **Intro du jeu** : one-shot ou à chaque partie ? Durée max 3s, skippable. Logo marque ou animation bille de démo ?
 
@@ -213,10 +215,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🔴 Non démarré | |
-| **Dev** | 🟢 Board propre — 0 tâches En test | Session 9 : QA complète validée. Toggle physique forcé, jackpot centré, valeurs €, trajectoires filtrées, badge version. |
+| **Design & UI** | 🟡 En cours | DESIGN.md créé. Brief visuel end game validé (Direction B). Implémentation à venir. |
+| **Dev** | 🟡 1 tâche En cours | Visuel end game — brief validé, implémentation prochaine session |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
-| **Migration Claude Code** | 🟡 Décidée — à exécuter | Environnement complet validé. CLAUDE.md + Git à initialiser en première session. |
+| **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
 
 ---
 
@@ -260,4 +262,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-03-31 — Migration Claude Code : CLAUDE.md créé, Git initialisé, decisions-log.md séparé, screenshots/ créé. Prochaine session : Visuel end game (Haute priorité).*
+*Dernière mise à jour : 2026-03-31 — Session Migration + Design : infrastructure Claude Code complète, brainstorm.skill, DESIGN.md, brief visuel end game validé (Direction B). Prochaine session : implémentation reward_overlay.dart.*
