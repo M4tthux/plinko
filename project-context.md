@@ -222,8 +222,9 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🔴 Bloqué | Assets intégrés (fond, cadre, picots sprite). Canvas Flame transparent (checkered) — bloque toute validation visuelle. |
-| **Dev** | 🔴 Bug bloquant | Canvas transparent sur Chrome Web — backgroundColor() non fiable sur Flutter Web. Background PositionComponent présent mais pas suffisant. À investiguer. |
+| **Design & UI** | 🟡 Backlog | Assets Gemini inutilisables (opaques, faux alpha). Rendu code restauré. Passe design complète prévue en fin de projet. |
+| **Dev** | 🟢 Stable | Bug damier résolu (plateau.png opaque retiré + backgroundBuilder). Rendu code fonctionnel. |
+| **Test mobile** | 🟢 Opérationnel | Build web + serve local sur port 8080, testé sur iPhone via Safari. |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
 
@@ -266,7 +267,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | `sessions/2026-03-28_dev-session-7.md` | Log Dev Session 7 — fix TrajectoryLoader, replayStride live, asymétrie picots, bugs loggués |
 | `sessions/2026-03-28_dev-session-8.md` | Log Dev Session 8 — fix bille traverse picots, taille visuelle, anti-orbite v5, replayStride=4 |
 | `generate_trajectories.py` | Script Python génération trajectoires (stride=1 — référence sandbox, Dart non dispo) |
+| `scripts/serve_web.sh` | Script build web + serveur local pour test mobile |
 
 ---
 
-*Dernière mise à jour : 2026-04-01 — Session Design Assets : refonte design avec assets Gemini (background.png, plateau.png, rond.png). Bille dorée, picots cyan sprite, cases coupe verre. Problème bloquant : canvas Flame transparent (checkered) sur Chrome Web. Cause identifiée (backgroundColor() non fiable), fix partiel (Background PositionComponent restauré + simplifié). Toujours transparent au build 23. À résoudre en prochaine session.*
+*Dernière mise à jour : 2026-04-01 — Session Fix Design + Web Mobile. Bug damier résolu (plateau.png Gemini 100% opaque retiré, backgroundBuilder ajouté). Picots restaurés en rendu code (dégradé cyan→violet). Build web release + serve local (port 8080) pour test iPhone — validé. Passe design complète reportée en fin de projet.*

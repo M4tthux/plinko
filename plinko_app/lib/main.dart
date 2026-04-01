@@ -63,16 +63,13 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
           ),
 
           // Jeu Flame — fond sombre opaque rendu par Flame
-          GameWidget(game: _game),
-
-          // Cadre plateau néon (PNG avec alpha — contain pour garder les proportions portrait)
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/plateau.png',
-              fit: BoxFit.contain,
-              alignment: Alignment.center,
-            ),
+          GameWidget(
+            game: _game,
+            backgroundBuilder: (_) => Container(color: const Color(0xFF08040f)),
           ),
+
+          // NOTE: plateau.png retiré — image Gemini opaque (faux damier baked-in,
+          // pas de vrai canal alpha). Le cadre néon est dessiné par BoardFrame dans Flame.
 
           // Instructions
           const Positioned(

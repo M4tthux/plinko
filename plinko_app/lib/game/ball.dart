@@ -178,39 +178,33 @@ class Ball extends PositionComponent {
   void render(Canvas canvas) {
     final r = PlinkoConfig.ballRadius * _visualScale;
 
-    // Halo externe (bloom) — contenu pour ne pas déborder sur les picots voisins
-    final glowPaint = Paint()
-      ..color = const Color(0xFF00c8ff).withOpacity(0.15)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8);
-    canvas.drawCircle(Offset.zero, r * 2.0, glowPaint);
+    // Halo externe or — se démarque des picots cyan
+    canvas.drawCircle(Offset.zero, r * 2.2, Paint()
+      ..color      = const Color(0xFFf0c040).withOpacity(0.18)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.9));
 
     // Halo interne
-    final innerGlowPaint = Paint()
-      ..color = const Color(0xFF00c8ff).withOpacity(0.35)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.4);
-    canvas.drawCircle(Offset.zero, r * 1.4, innerGlowPaint);
+    canvas.drawCircle(Offset.zero, r * 1.45, Paint()
+      ..color      = const Color(0xFFf0c040).withOpacity(0.40)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.45));
 
-    // Corps principal (gradient radial)
-    final bodyGradient = Paint()
+    // Corps principal — sphère dorée
+    canvas.drawCircle(Offset.zero, r, Paint()
       ..shader = RadialGradient(
         center: const Alignment(-0.3, -0.4),
         radius: 1.0,
         colors: const [
-          Color(0xFFaaf0ff),
-          Color(0xFF00c8ff),
-          Color(0xFF0080cc),
+          Color(0xFFfffbe6), // blanc chaud (highlight)
+          Color(0xFFf0c040), // or vif
+          Color(0xFF8a5c00), // or sombre (ombre)
         ],
-      ).createShader(
-        Rect.fromCircle(center: Offset.zero, radius: r),
-      );
-    canvas.drawCircle(Offset.zero, r, bodyGradient);
+        stops: const [0.0, 0.45, 1.0],
+      ).createShader(Rect.fromCircle(center: Offset.zero, radius: r)));
 
     // Reflet spéculaire
-    final highlightPaint = Paint()..color = Colors.white.withOpacity(0.8);
     canvas.drawCircle(
       Offset(-r * 0.35, -r * 0.35),
       r * 0.28,
-      highlightPaint,
-    );
+      Paint()..color = Colors.white.withOpacity(0.85));
   }
 }

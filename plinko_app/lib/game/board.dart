@@ -134,17 +134,35 @@ class Wall extends PositionComponent {
 // Taille visuelle : pegRadius × 3.2 (world units), physique inchangée (0.25).
 // ─────────────────────────────────────────────────────────────────────────────
 
-class Peg extends SpriteComponent {
-  Peg(Vector2 pegPosition)
-      : super(
-          position: pegPosition,
-          anchor:   Anchor.center,
-          size:     Vector2.all(PlinkoConfig.pegRadius * 3.2),
-        );
+class Peg extends PositionComponent {
+  final Color _color;
+
+  Peg(Vector2 pegPosition, {Color? color})
+      : _color = color ?? const Color(0xFF9d7de8),
+        super(position: pegPosition, anchor: Anchor.center);
 
   @override
-  Future<void> onLoad() async {
-    sprite = await Sprite.load('rond.png');
+  void render(Canvas canvas) {
+    final r = PlinkoConfig.pegRadius;
+
+    // Halo atmosphérique
+    canvas.drawCircle(
+      Offset.zero,
+      r * 1.7,
+      Paint()
+        ..color      = _color.withOpacity(0.22)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.7),
+    );
+
+    // Corps du picot — rayon physique exact
+    canvas.drawCircle(Offset.zero, r, Paint()..color = _color);
+
+    // Reflet (petit point blanc en haut à gauche)
+    canvas.drawCircle(
+      Offset(-r * 0.28, -r * 0.28),
+      r * 0.28,
+      Paint()..color = Colors.white.withOpacity(0.65),
+    );
   }
 }
 
@@ -379,8 +397,7 @@ class BoardBuilder {
   static Background buildBackground() => Background();
 
   static List<PositionComponent> buildWalls() {
-    // BoardFrame supprimé — remplacé par assets/images/plateau.png (Flutter overlay)
-    return [];
+    return [BoardFrame()];
   }
 
   static List<Peg> buildPegs() {
@@ -393,7 +410,7 @@ class BoardBuilder {
 
       for (int col = 0; col < colCount; col++) {
         final x = offsetX + col * PlinkoConfig.pegEffectiveSpacingX;
-        pegs.add(Peg(Vector2(x, y)));
+        pegs.add(Peg(Vector2(x, y), color: _rowColor(row)));
       }
     }
     return pegs;
