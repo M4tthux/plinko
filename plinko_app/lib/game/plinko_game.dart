@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter/material.dart' show Color;
 import '../config/plinko_config.dart';
 import '../models/prize_lot.dart';
-import '../data/trajectory_loader.dart';
 import 'board.dart';
 import 'ball.dart';
 
@@ -56,10 +55,10 @@ class PlinkoGame extends FlameGame with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Charger les trajectoires pré-calculées
-    if (!TrajectoryLoader.isLoaded) {
-      await TrajectoryLoader.load();
-    }
+    // Assert : la bille passe entre les picots
+    assert(PlinkoConfig.ballFitsThrough,
+        'GX (${PlinkoConfig.pegGX}) doit être > 2×PEG_RADIUS + 2×BALL_RADIUS '
+        '(${2 * PlinkoConfig.pegRadius + 2 * PlinkoConfig.ballRadius})');
 
     // Configurer la caméra — fixe, centrée sur tout le plateau
     camera.viewfinder.zoom = PlinkoConfig.zoom;
@@ -67,31 +66,29 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     camera.viewfinder.position =
         Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
 
-    // Précalculer les positions des picots (utilisées en mode physique fallback)
+    // Précalculer les positions des picots (grille triangulaire)
     _buildPegPositions();
 
-    // Assignation initiale des lots (décor avant le premier lancer)
+    // Assigner des lots aux cases dès le démarrage (décor)
     _assignSlotsDecor();
 
-    // Fond sombre opaque (requis pour que le canvas Flame soit opaque sur Chrome Web)
+    // Fond + plateau
     await world.add(BoardBuilder.buildBackground());
     await world.addAll(BoardBuilder.buildWalls());
     await world.addAll(BoardBuilder.buildPegs());
     await world.addAll(BoardBuilder.buildSlotDividers());
     await world.addAll(BoardBuilder.buildSlotLabels());
+    await world.add(BoardBuilder.buildTitle());
   }
 
+  /// Grille triangulaire : rang R contient R+1 picots (à partir de startRow).
   void _buildPegPositions() {
-    for (int row = 0; row < PlinkoConfig.pegRowCount; row++) {
-      final isOdd = row % 2 == 0;
-      final colCount =
-          isOdd ? PlinkoConfig.pegColsOdd : PlinkoConfig.pegColsEven;
-      // offsetX centré : même formule que buildPegs() pour cohérence physique/visuel
-      final offsetX =
-          isOdd ? PlinkoConfig.pegOffsetOdd : PlinkoConfig.pegOffsetEven;
-      final y = PlinkoConfig.pegStartY + row * PlinkoConfig.pegSpacingY;
+    _pegPositions.clear();
+    for (int row = PlinkoConfig.startRow; row < PlinkoConfig.rows; row++) {
+      final colCount = PlinkoConfig.pegCount(row);
+      final y = PlinkoConfig.pegY(row);
       for (int col = 0; col < colCount; col++) {
-        final x = offsetX + col * PlinkoConfig.pegEffectiveSpacingX;
+        final x = PlinkoConfig.pegX(row, col);
         _pegPositions.add(Vector2(x, y));
       }
     }
@@ -101,19 +98,12 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
-    if (_ballInFlight) return;
-    final worldPos = _screenToWorld(event.canvasPosition);
-    // Clamp entre les premiers picots — évite les couloirs latéraux
-    _launchX = worldPos.x.clamp(
-      PlinkoConfig.pegSpacingX / 2,
-      PlinkoConfig.worldWidth - PlinkoConfig.pegSpacingX / 2,
-    );
+    // Étape 1 : lancer désactivé (grille statique uniquement)
   }
 
   @override
   void onTapUp(TapUpEvent event) {
-    if (_ballInFlight) return;
-    _launchBall(_launchX);
+    // Étape 1 : lancer désactivé (grille statique uniquement)
   }
 
   // ── Système de lots ──────────────────────────────────────────────────────
@@ -209,40 +199,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   // ── Lancement ────────────────────────────────────────────────────────────
 
-  void _launchBall(double x) {
-    final startPos = Vector2(x, PlinkoConfig.ballStartY);
-
-    // 1. Tirer le lot gagnant
-    final winner = _drawLot();
-
-    // 2. Assigner les lots aux cases — retourne l'index de la case gagnante
-    final targetSlot = _assignSlots(winner);
-
-    // 3. Chercher une trajectoire pré-calculée pour (zone du tap, slot cible)
-    //    Si forcePhysicsMode est actif (debug), on bypasse le loader.
-    final trajectory = PlinkoConfig.forcePhysicsMode
-        ? null
-        : TrajectoryLoader.select(
-            slotIndex: targetSlot,
-            fingerX: x,
-          );
-
-    if (trajectory != null) {
-      // Mode replay — résultat garanti
-      _currentBall = Ball.replay(startPos, trajectory.frames);
-    } else {
-      // Fallback physique — résultat non garanti (pas de trajectoire disponible)
-      // ignore: avoid_print
-      print('⚠️ Fallback physique activé — aucune trajectoire pour slot=$targetSlot zone=${PlinkoConfig.zoneForX(x)} (trajLoaded=${TrajectoryLoader.isLoaded})');
-      _currentBall = Ball(startPos);
-    }
-
-    // DEBUG — affiche le lot tiré et la case cible
-    debugTargetNotifier.value = '${winner.name} · Case $targetSlot';
-
-    world.add(_currentBall!);
-    _ballInFlight = true;
-  }
+  // Étape 1 : _launchBall désactivé — sera réactivé avec generatePath (étape 2)
 
   // ── Conversion écran → monde ─────────────────────────────────────────────
 
@@ -357,7 +314,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     const double slotDividerRestitution = 0.15;
 
     for (int i = 0; i <= PlinkoConfig.slotCount; i++) {
-      final divX = i * PlinkoConfig.slotWidth;
+      final divX = PlinkoConfig.slotStartX + i * PlinkoConfig.slotWidth;
       final dx   = ball.position.x - divX;
       if (dx.abs() < PlinkoConfig.ballRadius) {
         final sign = dx >= 0 ? 1.0 : -1.0;
@@ -431,14 +388,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     world.addAll(BoardBuilder.buildSlotDividers());
     world.addAll(BoardBuilder.buildSlotLabels());
 
-    _pegPositions.clear();
     _buildPegPositions();
-
-    // NOTE : on ne vide PAS TrajectoryLoader ici.
-    // Le mode replay rejoue des coordonnées X,Y pré-calculées — il est indépendant
-    // des positions des picots (les collisions sont ignorées en mode replay).
-    // Vider le cache après rebuildBoard() laissait toutes les billes suivantes
-    // en mode physique fallback → résultat non garanti.
   }
 
   /// Rafraîchit les labels des cases sans reconstruire le plateau.

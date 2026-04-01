@@ -52,104 +52,98 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Background image — visible dans les zones letterbox autour du jeu
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/background.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-
-          // Jeu Flame — fond sombre opaque rendu par Flame
-          GameWidget(
-            game: _game,
-            backgroundBuilder: (_) => Container(color: const Color(0xFF08040f)),
-          ),
-
-          // NOTE: plateau.png retiré — image Gemini opaque (faux damier baked-in,
-          // pas de vrai canal alpha). Le cadre néon est dessiné par BoardFrame dans Flame.
-
-          // Instructions
-          const Positioned(
-            bottom: 24,
-            left: 0,
-            right: 0,
-            child: Text(
-              'Tap pour lancer',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0x8800c8ff),
-                fontSize: 13,
-                letterSpacing: 1.5,
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 9 / 16,
+          child: Stack(
+            children: [
+              // Jeu Flame — fond sombre opaque rendu par Flame
+              GameWidget(
+                game: _game,
+                backgroundBuilder: (_) => Container(color: const Color(0xFF08040f)),
               ),
-            ),
-          ),
 
-          // Badge version — DEBUG
-          const Positioned(
-            top: 8,
-            left: 0,
-            right: 0,
-            child: Text(
-              kBuildTime,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xCC00c8ff),
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.0,
-              ),
-            ),
-          ),
-
-          // Overlay récompense — apparaît à l'atterrissage de la bille
-          ValueListenableBuilder(
-            valueListenable: _game.landedSlotNotifier,
-            builder: (context, result, _) {
-              if (result == null) return const SizedBox.shrink();
-              return RewardOverlay(
-                prizeName: result.prizeName,
-                isJackpot: result.isJackpot,
-                isLoss: result.isLoss,
-                onDismiss: _game.dismissReward,
-              );
-            },
-          ),
-
-          // Badge DEBUG — lot tiré + case cible (visible pendant le lancer)
-          ValueListenableBuilder(
-            valueListenable: _game.debugTargetNotifier,
-            builder: (context, target, _) {
-              if (target == null) return const SizedBox.shrink();
-              return Positioned(
-                top: 16,
-                left: 16,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xEE0a0a18),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF7c5cbf)),
-                  ),
-                  child: Text(
-                    '🎯 $target',
-                    style: const TextStyle(
-                      color: Color(0xFFccaaff),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
+              // Instructions
+              const Positioned(
+                bottom: 24,
+                left: 0,
+                right: 0,
+                child: Text(
+                  'Tap pour lancer',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0x8800c8ff),
+                    fontSize: 13,
+                    letterSpacing: 1.5,
                   ),
                 ),
-              );
-            },
-          ),
+              ),
 
-          // Panneau de config DEBUG (icône ⚙ en haut à droite)
-          ConfigPanel(game: _game),
-        ],
+              // Badge version — DEBUG
+              const Positioned(
+                top: 8,
+                left: 0,
+                right: 0,
+                child: Text(
+                  kBuildTime,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xCC00c8ff),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+              ),
+
+              // Overlay récompense — apparaît à l'atterrissage de la bille
+              ValueListenableBuilder(
+                valueListenable: _game.landedSlotNotifier,
+                builder: (context, result, _) {
+                  if (result == null) return const SizedBox.shrink();
+                  return RewardOverlay(
+                    prizeName: result.prizeName,
+                    isJackpot: result.isJackpot,
+                    isLoss: result.isLoss,
+                    onDismiss: _game.dismissReward,
+                  );
+                },
+              ),
+
+              // Badge DEBUG — lot tiré + case cible (visible pendant le lancer)
+              ValueListenableBuilder(
+                valueListenable: _game.debugTargetNotifier,
+                builder: (context, target, _) {
+                  if (target == null) return const SizedBox.shrink();
+                  return Positioned(
+                    top: 16,
+                    left: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xEE0a0a18),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF7c5cbf)),
+                      ),
+                      child: Text(
+                        '🎯 $target',
+                        style: const TextStyle(
+                          color: Color(0xFFccaaff),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // Panneau de config DEBUG (icône ⚙ en haut à droite)
+              ConfigPanel(game: _game),
+            ],
+          ),
+        ),
       ),
     );
   }

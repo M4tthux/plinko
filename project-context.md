@@ -39,30 +39,29 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ## Configuration plateau actuelle (plinko_config.dart)
 
 > À conserver comme référence — permet de retrouver les valeurs validées.
+> Refonte grille triangulaire + alignement mécanique Plinko (Session Design 2026-04-02).
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
 | `worldWidth` | 18.0 | Largeur en unités physiques |
-| `worldHeight` | 29.0 | Hauteur totale |
+| `worldHeight` | 24.0 | Hauteur totale (réduit de 26) |
+| `zoom` | 24.0 | Zoom caméra |
 | `gravity` | 18.0 | Unités/s² |
-| `pegRadius` | **0.25** | Rayon picot |
-| `pegSpacingX` | **3.0** | Espacement horizontal picots |
-| `pegSpacingY` | **1.5** | Espacement vertical picots |
-| `pegColsOdd` | **6** | Picots/rangée impaire |
-| `pegColsEven` | **5** | Picots/rangée paire |
-| `pegRowCount` | **14** | Nombre de rangées |
+| `rows` | 10 | Rangs logiques 0–9 (grille triangulaire) |
+| `startRow` | 2 | Première rangée affichée (3 picots min) |
+| `pegGX` | 2.0 (calculé) | = worldWidth / slotCount — alignement parfait |
+| `pegGY` | 2.0 | Espacement vertical centre à centre |
+| `pegStartY` | 4.5 | Y du rang startRow |
+| `pegRadius` | 0.25 | Rayon picot |
 | `pegRestitution` | 0.50 | Rebond picot |
-| `ballRadius` | **0.60** | Rayon bille (2× taille initiale, validée) |
+| `ballRadius` | 0.40 | Rayon bille |
 | `ballRestitution` | 0.35 | |
 | `wallRestitution` | 0.55 | Rebond mur |
 | `minWallKick` | 1.5 | Kick minimum anti-couloir |
-| `funnelZoneWidth` | 2.5 | Zone entonnoir latéral |
-| `funnelForce` | 30.0 | Force entonnoir |
-| `slotCount` | **7** | Cases : 10/50/100/500/100/50/10 pts |
-| `replayStride` | **3** | Vitesse replay — ajusté Session 11 (4=trop lent, 3=bon rythme) |
-| `cameraLerp` | 0.08 | Fluidité caméra |
-| `cameraLeadY` | 3.0 | Avance caméra vers le bas |
-| `launchMin/Max` | 1.0 / 17.0 | Zone de lancer clampée |
+| `slotCount` | **9** | Cases symétriques (1€→500€→1€) |
+| `jackpotSlotIndex` | 4 | Centre (0-indexed) |
+| `slotWallHeight` | 2.5 | Hauteur des cases |
+| `slotLabels` | 1€,2€,5€,50€,**500€**,50€,5€,2€,1€ | Symétrique |
 
 ---
 
@@ -74,16 +73,18 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - Framework : Flutter (iOS + Android) — test via Chrome (`flutter run -d chrome`)
 - Physique manuelle (Flame only) — Forge2D supprimé (incompatible Flutter Web)
 - Config MVP codée en dur dans `plinko_config.dart`
-- Architecture trajectoires : 70 pré-calculées (7 cases × 5 zones × 2 variantes) — fallback physique si manquante
-- Après tout changement de config plateau → régénérer trajectoires (70/70 obligatoire)
+- Architecture trajectoires : pré-calculées (cases × zones × variantes) — fallback physique si manquante
+- Après tout changement de config plateau → régénérer trajectoires (obligatoire)
+- **Grille triangulaire** : rangée R a R+1 picots, alignement picots/séparateurs garanti par pegGX=worldWidth/slotCount
 
 ### Game Design
 - Illusion de hasard totale — résultat pré-déterminé, trajectoire rejouée frame par frame
 - One-shot — une seule partie par session
 - Pas de sons pour le MVP
 - Pas de trajectoire prévisionnelle — lancer à l'aveugle
-- Jackpot unique centré : 500€ en case centrale uniquement
-- Table de lots réelle (Session 11) : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot)
+- Jackpot unique centré : 500€ en case centrale (index 4) uniquement
+- 9 cases symétriques : 1€, 2€, 5€, 50€, 500€(jackpot), 50€, 5€, 2€, 1€
+- Table de lots réelle : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot)
 - Ambiance : futuriste / arcade — néons, fond sombre, bille lumineuse
 
 ### Process (depuis migration Claude Code — 2026-03-31)
@@ -222,8 +223,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🟡 Backlog | Assets Gemini inutilisables (opaques, faux alpha). Rendu code restauré. Passe design complète prévue en fin de projet. |
-| **Dev** | 🟢 Stable | Bug damier résolu (plateau.png opaque retiré + backgroundBuilder). Rendu code fonctionnel. |
+| **Design & UI** | 🟡 En cours | Refonte visuelle néon (fond gradient, picots blancs, cases colorées, titre PLINKO). Multi-agents actifs. |
+| **Dev** | 🟢 Stable | Grille triangulaire + 9 cases alignées. Compilation OK. Trajectoires à régénérer. |
 | **Test mobile** | 🟢 Opérationnel | Build web + serve local sur port 8080, testé sur iPhone via Safari. |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
@@ -271,4 +272,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-01 — Session Fix Design + Web Mobile. Bug damier résolu (plateau.png Gemini 100% opaque retiré, backgroundBuilder ajouté). Picots restaurés en rendu code (dégradé cyan→violet). Build web release + serve local (port 8080) pour test iPhone — validé. Passe design complète reportée en fin de projet.*
+*Dernière mise à jour : 2026-04-02 — Session Design Refonte. Grille triangulaire validée (rows=10, startRow=2, 8 rangées). 9 cases avec alignement mécanique Plinko (pegGX=worldWidth/slotCount). Refonte visuelle : fond gradient radial, picots blancs uniformes, cases néon colorées, titre PLINKO. Architecture multi-agents activée (orchestrator, game-designer, designer, developer, benchmark).*

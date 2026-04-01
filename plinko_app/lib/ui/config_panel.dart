@@ -13,18 +13,14 @@ class _ConfigStorage {
   static void save(String name, {
     required double ballRadius,
     required double pegRadius,
-    required double pegSpacingX,
     required double gravity,
     required double pegRestitution,
-    required int replayStride,
   }) {
     _store[name] = {
       'ballRadius':     ballRadius,
       'pegRadius':      pegRadius,
-      'pegSpacingX':    pegSpacingX,
       'gravity':        gravity,
       'pegRestitution': pegRestitution,
-      'replayStride':   replayStride,
     };
   }
 
@@ -70,10 +66,8 @@ class _ConfigPanelState extends State<ConfigPanel> {
   // ── Config plateau ───────────────────────────────────────────────────────
   late double _ballRadius;
   late double _pegRadius;
-  late double _pegSpacingX;
   late double _gravity;
   late double _pegRestitution;
-  late int    _replayStride;
 
   bool _open = false;
 
@@ -104,10 +98,8 @@ class _ConfigPanelState extends State<ConfigPanel> {
   void _loadFromConfig() {
     _ballRadius     = PlinkoConfig.ballRadius;
     _pegRadius      = PlinkoConfig.pegRadius;
-    _pegSpacingX    = PlinkoConfig.pegSpacingX;
     _gravity        = PlinkoConfig.gravity;
     _pegRestitution = PlinkoConfig.pegRestitution;
-    _replayStride   = PlinkoConfig.replayStride;
   }
 
   void _loadLotsFromConfig() {
@@ -125,17 +117,7 @@ class _ConfigPanelState extends State<ConfigPanel> {
   }
 
   // ── Stats plateau ────────────────────────────────────────────────────────
-  int get _colsOdd  => (_pegSpacingX > 0) ? (18.0 / _pegSpacingX).floor() : 1;
-  int get _colsEven => (_colsOdd - 1).clamp(1, 99);
-  int get _totalPegs {
-    final rows = PlinkoConfig.pegRowCount;
-    final odd  = (rows / 2).ceil();
-    final even = rows - odd;
-    return odd * _colsOdd + even * _colsEven;
-  }
-
-  bool get _ballFitsThrough => _pegSpacingX - 2 * _pegRadius >= 2 * _ballRadius;
-  bool get _ballFitsAtWall  => _pegSpacingX / 2 > _ballRadius + (_ballRadius + _pegRadius);
+  bool get _ballFitsThrough => PlinkoConfig.pegGX > 2 * _pegRadius + 2 * _ballRadius;
 
   // ── Stats lots ───────────────────────────────────────────────────────────
   double get _totalProb =>
@@ -146,10 +128,8 @@ class _ConfigPanelState extends State<ConfigPanel> {
   void _apply() {
     PlinkoConfig.ballRadius     = _ballRadius;
     PlinkoConfig.pegRadius      = _pegRadius;
-    PlinkoConfig.pegSpacingX    = _pegSpacingX;
     PlinkoConfig.gravity        = _gravity;
     PlinkoConfig.pegRestitution = _pegRestitution;
-    PlinkoConfig.replayStride   = _replayStride;
     widget.game.rebuildBoard();
     setState(() => _open = false);
   }
@@ -188,10 +168,8 @@ class _ConfigPanelState extends State<ConfigPanel> {
     _ConfigStorage.save(name,
       ballRadius:     _ballRadius,
       pegRadius:      _pegRadius,
-      pegSpacingX:    _pegSpacingX,
       gravity:        _gravity,
       pegRestitution: _pegRestitution,
-      replayStride:   _replayStride,
     );
     setState(() {
       _savedNames = _ConfigStorage.names;
@@ -205,10 +183,8 @@ class _ConfigPanelState extends State<ConfigPanel> {
     setState(() {
       _ballRadius     = (cfg['ballRadius']     as double);
       _pegRadius      = (cfg['pegRadius']      as double);
-      _pegSpacingX    = (cfg['pegSpacingX']    as double);
       _gravity        = (cfg['gravity']        as double);
       _pegRestitution = (cfg['pegRestitution'] as double);
-      _replayStride   = (cfg['replayStride']   as int);
     });
   }
 
@@ -281,33 +257,22 @@ class _ConfigPanelState extends State<ConfigPanel> {
                           (v) => setState(() => _ballRadius = v)),
                       _slider('⚪ Picot radius', _pegRadius, 0.10, 0.50, 0.05,
                           (v) => setState(() => _pegRadius = v)),
-                      _slider('↔ Espacement picots', _pegSpacingX, 1.5, 5.0, 0.5,
-                          (v) => setState(() => _pegSpacingX = v),
-                          suffix: ' → $_colsOdd/$_colsEven cols · $_totalPegs picots'),
                       _slider('⬇ Gravité (vitesse)', _gravity, 5.0, 50.0, 1.0,
                           (v) => setState(() => _gravity = v)),
                       _slider('↗ Rebond picot', _pegRestitution, 0.10, 0.90, 0.05,
                           (v) => setState(() => _pegRestitution = v)),
-                      // replayStride appliqué immédiatement (pas besoin de rebuildBoard)
-                      _sliderInt('▶ Vitesse replay', _replayStride, 1, 10,
-                          (v) => setState(() {
-                            _replayStride = v;
-                            PlinkoConfig.replayStride = v; // live — pas besoin d'"Appliquer"
-                          })),
 
                       const SizedBox(height: 8),
 
                       if (!_ballFitsThrough)
                         _warning('⚠ Bille trop grande — ne passe pas entre picots'),
-                      if (!_ballFitsAtWall)
-                        _warning('⚠ Bille trop grande — coincement mur possible'),
 
                       const SizedBox(height: 10),
 
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: (_ballFitsThrough && _ballFitsAtWall) ? _apply : null,
+                          onPressed: _ballFitsThrough ? _apply : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF00c8ff),
                             foregroundColor: const Color(0xFF0a0a18),

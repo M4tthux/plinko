@@ -86,36 +86,34 @@ flutter doctor
 
 ---
 
-## Config plateau actuelle (validée — Session 9)
+## Config plateau actuelle (validée — Session Design 2026-04-02)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
 | `worldWidth` | 18.0 | Largeur en unités physiques |
-| `worldHeight` | 29.0 | Hauteur totale |
+| `worldHeight` | 24.0 | Hauteur totale |
+| `zoom` | 24.0 | Zoom caméra |
 | `gravity` | 18.0 | Unités/s² |
+| `rows` | 10 | Rangs 0–9 (grille triangulaire) |
+| `startRow` | 2 | Première rangée = 3 picots |
+| `pegGX` | 2.0 (calculé) | = worldWidth/slotCount — alignement parfait |
+| `pegGY` | 2.0 | Espacement vertical |
+| `pegStartY` | 4.5 | Y du rang startRow |
 | `pegRadius` | 0.25 | Rayon picot |
-| `pegSpacingX` | 3.0 | Espacement horizontal picots |
-| `pegSpacingY` | 1.5 | Espacement vertical picots |
-| `pegRowCount` | 14 | Nombre de rangées |
-| `pegColsOdd` | 6 | Picots/rangée impaire |
-| `pegColsEven` | 5 | Picots/rangée paire |
 | `pegRestitution` | 0.50 | Rebond picot |
-| `ballRadius` | 0.60 | Rayon bille |
+| `ballRadius` | 0.40 | Rayon bille |
 | `ballRestitution` | 0.35 | |
 | `wallRestitution` | 0.55 | Rebond mur |
 | `minWallKick` | 1.5 | Kick minimum anti-couloir |
-| `funnelZoneWidth` | 2.5 | Zone entonnoir latéral |
-| `funnelForce` | 30.0 | Force entonnoir |
-| `slotCount` | 7 | Cases : 10/50/100/500/100/50/10 pts |
-| `replayStride` | 4 | Vitesse replay (5=trop lent, 4=bon compromis) |
-| `slotWeights` | [6,4,3,1,3,4,6] | Distribution — jackpot central plus rare |
-| `launchMin/Max` | 1.0 / 17.0 | Zone de lancer clampée |
+| `slotCount` | 9 | Cases : 1€/2€/5€/50€/**500€**/50€/5€/2€/1€ |
+| `jackpotSlotIndex` | 4 | Centre (0-indexed) |
+| `slotWallHeight` | 2.5 | Hauteur cases |
 
 ---
 
 ## Architecture trajectoires
 
-- **70 trajectoires** : 7 cases × 5 zones × 2 variantes
+- **Trajectoires** : cases × zones × variantes (à régénérer après changement de grille)
 - Générées par `generate_trajectories.py` (miroir Python de la physique Dart)
 - Stride=1 à la génération → interpolation linéaire dans `_updateReplay()` pour fluidité
 - Filtre anti-stagnation : rejet si Y ne progresse pas de 0.5 unités sur 120 frames
@@ -148,6 +146,24 @@ flutter doctor
 - **Jackpot unique** : hardcoder slot central = jackpot dans `_assignSlots()`
 - **Émotion win/lose** : direction visuelle à cadrer avant dev (sobre vs spectaculaire)
 - **Build iOS** : nécessite Mac + Xcode + compte Apple Developer
+
+---
+
+## Architecture multi-agents
+
+Ce projet utilise une architecture multi-agents. Quand Matthieu exprime une intention floue, activer le mode orchestrateur avant toute action.
+
+**Sous-agents disponibles :**
+
+| Fichier | Rôle | Se déclenche quand |
+|---|---|---|
+| `agents/orchestrator.md` | Chef de projet — cadre et route | Intention floue de Matthieu |
+| `agents/game-designer.md` | Game Design — mécaniques et équilibrage | Sujet lié au ressenti joueur |
+| `agents/designer.md` | Design — visuel, UI, animations | Sujet lié à l'interface |
+| `agents/developer.md` | Dev — Flutter, technique, implémentation | Sujet lié au code |
+| `agents/benchmark.md` | Veille — marché, concurrents, standards | Décision stratégique ou comparaison |
+
+**Règle :** lire `agents/orchestrator.md` en premier. Il contient le routing complet.
 
 ---
 
