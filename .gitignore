@@ -18,10 +18,15 @@ plinko_app/.packages
 .DS_Store
 Thumbs.db
 
-# Sessions HTML générées (les .md sont suffisants)
-sessions/*.html
-specs/*.html
-Informations\ générales/*.html
+# HTML générés (les .md sont suffisants)
+*.html
+!plinko_app/web/**/*.html
+
+# Skills legacy (migrés vers Anthropic Skills cloud)
+*.skill
+
+# Settings locaux Claude Code
+.claude/settings.local.json
 
 # Python
 __pycache__/
