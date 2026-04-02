@@ -167,11 +167,32 @@ Ce projet utilise une architecture multi-agents. Quand Matthieu exprime une inte
 
 ---
 
+## Workflow multi-device
+
+| Outil | Rôle | Accessible depuis |
+|---|---|---|
+| **GitHub** (`M4tthux/plinko`) | Source de vérité code + contexte | PC + téléphone |
+| **Notion** | Board + specs vivantes — source de vérité produit | PC + téléphone |
+| **Claude Code local** | Dev complet (Flutter, Chrome, terminal) | PC uniquement |
+| **Claude Code remote** | Code, git, agents (pas de Flutter run) | Téléphone via claude.ai |
+
+**Règle de sync :**
+- Toujours `git pull` avant de commencer une session
+- Toujours `git push` en fin de session
+- Mettre à jour Notion en fin de session
+
+---
+
 ## Board Notion
 
 `https://www.notion.so/6c1e7a3c58094cadac6313c3a57bbda7`
 
 Statuts : Backlog / En cours / En test / Done / Bloqué
+
+### Specs Notion (pages vivantes, à maintenir à jour)
+- 🎮 Game Design — `https://www.notion.so/336d826db45981639b1bf031dd8af08d`
+- 🔧 Architecture Technique — `https://www.notion.so/336d826db45981dd9fe4d977798871ea`
+- 🎱 Benchmark Physique Bille — `https://www.notion.so/336d826db45981049295d99d645aa8b0`
 
 ---
 
@@ -202,4 +223,6 @@ Statuts : Backlog / En cours / En test / Done / Bloqué
 1. Mettre à jour `project-context.md` (décisions, état d'avancement)
 2. Créer log dans `sessions/YYYY-MM-DD_nom-session.md`
 3. Committer : `git commit -m "Session X — description"`
-4. Mettre à jour la board Notion si tâches changent de statut
+4. `git push` — **obligatoire** pour sync multi-device
+5. Mettre à jour la board Notion si tâches changent de statut
+6. Mettre à jour les specs Notion si elles ont évolué
