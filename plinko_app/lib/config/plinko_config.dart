@@ -98,6 +98,18 @@ class PlinkoConfig {
   static bool   slotIsJackpot(int i) => i == jackpotSlotIndex;
   static Color  slotColorAt(int i) => Color(_slotColorValues[i]);
 
+  // ─── Zones de lancement ─────────────────────────────────────────────────────
+  /// Détermine la zone de lancement (0–4) pour une position X donnée.
+  static int zoneForX(double x) =>
+      (x / worldWidth * 5).clamp(0, 4).floor();
+
+  // ─── Entonnoir anti-couloir latéral ────────────────────────────────────────
+  static const double funnelZoneWidth = 2.5;
+  static const double funnelForce     = 30.0;
+
+  // ─── Replay ────────────────────────────────────────────────────────────────
+  static int replayStride = 3; // 4 = trop lent, 3 = bon rythme
+
   // ─── Parois ────────────────────────────────────────────────────────────────
   static const double wallRestitution = 0.55;
   static const double minWallKick     = 1.5;

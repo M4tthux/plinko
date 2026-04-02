@@ -182,6 +182,9 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | 2026-03-31 | Dev | **Session 11 — Table de lots réelle** : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot). `plinko_config.dart` mis à jour. |
 | 2026-03-31 | Dev | **Session 11 — replayStride** 4→3. Validé par Matthieu comme bon rythme. |
 | 2026-03-31 | Design | **Session 11 — Design validé visuellement** : plateau néon cyan→violet, overlay "Perdu" mode perte confirmé (carte grise, "Pas de chance cette fois…", sans particules). |
+| 2026-04-02 | Dev | **Fix lancement bille** : mécanisme de lancement désactivé lors de la session Design Refonte (onTapDown/onTapUp vidés, _launchBall supprimé, Ball.replay supprimé, trajectory_loader supprimé). Tout restauré : 6 fichiers modifiés (trajectory.dart, trajectory_loader.dart, ball.dart, plinko_config.dart, plinko_game.dart, main.dart). Ajout zoneForX, replayStride, funnelZoneWidth, funnelForce dans config. |
+| 2026-04-02 | Dev | **Trajectoires incompatibles** : les 70 trajectoires actuelles sont pour 7 cases, config = 9 cases → bille tombe en mode physique fallback. Régénération nécessaire. |
+| 2026-04-02 | Dev | **Trajectoire physique pas naturelle** : en mode fallback (physique temps réel), le mouvement n'est pas satisfaisant. À travailler lors de la régénération trajectoires 9 cases. |
 
 ---
 
@@ -199,6 +202,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **Overlay win/jackpot** : mode "Perdu" validé (Session 11). Overlay win (flash blanc + confettis) et jackpot (feux d'artifice or) non encore testés visuellement — code correct, à valider.
 
 ### Dev — Backlog prioritaire
+- **Régénérer trajectoires pour 9 cases** : script Python à adapter (7→9 cases), puis régénérer 70+ trajectoires
+- **Naturel trajectoire bille** : mouvement physique pas satisfaisant — revoir paramètres physiques et/ou replay
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) : à retirer avant prod — Basse priorité
 
 ### Backlog — à cadrer en session dédiée
@@ -224,7 +229,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
 | **Design & UI** | 🟡 En cours | Refonte visuelle néon (fond gradient, picots blancs, cases colorées, titre PLINKO). Multi-agents actifs. |
-| **Dev** | 🟢 Stable | Grille triangulaire + 9 cases alignées. Compilation OK. Trajectoires à régénérer. |
+| **Dev** | 🟡 En cours | Lancement bille restauré. Trajectoires incompatibles (7→9 cases) → mode physique fallback. Régénération + naturel trajectoire à travailler. |
 | **Test mobile** | 🟢 Opérationnel | Build web + serve local sur port 8080, testé sur iPhone via Safari. |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
@@ -272,4 +277,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-02 — Session Design Refonte. Grille triangulaire validée (rows=10, startRow=2, 8 rangées). 9 cases avec alignement mécanique Plinko (pegGX=worldWidth/slotCount). Refonte visuelle : fond gradient radial, picots blancs uniformes, cases néon colorées, titre PLINKO. Architecture multi-agents activée (orchestrator, game-designer, designer, developer, benchmark).*
+*Dernière mise à jour : 2026-04-02 — Session Fix Lancement. Mécanisme de lancement bille restauré (désactivé lors de la refonte design). Trajectoires incompatibles (7→9 cases) → mode physique fallback actif. Prochaine étape : régénérer trajectoires 9 cases + travailler le naturel du mouvement.*

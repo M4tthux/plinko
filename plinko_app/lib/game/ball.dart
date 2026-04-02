@@ -3,41 +3,102 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' show Colors, RadialGradient, Alignment;
 import '../config/plinko_config.dart';
+import '../models/trajectory.dart';
 
 /// Bille Plinko — Balleck Team.
 ///
-/// Mode physique : gravité + collisions gérées par PlinkoGame.
-/// Le système de trajectoire forcée (generatePath) sera ajouté en étape 2.
+/// Deux modes de fonctionnement :
+///
+/// [Mode physique] — Ball(startPosition)
+///   Physique manuelle frame par frame (gravité + collisions).
+///   Utilisé en mode fallback si aucune trajectoire disponible.
+///
+/// [Mode replay] — Ball.replay(startPosition, frames)
+///   Rejoue une trajectoire pré-calculée frame par frame.
+///   Aucune physique calculée au runtime — position lue depuis le JSON.
+///   C'est ce mode qui garantit l'atterrissage dans la case cible.
 class Ball extends PositionComponent {
-  /// Vitesse courante.
+  /// Vitesse courante — utilisée uniquement en mode physique.
   Vector2 velocity = Vector2.zero();
 
   bool hasLanded = false;
   int? landedSlotIndex;
 
-  // ── Anti-orbite : détecteur de blocage ────────────────────────────────────
+  // ── Anti-orbite : détecteur de blocage (mode physique) ────────────────────
   int _stuckFrames = 0;
   static const int _stuckLimit      = 30;
   static const double _stuckVyMin   = 2.0;
   static const double _stuckNudgeY  = 12.0;
   static const double _stuckDampX   = 0.1;
 
-  bool get isReplay => false; // sera réactivé en étape 2
+  // ── Mode replay ───────────────────────────────────────────────────────────
+  final List<TrajectoryFrame>? _replayFrames;
+  int _replayIndex   = 0;
+  int _tickCount     = 0;
 
-  // ── Constructeur ──────────────────────────────────────────────────────────
+  /// Vitesse de replay — lue depuis la config pour être ajustable facilement.
+  static int get _replayStride => PlinkoConfig.replayStride;
 
+  bool get isReplay => _replayFrames != null;
+
+  // ── Constructeurs ─────────────────────────────────────────────────────────
+
+  /// Mode physique (fallback si pas de trajectoire disponible).
   Ball(Vector2 startPosition)
-      : super(position: startPosition, anchor: Anchor.center);
+      : _replayFrames = null,
+        super(position: startPosition, anchor: Anchor.center);
+
+  /// Mode replay — la bille suit exactement la trajectoire pré-calculée.
+  Ball.replay(Vector2 startPosition, List<TrajectoryFrame> frames)
+      : _replayFrames = frames,
+        super(position: startPosition, anchor: Anchor.center);
 
   // ── Update ────────────────────────────────────────────────────────────────
 
   @override
   void update(double dt) {
     if (hasLanded) return;
-    _updatePhysics(dt);
+
+    if (_replayFrames != null) {
+      _updateReplay();
+    } else {
+      _updatePhysics(dt);
+    }
   }
 
-  // ── Physique ──────────────────────────────────────────────────────────────
+  // ── Mode replay ───────────────────────────────────────────────────────────
+
+  void _updateReplay() {
+    final frames = _replayFrames!;
+    _tickCount++;
+
+    final stride  = _replayStride;
+    final frameIdx = (_tickCount - 1) ~/ stride;
+    final t = ((_tickCount - 1) % stride) / stride;
+
+    // Dernière frame ou au-delà → atterrissage
+    if (frameIdx >= frames.length - 1) {
+      final last = frames.last;
+      position = Vector2(last.x, last.y);
+      if (!hasLanded) {
+        hasLanded = true;
+        _replayIndex = frames.length - 1;
+        landedSlotIndex = _detectSlot();
+      }
+      return;
+    }
+
+    // Interpolation linéaire entre frame[frameIdx] et frame[frameIdx+1]
+    final curr = frames[frameIdx];
+    final next = frames[frameIdx + 1];
+    position = Vector2(
+      curr.x + (next.x - curr.x) * t,
+      curr.y + (next.y - curr.y) * t,
+    );
+    _replayIndex = frameIdx;
+  }
+
+  // ── Mode physique (fallback) ───────────────────────────────────────────────
 
   void _updatePhysics(double dt) {
     // Anti-orbite
@@ -73,6 +134,15 @@ class Ball extends PositionComponent {
         velocity.x.abs() * PlinkoConfig.wallRestitution,
         PlinkoConfig.minWallKick,
       );
+    }
+
+    // Entonnoir anti-couloir latéral
+    if (position.y > PlinkoConfig.pegStartY) {
+      if (position.x < PlinkoConfig.funnelZoneWidth) {
+        velocity.x += PlinkoConfig.funnelForce * dt;
+      } else if (position.x > PlinkoConfig.worldWidth - PlinkoConfig.funnelZoneWidth) {
+        velocity.x -= PlinkoConfig.funnelForce * dt;
+      }
     }
 
     // Atterrissage

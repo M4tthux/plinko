@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter/material.dart' show Color;
 import '../config/plinko_config.dart';
 import '../models/prize_lot.dart';
+import '../data/trajectory_loader.dart';
 import 'board.dart';
 import 'ball.dart';
 
@@ -98,12 +99,17 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   @override
   void onTapDown(TapDownEvent event) {
-    // Étape 1 : lancer désactivé (grille statique uniquement)
+    _launchX = _screenToWorld(event.localPosition).x;
   }
 
   @override
   void onTapUp(TapUpEvent event) {
-    // Étape 1 : lancer désactivé (grille statique uniquement)
+    if (_ballInFlight) {
+      // Si une bille est déjà en vol avec overlay affiché, fermer l'overlay
+      if (_resetPending) dismissReward();
+      return;
+    }
+    _launchBall(_launchX);
   }
 
   // ── Système de lots ──────────────────────────────────────────────────────
@@ -199,7 +205,34 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   // ── Lancement ────────────────────────────────────────────────────────────
 
-  // Étape 1 : _launchBall désactivé — sera réactivé avec generatePath (étape 2)
+  void _launchBall(double x) {
+    final startPos = Vector2(x, PlinkoConfig.ballStartY);
+
+    // 1. Draw winning lot
+    final winner = _drawLot();
+
+    // 2. Assign slots — returns winning slot index
+    final targetSlot = _assignSlots(winner);
+
+    // 3. Load pre-calculated trajectory
+    final trajectory = PlinkoConfig.forcePhysicsMode
+        ? null
+        : TrajectoryLoader.select(
+            slotIndex: targetSlot,
+            fingerX: x,
+          );
+
+    if (trajectory != null) {
+      _currentBall = Ball.replay(startPos, trajectory.frames);
+    } else {
+      _currentBall = Ball(startPos);
+    }
+
+    debugTargetNotifier.value = '${winner.name} · Case $targetSlot';
+
+    world.add(_currentBall!);
+    _ballInFlight = true;
+  }
 
   // ── Conversion écran → monde ─────────────────────────────────────────────
 

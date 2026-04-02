@@ -1,6 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'data/trajectory_loader.dart';
 import 'game/plinko_game.dart';
 import 'ui/config_panel.dart';
 import 'ui/reward_overlay.dart';
@@ -46,6 +47,12 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   void initState() {
     super.initState();
     _game = PlinkoGame();
+    // Charger les trajectoires pré-calculées au démarrage
+    TrajectoryLoader.load().then((_) {
+      debugPrint('[Plinko] Trajectoires chargées');
+    }).catchError((e) {
+      debugPrint('[Plinko] Trajectoires non trouvées — mode physique fallback');
+    });
   }
 
   @override
