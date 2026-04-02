@@ -119,7 +119,7 @@ class PlinkoConfig {
   static const double cameraLerp  = 0.08;
 
   // ─── [DEBUG] ───────────────────────────────────────────────────────────────
-  static bool forcePhysicsMode = false;
+  static bool forcePhysicsMode = true;  // TEST — physique pure sans trajectoires
   static int? highlightedSlotIndex;
 
   // ─── Table de lots ────────────────────────────────────────────────────────

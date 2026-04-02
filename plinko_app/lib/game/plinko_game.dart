@@ -262,16 +262,10 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     _checkLanded();
   }
 
-  /// Collision bille ↔ picots — mode physique uniquement.
+  /// Collision bille ↔ picots — physique pure.
   ///
-  /// Fix orbite (v4) — trois mécanismes combinés :
-  ///   1. Décomposition normale/tangentielle : amortissement de la composante
-  ///      tangentielle HORIZONTALE uniquement — la vitesse vers le bas (Y > 0)
-  ///      est préservée pour éviter de bloquer la descente.
-  ///   2. Cooldown par picot : après collision, le picot est ignoré pendant
-  ///      [cooldownDuration] frames pour éviter les re-collisions immédiates.
-  ///   3. Kick anti-orbite : un kick vertical vers le bas est injecté si la
-  ///      composante Y de vitesse est trop faible après rebond.
+  /// Rebond classique : réflexion par rapport à la normale avec restitution.
+  /// Aucun forçage, aucun kick artificiel, aucun amortissement spécial.
   void _resolvePegCollisions() {
     final ball = _currentBall;
     if (ball == null || ball.hasLanded) return;
@@ -280,12 +274,8 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
     final collisionDist   = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius;
     final collisionDistSq = collisionDist * collisionDist;
-
-    const double minExitSpeed        = 1.5;
-    const double horizontalDamping   = 0.5;  // amortit uniquement l'horizontal
-    const double randomKickAmplitude = 0.8;
-    const double minDownwardVelocity = 1.0;  // kick si la bille ne descend pas assez
-    const int    cooldownDuration    = 8;    // augmenté pour mieux casser l'orbite
+    const int cooldownDuration = 5;
+    const double separationGap = 0.05;
 
     for (int i = 0; i < _pegPositions.length; i++) {
       final coolUntil = _pegCooldownFrames[i];
@@ -299,36 +289,13 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         final dist   = sqrt(distSq);
         final normal = delta / dist;
 
-        ball.position = pegPos + normal * (collisionDist + 0.1);
+        // Séparer la bille du picot
+        ball.position = pegPos + normal * (collisionDist + separationGap);
 
-        final dotProduct = ball.velocity.dot(normal);
-        final vNormal    = normal * dotProduct;
-        final vTangent   = ball.velocity - vNormal;
-
-        // ── Clé du fix orbite ──────────────────────────────────────────────
-        // On amortit uniquement le X tangentiel.
-        // Le Y tangentiel VERS LE BAS (> 0) est préservé intégralement.
-        // Le Y tangentiel vers le haut (< 0) est amorti normalement.
-        final dampedTangent = Vector2(
-          vTangent.x * horizontalDamping,
-          vTangent.y > 0 ? vTangent.y : vTangent.y * horizontalDamping,
-        );
-
-        ball.velocity = normal * (-dotProduct.abs() * PlinkoConfig.pegRestitution)
-                      + dampedTangent;
-
-        // Kick horizontal aléatoire pour casser la symétrie
-        ball.velocity.x += (_rng.nextDouble() - 0.5) * randomKickAmplitude;
-
-        // Vitesse minimum de sortie le long de la normale
-        final exitSpeed = ball.velocity.dot(normal);
-        if (exitSpeed < minExitSpeed) {
-          ball.velocity += normal * (minExitSpeed - exitSpeed);
-        }
-
-        // Kick vertical : si la bille ne descend pas assez, on lui donne une impulsion
-        if (ball.velocity.y < minDownwardVelocity) {
-          ball.velocity.y = minDownwardVelocity;
+        // Réflexion classique : v' = v - (1 + e) * dot(v, n) * n
+        final dot = ball.velocity.dot(normal);
+        if (dot < 0) {
+          ball.velocity -= normal * (dot * (1 + PlinkoConfig.pegRestitution));
         }
 
         _pegCooldownFrames[i] = _physicsFrame + cooldownDuration;

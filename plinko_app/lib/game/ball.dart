@@ -24,12 +24,7 @@ class Ball extends PositionComponent {
   bool hasLanded = false;
   int? landedSlotIndex;
 
-  // ── Anti-orbite : détecteur de blocage (mode physique) ────────────────────
-  int _stuckFrames = 0;
-  static const int _stuckLimit      = 30;
-  static const double _stuckVyMin   = 2.0;
-  static const double _stuckNudgeY  = 12.0;
-  static const double _stuckDampX   = 0.1;
+  // (Anti-orbite retiré — physique pure)
 
   // ── Mode replay ───────────────────────────────────────────────────────────
   final List<TrajectoryFrame>? _replayFrames;
@@ -101,48 +96,21 @@ class Ball extends PositionComponent {
   // ── Mode physique (fallback) ───────────────────────────────────────────────
 
   void _updatePhysics(double dt) {
-    // Anti-orbite
-    if (velocity.y < _stuckVyMin && position.y > PlinkoConfig.pegStartY) {
-      _stuckFrames++;
-      if (_stuckFrames >= _stuckLimit) {
-        velocity.y = _stuckNudgeY;
-        velocity.x *= _stuckDampX;
-        _stuckFrames = 0;
-      }
-    } else {
-      _stuckFrames = 0;
-    }
-
     // Gravité
     velocity.y += PlinkoConfig.gravity * dt;
 
     // Déplacement
     position += velocity * dt;
 
-    // Parois gauche / droite
+    // Parois gauche / droite — rebond simple
     final minX = PlinkoConfig.ballRadius;
     final maxX = PlinkoConfig.worldWidth - PlinkoConfig.ballRadius;
     if (position.x < minX) {
       position.x = minX;
-      velocity.x = max(
-        velocity.x.abs() * PlinkoConfig.wallRestitution,
-        PlinkoConfig.minWallKick,
-      );
+      velocity.x = velocity.x.abs() * PlinkoConfig.wallRestitution;
     } else if (position.x > maxX) {
       position.x = maxX;
-      velocity.x = -max(
-        velocity.x.abs() * PlinkoConfig.wallRestitution,
-        PlinkoConfig.minWallKick,
-      );
-    }
-
-    // Entonnoir anti-couloir latéral
-    if (position.y > PlinkoConfig.pegStartY) {
-      if (position.x < PlinkoConfig.funnelZoneWidth) {
-        velocity.x += PlinkoConfig.funnelForce * dt;
-      } else if (position.x > PlinkoConfig.worldWidth - PlinkoConfig.funnelZoneWidth) {
-        velocity.x -= PlinkoConfig.funnelForce * dt;
-      }
+      velocity.x = -velocity.x.abs() * PlinkoConfig.wallRestitution;
     }
 
     // Atterrissage
