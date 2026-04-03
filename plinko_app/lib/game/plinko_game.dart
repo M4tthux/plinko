@@ -328,6 +328,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
   }
 
   /// Vérifie si la bille a atterri et notifie le widget Flutter.
+  /// Délai 300ms avant l'overlay pour laisser le joueur voir la bille se poser.
   void _checkLanded() {
     final ball = _currentBall;
     if (ball == null) return;
@@ -337,28 +338,31 @@ class PlinkoGame extends FlameGame with TapCallbacks {
       // Identifier le lot gagnant depuis l'assignation courante
       final slotIdx = ball.landedSlotIndex;
 
-      // Bille sortie du plateau → Perdu
-      if (slotIdx == null || slotIdx < 0 || slotIdx >= PlinkoConfig.slotCount) {
+      // Délai avant l'overlay — le joueur voit la bille se poser
+      Future.delayed(const Duration(milliseconds: 300), () {
+        // Bille sortie du plateau → Perdu
+        if (slotIdx == null || slotIdx < 0 || slotIdx >= PlinkoConfig.slotCount) {
+          landedSlotNotifier.value = LandedResult(
+            prizeName: 'Perdu',
+            isJackpot: false,
+            isLoss: true,
+          );
+          return;
+        }
+
+        final lot = PlinkoConfig.currentSlotAssignment[slotIdx];
+
+        // Jackpot → highlight la case gagnante (toutes les autres s'estompent)
+        if (lot?.isJackpot ?? false) {
+          PlinkoConfig.highlightedSlotIndex = slotIdx;
+        }
+
         landedSlotNotifier.value = LandedResult(
-          prizeName: 'Perdu',
-          isJackpot: false,
-          isLoss: true,
+          prizeName: lot?.name ?? '?',
+          isJackpot: lot?.isJackpot ?? false,
+          isLoss: lot?.isLoss ?? false,
         );
-        return;
-      }
-
-      final lot = PlinkoConfig.currentSlotAssignment[slotIdx];
-
-      // Jackpot → highlight la case gagnante (toutes les autres s'estompent)
-      if (lot?.isJackpot ?? false) {
-        PlinkoConfig.highlightedSlotIndex = slotIdx;
-      }
-
-      landedSlotNotifier.value = LandedResult(
-        prizeName: lot?.name ?? '?',
-        isJackpot: lot?.isJackpot ?? false,
-        isLoss: lot?.isLoss ?? false,
-      );
+      });
     }
   }
 

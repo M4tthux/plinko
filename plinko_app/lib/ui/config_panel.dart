@@ -15,12 +15,14 @@ class _ConfigStorage {
     required double pegRadius,
     required double gravity,
     required double pegRestitution,
+    required double ballRestitution,
   }) {
     _store[name] = {
-      'ballRadius':     ballRadius,
-      'pegRadius':      pegRadius,
-      'gravity':        gravity,
-      'pegRestitution': pegRestitution,
+      'ballRadius':      ballRadius,
+      'pegRadius':       pegRadius,
+      'gravity':         gravity,
+      'pegRestitution':  pegRestitution,
+      'ballRestitution': ballRestitution,
     };
   }
 
@@ -68,6 +70,7 @@ class _ConfigPanelState extends State<ConfigPanel> {
   late double _pegRadius;
   late double _gravity;
   late double _pegRestitution;
+  late double _ballRestitution;
 
   bool _open = false;
 
@@ -96,10 +99,11 @@ class _ConfigPanelState extends State<ConfigPanel> {
   }
 
   void _loadFromConfig() {
-    _ballRadius     = PlinkoConfig.ballRadius;
-    _pegRadius      = PlinkoConfig.pegRadius;
-    _gravity        = PlinkoConfig.gravity;
-    _pegRestitution = PlinkoConfig.pegRestitution;
+    _ballRadius      = PlinkoConfig.ballRadius;
+    _pegRadius       = PlinkoConfig.pegRadius;
+    _gravity         = PlinkoConfig.gravity;
+    _pegRestitution  = PlinkoConfig.pegRestitution;
+    _ballRestitution = PlinkoConfig.ballRestitution;
   }
 
   void _loadLotsFromConfig() {
@@ -126,10 +130,11 @@ class _ConfigPanelState extends State<ConfigPanel> {
 
   // ── Actions ──────────────────────────────────────────────────────────────
   void _apply() {
-    PlinkoConfig.ballRadius     = _ballRadius;
-    PlinkoConfig.pegRadius      = _pegRadius;
-    PlinkoConfig.gravity        = _gravity;
-    PlinkoConfig.pegRestitution = _pegRestitution;
+    PlinkoConfig.ballRadius      = _ballRadius;
+    PlinkoConfig.pegRadius       = _pegRadius;
+    PlinkoConfig.gravity         = _gravity;
+    PlinkoConfig.pegRestitution  = _pegRestitution;
+    PlinkoConfig.ballRestitution = _ballRestitution;
     widget.game.rebuildBoard();
     setState(() => _open = false);
   }
@@ -166,10 +171,11 @@ class _ConfigPanelState extends State<ConfigPanel> {
     final name = _saveNameController.text.trim();
     if (name.isEmpty) return;
     _ConfigStorage.save(name,
-      ballRadius:     _ballRadius,
-      pegRadius:      _pegRadius,
-      gravity:        _gravity,
-      pegRestitution: _pegRestitution,
+      ballRadius:      _ballRadius,
+      pegRadius:       _pegRadius,
+      gravity:         _gravity,
+      pegRestitution:  _pegRestitution,
+      ballRestitution: _ballRestitution,
     );
     setState(() {
       _savedNames = _ConfigStorage.names;
@@ -181,10 +187,11 @@ class _ConfigPanelState extends State<ConfigPanel> {
     final cfg = _ConfigStorage.load(name);
     if (cfg == null) return;
     setState(() {
-      _ballRadius     = (cfg['ballRadius']     as double);
-      _pegRadius      = (cfg['pegRadius']      as double);
-      _gravity        = (cfg['gravity']        as double);
-      _pegRestitution = (cfg['pegRestitution'] as double);
+      _ballRadius      = (cfg['ballRadius']      as double);
+      _pegRadius       = (cfg['pegRadius']      as double);
+      _gravity         = (cfg['gravity']        as double);
+      _pegRestitution  = (cfg['pegRestitution'] as double);
+      _ballRestitution = (cfg['ballRestitution'] as double?) ?? PlinkoConfig.ballRestitution;
     });
   }
 
@@ -261,6 +268,8 @@ class _ConfigPanelState extends State<ConfigPanel> {
                           (v) => setState(() => _gravity = v)),
                       _slider('↗ Rebond picot', _pegRestitution, 0.10, 0.90, 0.05,
                           (v) => setState(() => _pegRestitution = v)),
+                      _slider('🏀 Rebond bille', _ballRestitution, 0.05, 0.90, 0.05,
+                          (v) => setState(() => _ballRestitution = v)),
 
                       const SizedBox(height: 8),
 

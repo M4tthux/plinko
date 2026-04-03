@@ -50,14 +50,14 @@ class PlinkoConfig {
   // ─── Bille ─────────────────────────────────────────────────────────────────
   static const double ballStartY = 1.5;  // au-dessus de la première rangée
   static double ballRadius      = 0.40;
-  static double ballRestitution = 0.35;
+  static double ballRestitution = 0.25;
 
   // ─── Gravité ───────────────────────────────────────────────────────────────
-  static double gravity = 18.0;
+  static double gravity = 15.0;
 
   // ─── Picots ────────────────────────────────────────────────────────────────
   static double pegRadius      = 0.25;
-  static double pegRestitution = 0.50;
+  static double pegRestitution = 0.55;
 
   // ─── Cases de récompense (pleine largeur) ──────────────────────────────────
   static const int    slotCount         = 9;
