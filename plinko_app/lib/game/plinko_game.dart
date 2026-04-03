@@ -256,6 +256,11 @@ class PlinkoGame extends FlameGame with TapCallbacks {
       _resolveSlotDividerCollisions();
     }
 
+    // En mode replay, détecter la proximité bille-picots pour le glow flash
+    if (ball != null && ball.isReplay) {
+      _checkReplayPegProximity();
+    }
+
     _followBall();
     _checkLanded();
   }
@@ -299,6 +304,9 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         // Squash & stretch au rebond
         ball.triggerBounce(normal);
 
+        // Glow flash sur le picot touché
+        _triggerPegHit(i);
+
         _pegCooldownFrames[i] = _physicsFrame + cooldownDuration;
       }
     }
@@ -321,6 +329,32 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         final sign = dx >= 0 ? 1.0 : -1.0;
         ball.position.x = divX + sign * PlinkoConfig.ballRadius;
         ball.velocity.x = -ball.velocity.x * slotDividerRestitution;
+      }
+    }
+  }
+
+  /// Active le glow flash sur le picot d'index [pegIndex].
+  void _triggerPegHit(int pegIndex) {
+    final pegs = world.children.whereType<Peg>().toList();
+    if (pegIndex >= 0 && pegIndex < pegs.length) {
+      pegs[pegIndex].triggerHit();
+    }
+  }
+
+  /// Détecte la proximité bille-picots en mode replay et déclenche le glow.
+  void _checkReplayPegProximity() {
+    final ball = _currentBall;
+    if (ball == null || ball.hasLanded) return;
+
+    final hitDist = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius + 0.15;
+    final hitDistSq = hitDist * hitDist;
+    final pegs = world.children.whereType<Peg>().toList();
+
+    for (int i = 0; i < _pegPositions.length && i < pegs.length; i++) {
+      final delta = ball.position - _pegPositions[i];
+      final distSq = delta.x * delta.x + delta.y * delta.y;
+      if (distSq < hitDistSq) {
+        pegs[i].triggerHit();
       }
     }
   }

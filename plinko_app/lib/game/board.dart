@@ -121,33 +121,49 @@ class Wall extends PositionComponent {
 class Peg extends PositionComponent {
   final Color _color;
 
+  // ── Glow flash au passage de la bille ──────────────────────────────────
+  double _hitTimer = 0.0;
+  static const double _hitDuration = 0.20; // 200ms
+
+  void triggerHit() {
+    _hitTimer = _hitDuration;
+  }
+
   Peg(Vector2 pegPosition, {Color? color})
       : _color = color ?? const Color(0xFFd0d0e0),
         super(position: pegPosition, anchor: Anchor.center);
 
   @override
+  void update(double dt) {
+    if (_hitTimer > 0) _hitTimer -= dt;
+  }
+
+  @override
   void render(Canvas canvas) {
     final r = PlinkoConfig.pegRadius;
+    final hitProgress = (_hitTimer > 0) ? (_hitTimer / _hitDuration) : 0.0;
 
-    // Halo atmosphérique — 2.2× rayon, opacity 0.30
+    // Halo atmosphérique — 2.2× rayon, plus intense si hit
+    final haloOpacity = 0.30 + hitProgress * 0.50;
+    final haloRadius  = r * (2.2 + hitProgress * 1.0);
     canvas.drawCircle(
       Offset.zero,
-      r * 2.2,
+      haloRadius,
       Paint()
-        ..color      = _color.withOpacity(0.30)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 1.0),
+        ..color      = Color.lerp(_color, Colors.white, hitProgress * 0.7)!.withOpacity(haloOpacity)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * (1.0 + hitProgress * 0.6)),
     );
 
-    // Corps — dégradé radial blanc→gris
+    // Corps — dégradé radial blanc→gris, plus blanc si hit
     final bodyRect = Rect.fromCircle(center: Offset.zero, radius: r);
     canvas.drawCircle(Offset.zero, r, Paint()
       ..shader = RadialGradient(
         center: const Alignment(-0.3, -0.35),
         radius: 0.85,
-        colors: const [
-          Color(0xFFf0f0ff), // blanc chaud centre
-          Color(0xFFd0d0e0), // gris clair
-          Color(0xFF9898b0), // gris moyen bord
+        colors: [
+          Color.lerp(const Color(0xFFf0f0ff), Colors.white, hitProgress)!,
+          Color.lerp(const Color(0xFFd0d0e0), Colors.white, hitProgress * 0.8)!,
+          Color.lerp(const Color(0xFF9898b0), const Color(0xFFd0d0e0), hitProgress)!,
         ],
         stops: const [0.0, 0.5, 1.0],
       ).createShader(bodyRect));
@@ -156,7 +172,7 @@ class Peg extends PositionComponent {
     canvas.drawCircle(
       Offset(-r * 0.25, -r * 0.28),
       r * 0.35,
-      Paint()..color = Colors.white.withOpacity(0.80),
+      Paint()..color = Colors.white.withOpacity(0.80 + hitProgress * 0.20),
     );
   }
 }
