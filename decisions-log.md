@@ -87,3 +87,6 @@
 | 2026-04-03 | Dev | **Trail lumineux bille** : 10 positions, fade opacity + glow or. `ball.dart`. |
 | 2026-04-03 | Dev | **Squash & stretch bille** : 15% déformation, 120ms, direction d'impact. `ball.dart` + `plinko_game.dart`. |
 | 2026-04-03 | Dev | **Glow flash picots** : 200ms blanc lumineux au passage. `board.dart` + `plinko_game.dart`. |
+| 2026-04-03 | Dev | **Glow dynamique** : halos bille modulés par vitesse (speedFactor). `ball.dart`. |
+| 2026-04-03 | Dev | **Particules d'impact** : 12 particules or à l'atterrissage (600ms). `ball.dart` + `plinko_game.dart`. |
+| 2026-04-03 | Game Design | **Slow-motion annulé** : pas de ralentissement derniers rangs (décision Matthieu). |

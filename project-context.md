@@ -196,6 +196,9 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | 2026-04-03 | Dev | **Trail lumineux bille** : buffer de 10 positions précédentes, rendu avec opacity décroissante + glow or. Échantillonnage 1 frame sur 2. Fonctionne en mode physique et replay. `ball.dart` modifié. |
 | 2026-04-03 | Dev | **Squash & stretch bille** : déformation 15% au rebond (120ms). Phase squash (écrasé dans la direction d'impact) puis stretch (étiré en repartant). Volume constant. En physique : notifié par collision. En replay : détection auto d'inversion de direction X. `ball.dart` + `plinko_game.dart` modifiés. |
 | 2026-04-03 | Dev | **Glow flash picots** : flash blanc 200ms quand la bille touche un picot. Halo élargi (2.2×→3.2×), corps blanchit, retour smooth. En physique : collision directe. En replay : détection de proximité. `board.dart` + `plinko_game.dart` modifiés. |
+| 2026-04-03 | Dev | **Glow dynamique** : halos de la bille s'intensifient avec la vitesse (rayon et opacity modulés par speedFactor calculé depuis le déplacement frame-à-frame). `ball.dart` modifié. |
+| 2026-04-03 | Dev | **Particules d'impact** : 12 particules or en éventail vers le haut à l'atterrissage (600ms, mini-gravité, fade out). Classe `ImpactParticles` dans `ball.dart`, spawn dans `plinko_game.dart`. Pas de particules si bille sortie du plateau. |
+| 2026-04-03 | Game Design | **Slow-motion annulé** : décision Matthieu — pas de ralentissement sur les derniers rangs. Barré dans le benchmark Notion. |
 
 ---
 
