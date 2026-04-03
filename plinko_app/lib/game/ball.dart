@@ -1,4 +1,4 @@
-import 'dart:math' show atan2, max;
+import 'dart:math' show Random, atan2, cos, max, min, sin, sqrt;
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' show Colors, RadialGradient, Alignment;
@@ -37,6 +37,10 @@ class Ball extends PositionComponent {
   static const double _squashDuration = 0.12; // 120ms
   static const double _squashAmount   = 0.15; // 15% de déformation max
 
+  // ── Glow dynamique (brille plus quand accélère) ────────────────────────
+  Vector2 _prevPosition = Vector2.zero();
+  double _speedFactor = 0.0; // 0.0=immobile → 1.0=vitesse max
+
   // ── Mode replay ───────────────────────────────────────────────────────────
   final List<TrajectoryFrame>? _replayFrames;
   int _replayIndex   = 0;
@@ -59,11 +63,13 @@ class Ball extends PositionComponent {
   /// Mode physique (fallback si pas de trajectoire disponible).
   Ball(Vector2 startPosition)
       : _replayFrames = null,
+        _prevPosition = startPosition.clone(),
         super(position: startPosition, anchor: Anchor.center);
 
   /// Mode replay — la bille suit exactement la trajectoire pré-calculée.
   Ball.replay(Vector2 startPosition, List<TrajectoryFrame> frames)
       : _replayFrames = frames,
+        _prevPosition = startPosition.clone(),
         super(position: startPosition, anchor: Anchor.center);
 
   // ── Update ────────────────────────────────────────────────────────────────
@@ -87,6 +93,14 @@ class Ball extends PositionComponent {
         _trailPositions.removeAt(0);
       }
     }
+
+    // Glow dynamique — estimer la vitesse depuis le déplacement
+    final dx = position.x - _prevPosition.x;
+    final dy = position.y - _prevPosition.y;
+    final speed = sqrt(dx * dx + dy * dy);
+    // Normaliser : ~0.3 unités/frame = vitesse haute typique
+    _speedFactor = min(1.0, speed / 0.3);
+    _prevPosition.setFrom(position);
 
     // Animer le squash & stretch (retour progressif à la forme ronde)
     if (_squashTimer > 0) {
@@ -223,15 +237,16 @@ class Ball extends PositionComponent {
     canvas.scale(_squashScaleX, _squashScaleY);
     canvas.rotate(-_squashAngle);
 
-    // ── Halo externe or ───────────────────────────────────────────────────
-    canvas.drawCircle(Offset.zero, r * 2.2, Paint()
-      ..color      = const Color(0xFFf0c040).withOpacity(0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.9));
+    // ── Halo externe or (glow dynamique — brille plus quand accélère) ────
+    final glowBoost = _speedFactor * 0.25; // 0→0.25 boost
+    canvas.drawCircle(Offset.zero, r * (2.2 + _speedFactor * 0.8), Paint()
+      ..color      = const Color(0xFFf0c040).withOpacity(0.18 + glowBoost)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.9 + _speedFactor * 0.5));
 
     // Halo interne
-    canvas.drawCircle(Offset.zero, r * 1.45, Paint()
-      ..color      = const Color(0xFFf0c040).withOpacity(0.40)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.45));
+    canvas.drawCircle(Offset.zero, r * (1.45 + _speedFactor * 0.3), Paint()
+      ..color      = const Color(0xFFf0c040).withOpacity(0.40 + glowBoost * 0.6)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.45 + _speedFactor * 0.3));
 
     // Corps principal — sphère dorée
     canvas.drawCircle(Offset.zero, r, Paint()
@@ -255,3 +270,72 @@ class Ball extends PositionComponent {
     canvas.restore(); // fin squash & stretch
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ImpactParticles — explosion de particules or à l'atterrissage
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _Particle {
+  double x, y, vx, vy;
+  double life;     // 1.0→0.0
+  double radius;
+  _Particle(this.x, this.y, this.vx, this.vy, this.life, this.radius);
+}
+
+class ImpactParticles extends PositionComponent {
+  static const int _count = 12;
+  static const double _duration = 0.6; // 600ms
+  final List<_Particle> _particles = [];
+  double _elapsed = 0.0;
+  final bool isJackpot;
+
+  ImpactParticles(Vector2 impactPos, {this.isJackpot = false})
+      : super(position: impactPos, anchor: Anchor.center, priority: 90) {
+    final rng = Random();
+    for (int i = 0; i < _count; i++) {
+      // Direction : éventail vers le haut (±120°)
+      final angle = -1.57 + (rng.nextDouble() - 0.5) * 2.1; // -π/2 ± ~60°
+      final speed = 2.0 + rng.nextDouble() * 4.0;
+      _particles.add(_Particle(
+        0, 0,
+        cos(angle) * speed,
+        sin(angle) * speed,
+        1.0,
+        0.08 + rng.nextDouble() * 0.12,
+      ));
+    }
+  }
+
+  @override
+  void update(double dt) {
+    _elapsed += dt;
+    if (_elapsed >= _duration) {
+      removeFromParent();
+      return;
+    }
+    for (final p in _particles) {
+      p.vy += 8.0 * dt; // mini gravité sur les particules
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life = max(0.0, 1.0 - _elapsed / _duration);
+    }
+  }
+
+  @override
+  void render(Canvas canvas) {
+    for (final p in _particles) {
+      final color = isJackpot ? const Color(0xFFf0c040) : const Color(0xFFf0c040);
+      final opacity = p.life * 0.8;
+
+      // Glow
+      canvas.drawCircle(Offset(p.x, p.y), p.radius * 2.5, Paint()
+        ..color      = color.withOpacity(opacity * 0.3)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.15));
+
+      // Corps
+      canvas.drawCircle(Offset(p.x, p.y), p.radius * p.life, Paint()
+        ..color = color.withOpacity(opacity));
+    }
+  }
+}
+

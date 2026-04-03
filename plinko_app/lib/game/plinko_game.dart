@@ -372,8 +372,15 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     if (ball.hasLanded && _ballInFlight && !_resetPending) {
       _resetPending = true;
 
-      // Identifier le lot gagnant depuis l'assignation courante
+      // Particules d'impact à l'atterrissage (sauf sortie hors plateau)
       final slotIdx = ball.landedSlotIndex;
+      if (slotIdx != null && slotIdx >= 0 && slotIdx < PlinkoConfig.slotCount) {
+        final lot = PlinkoConfig.currentSlotAssignment[slotIdx];
+        world.add(ImpactParticles(
+          ball.position.clone(),
+          isJackpot: lot?.isJackpot ?? false,
+        ));
+      }
 
       // Délai avant l'overlay — le joueur voit la bille se poser
       Future.delayed(const Duration(milliseconds: 300), () {
