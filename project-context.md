@@ -82,6 +82,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - One-shot — une seule partie par session
 - Pas de sons pour le MVP
 - Pas de trajectoire prévisionnelle — lancer à l'aveugle
+- **Lancement depuis le centre** : bille lancée au centre avec micro-jitter (±0.2), rebondit sur le picot central — standard industrie (Stake, BGaming)
+- **Pas de parois latérales** : bille sortie du plateau = Perdu
 - Jackpot unique centré : 500€ en case centrale (index 4) uniquement
 - 9 cases symétriques : 1€, 2€, 5€, 50€, 500€(jackpot), 50€, 5€, 2€, 1€
 - Table de lots réelle : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot)
@@ -185,29 +187,25 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | 2026-04-02 | Dev | **Fix lancement bille** : mécanisme de lancement désactivé lors de la session Design Refonte (onTapDown/onTapUp vidés, _launchBall supprimé, Ball.replay supprimé, trajectory_loader supprimé). Tout restauré : 6 fichiers modifiés (trajectory.dart, trajectory_loader.dart, ball.dart, plinko_config.dart, plinko_game.dart, main.dart). Ajout zoneForX, replayStride, funnelZoneWidth, funnelForce dans config. |
 | 2026-04-02 | Dev | **Trajectoires incompatibles** : les 70 trajectoires actuelles sont pour 7 cases, config = 9 cases → bille tombe en mode physique fallback. Régénération nécessaire. |
 | 2026-04-02 | Dev | **Trajectoire physique pas naturelle** : en mode fallback (physique temps réel), le mouvement n'est pas satisfaisant. À travailler lors de la régénération trajectoires 9 cases. |
+| 2026-04-03 | Game Design | **Benchmark Plinko industrie** : lancement centre + micro-jitter = standard (Stake, BGaming, Spribe). Vélocité initiale = 0. Anti-blocage = grille quinconce + filtre rejet trajectoires. |
+| 2026-04-03 | Dev | **Lancement centre + micro-jitter** : bille lancée depuis boardCenterX avec jitter ±0.2. Suppression du lancement libre (position tap ignorée). |
+| 2026-04-03 | Dev | **Suppression parois latérales** : walls physiques retirées dans ball.dart et generate_trajectories.py. Bille sortie hors plateau (X hors limites) = Perdu. |
+| 2026-04-03 | Dev | **Trajectoires régénérées** : 180/180 (20/case) avec lancement centre, sans parois. |
+| 2026-04-03 | Dev | **Physique validée** par Matthieu — mouvement naturel satisfaisant. |
 
 ---
 
 ## Questions ouvertes
 
 ### Game Design
-- Trajectoire prévisionnelle pendant la visée ? (à arbitrer avant Dev Session 4)
 - Écran d'intro : animation de la bille ou simple logo marque ? (basse priorité)
-- Vitesse de chute de la bille : replayStride=4 (ajusté Session 8) — à valider à l'usage
-
-### Dev — En test (valider en prochaine session)
-- *(aucune tâche en test)*
 
 ### Dev — En test (valider visuellement en prochaine session)
 - **Overlay win/jackpot** : mode "Perdu" validé (Session 11). Overlay win (flash blanc + confettis) et jackpot (feux d'artifice or) non encore testés visuellement — code correct, à valider.
+- **Lancement centre + sortie Perdu** : codé, compilé, à tester visuellement
 
 ### Dev — Backlog prioritaire
-- **Régénérer trajectoires pour 9 cases** : script Python à adapter (7→9 cases), puis régénérer 70+ trajectoires
-- **Naturel trajectoire bille** : mouvement physique pas satisfaisant — revoir paramètres physiques et/ou replay
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) : à retirer avant prod — Basse priorité
-
-### Backlog — à cadrer en session dédiée
-- **Lourdeur bille** : gravity=18.0 actuelle — augmenter dans le générateur Python et régénérer ? Ou ajuster replayStride ? À qualifier : chute trop lente ou rebonds trop élastiques ?
 - **Jackpot unique** : fixer la règle dans `_assignSlots()` — slot central toujours = jackpot, hardcodé. Court à implémenter.
 - **Skills manquants** : plinko-flutter-run (relance serveur Flutter) + plinko-regen-trajectories (script Python auto)
 - **Build iOS** : nécessite Mac + Xcode + compte Apple Developer. Sans Mac → services CI cloud (Codemagic, Bitrise). Préparer guide étapes quand Matthieu sera équipé.
@@ -226,10 +224,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 | Domaine | Statut | Notes |
 |---|---|---|
-| **Game Design** | 🟡 2 questions ouvertes | Trajectoire prévisionnelle + vitesse bille à valider |
+| **Game Design** | 🟢 Calé | Lancement centre validé (benchmark industrie). 1 question ouverte (écran intro). |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🟡 En cours | Refonte visuelle néon (fond gradient, picots blancs, cases colorées, titre PLINKO). Multi-agents actifs. |
-| **Dev** | 🟡 En cours | Lancement bille restauré. Trajectoires incompatibles (7→9 cases) → mode physique fallback. Régénération + naturel trajectoire à travailler. |
+| **Design & UI** | 🟡 En cours | Refonte visuelle néon. Overlay win/jackpot à tester visuellement. |
+| **Dev** | 🟡 En cours | Physique validée. Lancement centre + suppression parois + sortie=Perdu implémentés. À tester visuellement. |
 | **Test mobile** | 🟢 Opérationnel | Build web + serve local sur port 8080, testé sur iPhone via Safari. |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
@@ -277,4 +275,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-02 — Session Fix Lancement. Mécanisme de lancement bille restauré (désactivé lors de la refonte design). Trajectoires incompatibles (7→9 cases) → mode physique fallback actif. Prochaine étape : régénérer trajectoires 9 cases + travailler le naturel du mouvement.*
+*Dernière mise à jour : 2026-04-03 — Session Lancement Centre. Lancement bille depuis le centre avec micro-jitter (standard industrie). Parois latérales supprimées, sortie hors plateau = Perdu. Trajectoires régénérées 180/180. Physique validée par Matthieu. Prochaine étape : tester visuellement le lancement centre + overlay win/jackpot.*
