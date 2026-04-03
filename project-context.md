@@ -46,16 +46,16 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | `worldWidth` | 18.0 | Largeur en unités physiques |
 | `worldHeight` | 24.0 | Hauteur totale (réduit de 26) |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | 18.0 | Unités/s² |
+| `gravity` | 15.0 | Unités/s² (réduit de 18 pour benchmark) |
 | `rows` | 10 | Rangs logiques 0–9 (grille triangulaire) |
 | `startRow` | 2 | Première rangée affichée (3 picots min) |
 | `pegGX` | 2.0 (calculé) | = worldWidth / slotCount — alignement parfait |
 | `pegGY` | 2.0 | Espacement vertical centre à centre |
 | `pegStartY` | 4.5 | Y du rang startRow |
 | `pegRadius` | 0.25 | Rayon picot |
-| `pegRestitution` | 0.50 | Rebond picot |
+| `pegRestitution` | 0.55 | Rebond picot (ajusté benchmark) |
 | `ballRadius` | 0.40 | Rayon bille |
-| `ballRestitution` | 0.35 | |
+| `ballRestitution` | 0.25 | En test (benchmark recommande 0.55, testé trop fort → réduit) |
 | `wallRestitution` | 0.55 | Rebond mur |
 | `minWallKick` | 1.5 | Kick minimum anti-couloir |
 | `slotCount` | **9** | Cases symétriques (1€→500€→1€) |
@@ -192,6 +192,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | 2026-04-03 | Dev | **Suppression parois latérales** : walls physiques retirées dans ball.dart et generate_trajectories.py. Bille sortie hors plateau (X hors limites) = Perdu. |
 | 2026-04-03 | Dev | **Trajectoires régénérées** : 180/180 (20/case) avec lancement centre, sans parois. |
 | 2026-04-03 | Dev | **Physique validée** par Matthieu — mouvement naturel satisfaisant. |
+| 2026-04-03 | Design | **Benchmark physique bille appliqué** : ballRestitution 0.35→0.25 (en test, 0.55 trop fort), pegRestitution 0.50→0.55, gravity 18→15. Délai overlay 300ms. Slider "Rebond bille" ajouté au config panel. Build 24. |
 
 ---
 
@@ -275,4 +276,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-03 — Session Lancement Centre. Lancement bille depuis le centre avec micro-jitter (standard industrie). Parois latérales supprimées, sortie hors plateau = Perdu. Trajectoires régénérées 180/180. Physique validée par Matthieu. Prochaine étape : tester visuellement le lancement centre + overlay win/jackpot.*
+*Dernière mise à jour : 2026-04-03 — Session Design Benchmark. Quick wins benchmark appliqués : restitution, gravity, délai overlay. Slider rebond bille ajouté au config panel. Valeurs en cours de test (ballRestitution=0.25 à valider). Prochaine étape : valider les valeurs physiques + attaquer trail lumineux et squash & stretch.*
