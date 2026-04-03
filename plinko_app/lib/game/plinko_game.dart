@@ -296,6 +296,9 @@ class PlinkoGame extends FlameGame with TapCallbacks {
           ball.velocity -= normal * (dot * (1 + PlinkoConfig.pegRestitution));
         }
 
+        // Squash & stretch au rebond
+        ball.triggerBounce(normal);
+
         _pegCooldownFrames[i] = _physicsFrame + cooldownDuration;
       }
     }

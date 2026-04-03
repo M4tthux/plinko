@@ -1,4 +1,4 @@
-import 'dart:math' show max;
+import 'dart:math' show atan2, max;
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' show Colors, RadialGradient, Alignment;
@@ -29,6 +29,14 @@ class Ball extends PositionComponent {
   final List<Vector2> _trailPositions = [];
   int _trailSkip = 0; // échantillonne 1 frame sur 2 pour espacer le trail
 
+  // ── Squash & stretch ──────────────────────────────────────────────────
+  double _squashScaleX = 1.0; // >1 = étiré horizontalement, <1 = écrasé
+  double _squashScaleY = 1.0;
+  double _squashAngle  = 0.0; // angle de l'impact (radians)
+  double _squashTimer  = 0.0; // temps restant de l'animation
+  static const double _squashDuration = 0.12; // 120ms
+  static const double _squashAmount   = 0.15; // 15% de déformation max
+
   // ── Mode replay ───────────────────────────────────────────────────────────
   final List<TrajectoryFrame>? _replayFrames;
   int _replayIndex   = 0;
@@ -38,6 +46,13 @@ class Ball extends PositionComponent {
   static int get _replayStride => PlinkoConfig.replayStride;
 
   bool get isReplay => _replayFrames != null;
+
+  /// Déclenche l'animation squash & stretch lors d'un rebond.
+  /// [impactNormal] : direction de l'impact (du picot vers la bille).
+  void triggerBounce(Vector2 impactNormal) {
+    _squashAngle = atan2(impactNormal.y, impactNormal.x);
+    _squashTimer = _squashDuration;
+  }
 
   // ── Constructeurs ─────────────────────────────────────────────────────────
 
@@ -72,9 +87,31 @@ class Ball extends PositionComponent {
         _trailPositions.removeAt(0);
       }
     }
+
+    // Animer le squash & stretch (retour progressif à la forme ronde)
+    if (_squashTimer > 0) {
+      _squashTimer = max(0.0, _squashTimer - dt);
+      final progress = _squashTimer / _squashDuration; // 1→0
+      // Phase squash (première moitié) puis stretch (seconde moitié)
+      final double deform;
+      if (progress > 0.5) {
+        // Squash : écrasé dans la direction d'impact
+        deform = _squashAmount * ((progress - 0.5) * 2);
+      } else {
+        // Stretch : étiré dans la direction d'impact (rebond)
+        deform = -_squashAmount * 0.6 * (progress * 2);
+      }
+      _squashScaleX = 1.0 - deform;
+      _squashScaleY = 1.0 + deform; // volume constant
+    } else {
+      _squashScaleX = 1.0;
+      _squashScaleY = 1.0;
+    }
   }
 
   // ── Mode replay ───────────────────────────────────────────────────────────
+
+  int _lastBounceFrame = -10; // évite les doublons de détection
 
   void _updateReplay() {
     final frames = _replayFrames!;
@@ -103,6 +140,20 @@ class Ball extends PositionComponent {
       curr.x + (next.x - curr.x) * t,
       curr.y + (next.y - curr.y) * t,
     );
+
+    // Détection de rebond en replay : changement de direction X brusque
+    if (frameIdx > 0 && frameIdx - _lastBounceFrame > 3) {
+      final prev = frames[frameIdx - 1];
+      final dxBefore = curr.x - prev.x;
+      final dxAfter  = next.x - curr.x;
+      // Rebond = inversion de direction X ou changement Y brusque
+      if (dxBefore * dxAfter < -0.01) {
+        final nx = dxBefore > 0 ? -1.0 : 1.0;
+        triggerBounce(Vector2(nx, -0.5)..normalize());
+        _lastBounceFrame = frameIdx;
+      }
+    }
+
     _replayIndex = frameIdx;
   }
 
@@ -145,6 +196,7 @@ class Ball extends PositionComponent {
     final r = PlinkoConfig.ballRadius;
 
     // ── Trail lumineux (10 positions précédentes, fade opacity) ────────────
+    // Le trail est dessiné AVANT la transformation squash (positions absolues)
     for (int i = 0; i < _trailPositions.length; i++) {
       final t = (i + 1) / _trailPositions.length; // 0→1 (ancien→récent)
       final trailPos = _trailPositions[i];
@@ -164,6 +216,12 @@ class Ball extends PositionComponent {
       canvas.drawCircle(offset, trailRadius, Paint()
         ..color = const Color(0xFFf0c040).withOpacity(opacity));
     }
+
+    // ── Squash & stretch (déformation au rebond) ──────────────────────────
+    canvas.save();
+    canvas.rotate(_squashAngle);
+    canvas.scale(_squashScaleX, _squashScaleY);
+    canvas.rotate(-_squashAngle);
 
     // ── Halo externe or ───────────────────────────────────────────────────
     canvas.drawCircle(Offset.zero, r * 2.2, Paint()
@@ -193,5 +251,7 @@ class Ball extends PositionComponent {
       Offset(-r * 0.35, -r * 0.35),
       r * 0.28,
       Paint()..color = Colors.white.withOpacity(0.85));
+
+    canvas.restore(); // fin squash & stretch
   }
 }
