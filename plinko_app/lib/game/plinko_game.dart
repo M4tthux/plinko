@@ -24,7 +24,6 @@ class PlinkoGame extends FlameGame with TapCallbacks {
   Ball? _currentBall;
   bool _ballInFlight = false;
   bool _resetPending = false;
-  double _launchX = PlinkoConfig.worldWidth / 2;
 
   /// Notifie le widget Flutter de l'atterrissage avec le lot gagné.
   /// null = pas d'overlay affiché.
@@ -98,18 +97,13 @@ class PlinkoGame extends FlameGame with TapCallbacks {
   // ── Tap pour lancer ──────────────────────────────────────────────────────
 
   @override
-  void onTapDown(TapDownEvent event) {
-    _launchX = _screenToWorld(event.localPosition).x;
-  }
-
-  @override
   void onTapUp(TapUpEvent event) {
     if (_ballInFlight) {
       // Si une bille est déjà en vol avec overlay affiché, fermer l'overlay
       if (_resetPending) dismissReward();
       return;
     }
-    _launchBall(_launchX);
+    _launchBall();
   }
 
   // ── Système de lots ──────────────────────────────────────────────────────
@@ -205,8 +199,12 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   // ── Lancement ────────────────────────────────────────────────────────────
 
-  void _launchBall(double x) {
-    final startPos = Vector2(x, PlinkoConfig.ballStartY);
+  void _launchBall() {
+    // Lancement depuis le centre avec micro-jitter (±0.2)
+    // La bille tombe sur le picot central et rebondit naturellement gauche/droite
+    final jitter = (_rng.nextDouble() - 0.5) * 0.4;
+    final startX = PlinkoConfig.boardCenterX + jitter;
+    final startPos = Vector2(startX, PlinkoConfig.ballStartY);
 
     // 1. Draw winning lot
     final winner = _drawLot();
@@ -219,7 +217,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         ? null
         : TrajectoryLoader.select(
             slotIndex: targetSlot,
-            fingerX: x,
+            fingerX: PlinkoConfig.boardCenterX,
           );
 
     if (trajectory != null) {
@@ -338,9 +336,18 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
       // Identifier le lot gagnant depuis l'assignation courante
       final slotIdx = ball.landedSlotIndex;
-      final lot = (slotIdx != null && slotIdx >= 0 && slotIdx < PlinkoConfig.slotCount)
-          ? PlinkoConfig.currentSlotAssignment[slotIdx]
-          : null;
+
+      // Bille sortie du plateau → Perdu
+      if (slotIdx == null || slotIdx < 0 || slotIdx >= PlinkoConfig.slotCount) {
+        landedSlotNotifier.value = LandedResult(
+          prizeName: 'Perdu',
+          isJackpot: false,
+          isLoss: true,
+        );
+        return;
+      }
+
+      final lot = PlinkoConfig.currentSlotAssignment[slotIdx];
 
       // Jackpot → highlight la case gagnante (toutes les autres s'estompent)
       if (lot?.isJackpot ?? false) {

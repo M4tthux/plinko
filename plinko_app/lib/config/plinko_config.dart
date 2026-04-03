@@ -8,6 +8,7 @@ import '../models/prize_lot.dart';
 ///   - 9 cases, rows=10 → rangée 9 a 10 picots alignés sur les 9 séparateurs
 ///   - pegGX = worldWidth / slotCount → alignement parfait garanti
 ///   - 8 rangées affichées (startRow=2), plateau dense
+///   - Bille lancée depuis le centre, rebondit sur le picot central
 class PlinkoConfig {
   // ─── Monde physique ────────────────────────────────────────────────────────
   static const double worldWidth  = 18.0;
@@ -16,7 +17,7 @@ class PlinkoConfig {
 
   // ─── Grille triangulaire ───────────────────────────────────────────────────
   static const int    rows       = 10;    // rangs logiques 0–9 (row 9 = 10 picots)
-  static const int    startRow   = 2;     // première rangée affichée (3 picots min)
+  static const int    startRow   = 2;     // première rangée affichée (3 picots)
   static const double pegGY     = 2.0;   // espacement vertical centre à centre
   static const double pegStartY = 4.5;   // Y du rang startRow
 
@@ -47,7 +48,7 @@ class PlinkoConfig {
   }
 
   // ─── Bille ─────────────────────────────────────────────────────────────────
-  static const double ballStartY = 1.5;
+  static const double ballStartY = 1.5;  // au-dessus de la première rangée
   static double ballRadius      = 0.40;
   static double ballRestitution = 0.35;
 

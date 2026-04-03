@@ -25,7 +25,7 @@ GRAVITY       = 18.0
 
 # Grille triangulaire
 ROWS          = 10     # rangs logiques 0–9
-START_ROW     = 2      # première rangée affichée
+START_ROW     = 2      # première rangée affichée (3 picots)
 PEG_GY        = 2.0    # espacement vertical
 PEG_START_Y   = 4.5    # Y du rang startRow
 SLOT_COUNT    = 9
@@ -54,7 +54,7 @@ STAGNATION_MIN_DY = 0.5   # progrès Y minimum sur la fenêtre
 # ── Génération ──────────────────────────────────────────────────────────────
 TOTAL_LAUNCHES    = 2000   # lancers naturels depuis le centre
 KEEP_PER_SLOT     = 20     # trajectoires max à conserver par case
-LAUNCH_JITTER     = 0.3    # petit jitter autour du centre pour éviter la symétrie parfaite
+LAUNCH_JITTER     = 0.3    # petit jitter autour du point de lancement
 
 
 # ── Positions des picots (grille triangulaire) ──────────────────────────────
@@ -150,14 +150,6 @@ def simulate(start_x, pegs, dividers, rng, max_frames=6000):
         x += vx * DT
         y += vy * DT
 
-        # ── Parois gauche/droite ─────────────────────────────────────
-        if x < BALL_RADIUS:
-            x = BALL_RADIUS
-            vx = max(abs(vx) * WALL_RESTITUTION, MIN_WALL_KICK)
-        elif x > WORLD_WIDTH - BALL_RADIUS:
-            x = WORLD_WIDTH - BALL_RADIUS
-            vx = -max(abs(vx) * WALL_RESTITUTION, MIN_WALL_KICK)
-
         # ── Collision picots ─────────────────────────────────────────
         MIN_EXIT_SPEED = 2.5
         GAP = 0.08
@@ -237,7 +229,7 @@ def main():
     print(f'Lancement de {TOTAL_LAUNCHES} billes depuis le centre (jitter ±{LAUNCH_JITTER})...\n')
 
     for i in range(TOTAL_LAUNCHES):
-        # Petit jitter autour du centre
+        # Centre + micro-jitter — la bille tape le picot central et rebondit
         jitter = rng.uniform(-LAUNCH_JITTER, LAUNCH_JITTER)
         start_x = center_x + jitter
 

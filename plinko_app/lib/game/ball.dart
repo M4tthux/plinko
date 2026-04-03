@@ -102,15 +102,11 @@ class Ball extends PositionComponent {
     // Déplacement
     position += velocity * dt;
 
-    // Parois gauche / droite — rebond simple
-    final minX = PlinkoConfig.ballRadius;
-    final maxX = PlinkoConfig.worldWidth - PlinkoConfig.ballRadius;
-    if (position.x < minX) {
-      position.x = minX;
-      velocity.x = velocity.x.abs() * PlinkoConfig.wallRestitution;
-    } else if (position.x > maxX) {
-      position.x = maxX;
-      velocity.x = -velocity.x.abs() * PlinkoConfig.wallRestitution;
+    // Sortie du plateau (pas de parois) → perdu
+    if (position.x < -PlinkoConfig.ballRadius * 2 || position.x > PlinkoConfig.worldWidth + PlinkoConfig.ballRadius * 2) {
+      hasLanded = true;
+      landedSlotIndex = -1; // hors plateau = perdu
+      return;
     }
 
     // Atterrissage
