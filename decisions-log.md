@@ -84,3 +84,6 @@
 | 2026-03-31 | Process | **decisions-log.md créé** : historique complet séparé de project-context.md. |
 | 2026-03-31 | Process | **screenshots/** créé : captures QA datées des états validés. |
 | 2026-03-31 | Process | **Skills manquants identifiés** : plinko-flutter-run (relance serveur) + plinko-regen-trajectories (script Python auto). |
+| 2026-04-03 | Dev | **Trail lumineux bille** : 10 positions, fade opacity + glow or. `ball.dart`. |
+| 2026-04-03 | Dev | **Squash & stretch bille** : 15% déformation, 120ms, direction d'impact. `ball.dart` + `plinko_game.dart`. |
+| 2026-04-03 | Dev | **Glow flash picots** : 200ms blanc lumineux au passage. `board.dart` + `plinko_game.dart`. |

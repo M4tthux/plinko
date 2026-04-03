@@ -193,6 +193,9 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 | 2026-04-03 | Dev | **Trajectoires régénérées** : 180/180 (20/case) avec lancement centre, sans parois. |
 | 2026-04-03 | Dev | **Physique validée** par Matthieu — mouvement naturel satisfaisant. |
 | 2026-04-03 | Design | **Benchmark physique bille appliqué** : ballRestitution 0.35→0.25 (en test, 0.55 trop fort), pegRestitution 0.50→0.55, gravity 18→15. Délai overlay 300ms. Slider "Rebond bille" ajouté au config panel. Build 24. |
+| 2026-04-03 | Dev | **Trail lumineux bille** : buffer de 10 positions précédentes, rendu avec opacity décroissante + glow or. Échantillonnage 1 frame sur 2. Fonctionne en mode physique et replay. `ball.dart` modifié. |
+| 2026-04-03 | Dev | **Squash & stretch bille** : déformation 15% au rebond (120ms). Phase squash (écrasé dans la direction d'impact) puis stretch (étiré en repartant). Volume constant. En physique : notifié par collision. En replay : détection auto d'inversion de direction X. `ball.dart` + `plinko_game.dart` modifiés. |
+| 2026-04-03 | Dev | **Glow flash picots** : flash blanc 200ms quand la bille touche un picot. Halo élargi (2.2×→3.2×), corps blanchit, retour smooth. En physique : collision directe. En replay : détection de proximité. `board.dart` + `plinko_game.dart` modifiés. |
 
 ---
 
@@ -204,6 +207,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ### Dev — En test (valider visuellement en prochaine session)
 - **Overlay win/jackpot** : mode "Perdu" validé (Session 11). Overlay win (flash blanc + confettis) et jackpot (feux d'artifice or) non encore testés visuellement — code correct, à valider.
 - **Lancement centre + sortie Perdu** : codé, compilé, à tester visuellement
+- **Trail lumineux + squash & stretch + glow flash picots** : 3 features Phase 1 benchmark implémentées, à valider visuellement sur Chrome
 
 ### Dev — Backlog prioritaire
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) : à retirer avant prod — Basse priorité
@@ -227,8 +231,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | **Game Design** | 🟢 Calé | Lancement centre validé (benchmark industrie). 1 question ouverte (écran intro). |
 | **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🟡 En cours | Refonte visuelle néon. Overlay win/jackpot à tester visuellement. |
-| **Dev** | 🟡 En cours | Physique validée. Lancement centre + suppression parois + sortie=Perdu implémentés. À tester visuellement. |
+| **Design & UI** | 🟡 En cours | Refonte visuelle néon. Phase 1 benchmark (trail, squash&stretch, glow picots) implémentée. À tester visuellement. |
+| **Dev** | 🟡 En cours | Physique validée. Phase 1 benchmark VFX terminée. Phase 2 (flash case, screen shake, scale pulse) à faire. |
 | **Test mobile** | 🟢 Opérationnel | Build web + serve local sur port 8080, testé sur iPhone via Safari. |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
@@ -276,4 +280,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-03 — Session Design Benchmark. Quick wins benchmark appliqués : restitution, gravity, délai overlay. Slider rebond bille ajouté au config panel. Valeurs en cours de test (ballRestitution=0.25 à valider). Prochaine étape : valider les valeurs physiques + attaquer trail lumineux et squash & stretch.*
+*Dernière mise à jour : 2026-04-03 — Session VFX Phase 1. Trail lumineux (10 positions, fade or), squash & stretch (15%, 120ms), glow flash picots (200ms blanc) implémentés. Phase 1 benchmark terminée. Prochaine étape : valider visuellement sur Chrome + Phase 2 (flash case, screen shake, scale pulse).*
