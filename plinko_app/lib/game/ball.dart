@@ -24,7 +24,10 @@ class Ball extends PositionComponent {
   bool hasLanded = false;
   int? landedSlotIndex;
 
-  // (Anti-orbite retiré — physique pure)
+  // ── Trail lumineux ──────────────────────────────────────────────────────
+  static const int _trailLength = 10;
+  final List<Vector2> _trailPositions = [];
+  int _trailSkip = 0; // échantillonne 1 frame sur 2 pour espacer le trail
 
   // ── Mode replay ───────────────────────────────────────────────────────────
   final List<TrajectoryFrame>? _replayFrames;
@@ -58,6 +61,16 @@ class Ball extends PositionComponent {
       _updateReplay();
     } else {
       _updatePhysics(dt);
+    }
+
+    // Enregistrer la position pour le trail (1 frame sur 2)
+    _trailSkip++;
+    if (_trailSkip >= 2) {
+      _trailSkip = 0;
+      _trailPositions.add(position.clone());
+      if (_trailPositions.length > _trailLength) {
+        _trailPositions.removeAt(0);
+      }
     }
   }
 
@@ -131,7 +144,28 @@ class Ball extends PositionComponent {
   void render(Canvas canvas) {
     final r = PlinkoConfig.ballRadius;
 
-    // Halo externe or
+    // ── Trail lumineux (10 positions précédentes, fade opacity) ────────────
+    for (int i = 0; i < _trailPositions.length; i++) {
+      final t = (i + 1) / _trailPositions.length; // 0→1 (ancien→récent)
+      final trailPos = _trailPositions[i];
+      final offset = Offset(
+        trailPos.x - position.x,
+        trailPos.y - position.y,
+      );
+      final trailRadius = r * (0.3 + 0.5 * t); // 30%→80% du rayon
+      final opacity = 0.35 * t;                  // 0→0.35
+
+      // Glow flou
+      canvas.drawCircle(offset, trailRadius * 1.6, Paint()
+        ..color      = const Color(0xFFf0c040).withOpacity(opacity * 0.4)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5));
+
+      // Point solide
+      canvas.drawCircle(offset, trailRadius, Paint()
+        ..color = const Color(0xFFf0c040).withOpacity(opacity));
+    }
+
+    // ── Halo externe or ───────────────────────────────────────────────────
     canvas.drawCircle(Offset.zero, r * 2.2, Paint()
       ..color      = const Color(0xFFf0c040).withOpacity(0.18)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.9));
