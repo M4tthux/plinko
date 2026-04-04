@@ -79747,7 +79747,8 @@ e=new A.au(f)
 f[1]=a[1]
 f[0]=a[0]
 e.uD(a2)
-a5.p1=e}a5.ry=Math.atan2(b[1],b[0])
+a5.p1=e
+f[0]=f[0]*0.3}a5.ry=Math.atan2(b[1],b[0])
 a5.to=0.12
 f=m.f
 a3=J.jx((f==null?m.f=$.alW().$0():f).j8(0,n))
@@ -85447,7 +85448,7 @@ B.SP=new A.dQ("Tap pour lancer",null,B.Rs,B.cn,null,null,null,null,null)
 B.Lu=new A.oA(0,null,0,24,null,null,B.SP,null)
 B.Cf=new A.m(0.8,0,0.7843137254901961,1,B.e)
 B.Rj=new A.n(!0,B.Cf,null,null,null,null,14,B.bC,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.SO=new A.dQ("2026-04-04 \xb7 build 28",null,B.Rj,B.cn,null,null,null,null,null)
+B.SO=new A.dQ("2026-04-04 \xb7 build 29",null,B.Rj,B.cn,null,null,null,null,null)
 B.Lv=new A.oA(0,8,0,null,null,null,B.SO,null)
 B.Lw=new A.ye(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.zV=new A.d8(-0.3,-0.4)
