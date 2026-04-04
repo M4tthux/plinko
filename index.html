@@ -43,7 +43,6 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script>
-    // Désinscrire tout service worker existant pour forcer le rechargement
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (var r of registrations) { r.unregister(); }

@@ -23801,7 +23801,7 @@ return A.P(null,r)}})
 return A.Q($async$aaU,r)},
 aEs(a,b){var s,r,q,p
 if($.ao_==null)return null
-s=B.c.hb(B.c.d2(a/18*5,0,4))
+s=B.c.hb(B.c.d2(a/15*5,0,4))
 r=$.ao_
 r.toString
 q=A.W(r).i("aO<1>")
@@ -23863,9 +23863,9 @@ _.at=j},
 aq1(){var s,r,q,p,o,n,m,l,k,j,i,h=null,g=A.c([],t.Hq)
 for(s=t.qw,r=t.gN,q=0;q<8;q=p){p=q+1
 o=4.5+q*2
-for(n=9-q*2.4857142857142853/2,m=0;m<p;++m){l=new Float32Array(2)
+for(n=7.5-q*2.0571428571428574/2,m=0;m<p;++m){l=new Float32Array(2)
 l[1]=o
-l[0]=n+m*2.4857142857142853
+l[0]=n+m*2.0571428571428574
 k=A.ky()
 j=new A.au(new Float32Array(2))
 i=$.ab()
@@ -23885,13 +23885,13 @@ m=new A.fc(m,new Float32Array(2))
 m.eJ(n)
 m.T()
 n=A.aN(A.ff(l),l,!1,s)
-o=new A.zt(0.3+q*2.4857142857142853,o,m,B.d1,0,new A.cb(n,0,0,r),l,new A.c0([]),new A.c0([]))
+o=new A.zt(0.3+q*2.0571428571428574,o,m,B.d1,0,new A.cb(n,0,0,r),l,new A.c0([]),new A.c0([]))
 o.la(l,l,l,l,0,new A.au(p),l,l,l)
 k[q]=o}return k},
 aq3(){var s,r,q,p,o,n,m,l=null,k=J.x0(7,t.FF)
 for(s=t.qw,r=t.gN,q=0;q<7;++q){p=new Float32Array(2)
 p[1]=21.75
-p[0]=0.3+q*2.4857142857142853+1.2428571428571427
+p[0]=0.3+q*2.0571428571428574+1.0285714285714287
 o=A.ky()
 n=new A.au(new Float32Array(2))
 m=$.ab()
@@ -79245,7 +79245,7 @@ s.eJ(s.U(0,i.p1.a9(0,a)))
 s.T()
 r=$.or
 q=0.3+r
-p=17.7-r
+p=14.700000000000003-r
 r=s.a
 o=r[0]
 if(o<q){s.uO(q)
@@ -79312,7 +79312,7 @@ g.dV(i,-0.5)
 g.am7()
 h.aoL(g)
 h.aq=r}}},
-L2(){return B.c.hb(B.c.d2((this.ax.e.a[0]-0.3)/2.4857142857142853,0,6))},
+L2(){return B.c.hb(B.c.d2((this.ax.e.a[0]-0.3)/2.0571428571428574,0,6))},
 kU(a){var s,r,q,p,o,n,m,l,k,j,i,h,g,f=this,e=$.or
 for(s=f.p4,r=f.ax.e.a,q=a.a,p=0;o=s.length,p<o;p=n){n=p+1
 m=n/o
@@ -79395,19 +79395,19 @@ kU(a){var s,r
 $.T()
 s=A.af()
 s.r=B.mB.gp()
-a.ez(new A.u(-14,-10,32,34),s)
-r=A.fN(new A.f(9,10.8),16.799999999999997)
+a.ez(new A.u(-14,-10,29,34),s)
+r=A.fN(new A.f(7.5,10.8),16.799999999999997)
 s=A.af()
 s.sl4(new A.j0(B.an,1,B.bw,null,0,B.Fs,B.nI,null).p8(r))
 a.Fh(r,s)
 s=A.af()
 s.r=A.N(89,B.iU.m()>>>16&255,B.iU.m()>>>8&255,B.iU.m()&255).gp()
 s.z=B.Jl
-a.e_(new A.f(9,2),10.799999999999999,s)
+a.e_(new A.f(7.5,2),9,s)
 s=A.af()
 s.r=A.N(56,B.iO.m()>>>16&255,B.iO.m()>>>8&255,B.iO.m()&255).gp()
 s.z=B.Jk
-a.e_(new A.f(9,23),8.1,s)}}
+a.e_(new A.f(7.5,23),6.75,s)}}
 A.rq.prototype={
 bw(a){var s=this.p2
 if(s>0)this.p2=s-a},
@@ -79455,7 +79455,7 @@ if(s==null)s=B.Gg[f]
 r=g?h:e.c
 if(r==null)r=f===3
 q=A.aS(B.Hn[f])
-g=1.2028571428571426+(r?0.09622857142857141:0)
+g=0.9885714285714287+(r?0.0790857142857143:0)
 p=A.bA($.T().r)
 o=g+g*0.07
 n=-o
@@ -79565,7 +79565,7 @@ n.T()
 h.ay=B.aO
 h.yE()
 h=new A.au(new Float32Array(2))
-h.dV(9,12)
+h.dV(7.5,12)
 p=p.r
 p.eJ(h.uh(0))
 p.T()
@@ -79597,7 +79597,7 @@ return A.U(p.N(0,A.aq2()),$async$fj)
 case 6:s=7
 return A.U(p.N(0,A.aq3()),$async$fj)
 case 7:h=new A.au(new Float32Array(2))
-h.dV(9,0.8)
+h.dV(7.5,0.8)
 l=A.ky()
 k=new A.au(new Float32Array(2))
 m=new A.fc(m,new Float32Array(2))
@@ -79615,18 +79615,18 @@ K6(){var s,r,q,p,o,n,m=this.a3
 B.b.S(m)
 for(s=0;s<8;s=r){r=s+1
 q=4.5+s*2
-for(p=9-s*2.4857142857142853/2,o=0;o<r;++o){n=new Float32Array(2)
+for(p=7.5-s*2.0571428571428574/2,o=0;o<r;++o){n=new Float32Array(2)
 n[1]=q
-n[0]=p+o*2.4857142857142853
+n[0]=p+o*2.0571428571428574
 m.push(new A.au(n))}}},
 GO(a){var s,r,q,p,o,n,m,l,k,j,i,h=this,g=null
 if(h.u){if(h.bK)h.Sj()
 return}s=h.cX.eU()
 r=new A.au(new Float32Array(2))
-r.dV(9+(s-0.5)*0.4,1.5)
+r.dV(7.5+(s-0.5)*0.4,1.5)
 q=h.a3z()
 p=h.a1w(q)
-o=$.a5b?g:A.aEs(9,p)
+o=$.a5b?g:A.aEs(7.5,p)
 if(o!=null){s=o.d
 n=new Float32Array(2)
 m=A.c([],t.Gt)
@@ -79759,7 +79759,7 @@ if(l==null||l.p2)return
 s=l.ax.e
 r=s.a
 if(r[1]<20.5)return
-for(q=0;q<=7;++q){p=0.3+q*2.4857142857142853
+for(q=0;q<=7;++q){p=0.3+q*2.0571428571428574
 o=r[0]-p
 n=$.or
 if(Math.abs(o)<n){s.uO(p+(o>=0?1:-1)*n)
@@ -79819,7 +79819,7 @@ r.bc=0
 r.C.S(0)
 r.cl.sp(null)
 q=new A.au(new Float32Array(2))
-q.dV(9,12)
+q.dV(7.5,12)
 s=r.p1.ay.ax.r
 s.eJ(q.uh(0))
 s.T()}}
@@ -79989,7 +79989,7 @@ gK2(){var s,r=this.e
 r===$&&A.a()
 s=this.d
 s===$&&A.a()
-return 2.4857142857142853>2*r+2*s},
+return 2.0571428571428574>2*r+2*s},
 gPF(){return B.b.xG(this.Q,0,new A.ad6())},
 gvq(){return Math.abs(this.gPF()-100)<0.5&&this.Q.length!==0},
 a1o(){var s,r,q=this,p=q.d
@@ -85447,7 +85447,7 @@ B.SP=new A.dQ("Tap pour lancer",null,B.Rs,B.cn,null,null,null,null,null)
 B.Lu=new A.oA(0,null,0,24,null,null,B.SP,null)
 B.Cf=new A.m(0.8,0,0.7843137254901961,1,B.e)
 B.Rj=new A.n(!0,B.Cf,null,null,null,null,14,B.bC,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.SO=new A.dQ("2026-04-04 \xb7 build 25",null,B.Rj,B.cn,null,null,null,null,null)
+B.SO=new A.dQ("2026-04-04 \xb7 build 26",null,B.Rj,B.cn,null,null,null,null,null)
 B.Lv=new A.oA(0,8,0,null,null,null,B.SO,null)
 B.Lw=new A.ye(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.zV=new A.d8(-0.3,-0.4)
