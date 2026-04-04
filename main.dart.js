@@ -23861,8 +23861,8 @@ _.z=h
 _.as=i
 _.at=j},
 aq1(){var s,r,q,p,o,n,m,l,k,j,i,h=null,g=A.c([],t.Hq)
-for(s=t.qw,r=t.gN,q=2;q<8;q=p){p=q+1
-o=4.5+(q-2)*2
+for(s=t.qw,r=t.gN,q=0;q<8;q=p){p=q+1
+o=4.5+q*2
 for(n=7.5-q*2.1142857142857143/2,m=0;m<p;++m){l=new Float32Array(2)
 l[1]=o
 l[0]=n+m*2.1142857142857143
@@ -23890,7 +23890,7 @@ o.la(l,l,l,l,0,new A.au(p),l,l,l)
 k[q]=o}return k},
 aq3(){var s,r,q,p,o,n,m,l=null,k=J.x0(7,t.FF)
 for(s=t.qw,r=t.gN,q=0;q<7;++q){p=new Float32Array(2)
-p[1]=17.75
+p[1]=21.75
 p[0]=0.1+q*2.1142857142857143+1.0571428571428572
 o=A.ky()
 n=new A.au(new Float32Array(2))
@@ -79259,7 +79259,7 @@ o=i.p1
 o.snY(-Math.abs(o.a[0])*0.55)
 o=i.p1
 if(o.a[0]>-1.5)o.snY(-1.5)}r=r[1]
-o=19-$.or
+o=23-$.or
 if(r>=o){i.p2=!0
 s.Jr(o)
 s.T()
@@ -79407,7 +79407,7 @@ a.e_(new A.f(7.5,2),9,s)
 s=A.af()
 s.r=A.N(56,B.iO.m()>>>16&255,B.iO.m()>>>8&255,B.iO.m()&255).gp()
 s.z=B.Jk
-a.e_(new A.f(7.5,19),6.75,s)}}
+a.e_(new A.f(7.5,23),6.75,s)}}
 A.rq.prototype={
 bw(a){var s=this.p2
 if(s>0)this.p2=s-a},
@@ -79441,12 +79441,12 @@ s.r=A.N(46,B.bh.m()>>>16&255,B.bh.m()>>>8&255,B.bh.m()&255).gp()
 s.c=0.2
 s.b=B.as
 s.z=B.tQ
-a.h7(new A.f(r,16.5),new A.f(r,19),s)
+a.h7(new A.f(r,20.5),new A.f(r,23),s)
 s=A.af()
 s.r=A.N(140,B.iD.m()>>>16&255,B.iD.m()>>>8&255,B.iD.m()&255).gp()
 s.c=0.12
 s.b=B.as
-a.h7(new A.f(r,16.5),new A.f(r,19),s)}}
+a.h7(new A.f(r,20.5),new A.f(r,23),s)}}
 A.zu.prototype={
 kU(a){var s,r,q,p,o,n,m,l,k,j,i,h=null,g=$.am1(),f=this.p1,e=7>f?g[f]:h
 g=e==null
@@ -79613,8 +79613,8 @@ case 8:return A.P(null,r)}})
 return A.Q($async$fj,r)},
 K6(){var s,r,q,p,o,n,m=this.a3
 B.b.S(m)
-for(s=2;s<8;s=r){r=s+1
-q=4.5+(s-2)*2
+for(s=0;s<8;s=r){r=s+1
+q=4.5+s*2
 for(p=7.5-s*2.1142857142857143/2,o=0;o<r;++o){n=new Float32Array(2)
 n[1]=q
 n[0]=p+o*2.1142857142857143
@@ -79764,7 +79764,7 @@ abD(){var s,r,q,p,o,n,m,l=this.bJ
 if(l==null||l.p2)return
 s=l.ax.e
 r=s.a
-if(r[1]<16.5)return
+if(r[1]<20.5)return
 for(q=0;q<=7;++q){p=0.1+q*2.1142857142857143
 o=r[0]-p
 n=$.or
@@ -85453,7 +85453,7 @@ B.SP=new A.dQ("Tap pour lancer",null,B.Rs,B.cn,null,null,null,null,null)
 B.Lu=new A.oA(0,null,0,24,null,null,B.SP,null)
 B.Cf=new A.m(0.8,0,0.7843137254901961,1,B.e)
 B.Rj=new A.n(!0,B.Cf,null,null,null,null,14,B.bC,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.SO=new A.dQ("2026-04-04 \xb7 build 30",null,B.Rj,B.cn,null,null,null,null,null)
+B.SO=new A.dQ("2026-04-04 \xb7 build 31",null,B.Rj,B.cn,null,null,null,null,null)
 B.Lv=new A.oA(0,8,0,null,null,null,B.SO,null)
 B.Lw=new A.ye(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.zV=new A.d8(-0.3,-0.4)
@@ -86469,7 +86469,7 @@ $.oE=A.c([],A.al("t<kj>"))
 $.or=0.4
 $.anq=0.1
 $.ans=15
-$.J7=0.25
+$.J7=0.15
 $.anu=0.1
 $.a5b=!0
 $.ant=null
