@@ -277,8 +277,8 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
     final collisionDist   = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius;
     final collisionDistSq = collisionDist * collisionDist;
-    const int cooldownDuration = 5;
-    const double separationGap = 0.05;
+    const int cooldownDuration = 15;
+    const double separationGap = 0.20;
 
     for (int i = 0; i < _pegPositions.length; i++) {
       final coolUntil = _pegCooldownFrames[i];
@@ -292,13 +292,18 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         final dist   = sqrt(distSq);
         final normal = delta / dist;
 
-        // Séparer la bille du picot
+        // Séparer la bille bien au-delà du picot
         ball.position = pegPos + normal * (collisionDist + separationGap);
 
         // Réflexion classique : v' = v - (1 + e) * dot(v, n) * n
         final dot = ball.velocity.dot(normal);
         if (dot < 0) {
           ball.velocity -= normal * (dot * (1 + PlinkoConfig.pegRestitution));
+        }
+
+        // La gravité fait le reste — s'assurer que la bille descend toujours
+        if (ball.velocity.y < 1.0) {
+          ball.velocity.y = 1.0;
         }
 
         // Squash & stretch au rebond
