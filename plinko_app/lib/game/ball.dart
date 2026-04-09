@@ -183,14 +183,12 @@ class Ball extends PositionComponent {
     // Déplacement
     position += velocity * subDt;
 
-    // Murs latéraux — rebond
+    // Pas de murs — sortie du plateau = perdu (comme les vrais Plinko)
     final r = PlinkoConfig.ballRadius;
-    if (position.x < r) {
-      position.x = r;
-      velocity.x = velocity.x.abs() * PlinkoConfig.wallRestitution;
-    } else if (position.x > PlinkoConfig.worldWidth - r) {
-      position.x = PlinkoConfig.worldWidth - r;
-      velocity.x = -velocity.x.abs() * PlinkoConfig.wallRestitution;
+    if (position.x < -r || position.x > PlinkoConfig.worldWidth + r) {
+      hasLanded = true;
+      landedSlotIndex = -1;
+      return;
     }
 
     // Atterrissage

@@ -51,14 +51,14 @@ class PlinkoConfig {
   // ─── Bille ─────────────────────────────────────────────────────────────────
   static const double ballStartY = 1.5;  // au-dessus de la première rangée
   static double ballRadius      = 0.30;  // ratio ~1:1 avec pegRadius (standard Plinko)
-  static double ballRestitution = 0.75;  // rebond réaliste (standard Matter.js Plinko)
+  static double ballRestitution = 0.35;  // rebond amorti — la gravité domine
 
   // ─── Gravité ───────────────────────────────────────────────────────────────
-  static double gravity = 12.0;  // réduit pour sub-stepping propre
+  static double gravity = 12.0;
 
   // ─── Picots ────────────────────────────────────────────────────────────────
   static double pegRadius      = 0.25;  // ratio ~1:1 avec ballRadius
-  static double pegRestitution = 0.75;  // rebond réaliste (standard Plinko)
+  static double pegRestitution = 0.35;  // dévie légèrement, pas de gros rebond
 
   // ─── Cases de récompense (pleine largeur) ──────────────────────────────────
   static const int    slotCount         = 7;   // build 25 — 7 cases
