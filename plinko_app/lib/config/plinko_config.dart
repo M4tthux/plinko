@@ -12,13 +12,13 @@ import '../models/prize_lot.dart';
 ///   - Parois latérales présentes
 class PlinkoConfig {
   // ─── Monde physique ────────────────────────────────────────────────────────
-  static const double worldWidth  = 15.0;  // réduit de 18 pour mobile (build 26)
+  static const double worldWidth  = 12.0;  // réduit pour espacement picots standard (2× diamètre bille)
   static const double worldHeight = 24.0;
   static const double zoom        = 24.0;
 
   // ─── Grille triangulaire ───────────────────────────────────────────────────
   static const int    rows       = 10;    // rangs logiques 0–9
-  static const int    startRow   = 0;     // toutes les rangées affichées (build 31)
+  static const int    startRow   = 2;     // commence à 3 picots (standard Plinko)
   static const double pegGY     = 2.0;   // espacement vertical centre à centre
   static const double pegStartY = 4.5;   // Y du rang startRow
 

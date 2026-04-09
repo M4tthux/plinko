@@ -8,7 +8,7 @@ import 'ui/reward_overlay.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-09 · build 33';
+const String kBuildTime = '2026-04-09 · build 34';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
