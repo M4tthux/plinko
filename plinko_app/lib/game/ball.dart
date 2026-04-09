@@ -80,9 +80,8 @@ class Ball extends PositionComponent {
 
     if (_replayFrames != null) {
       _updateReplay();
-    } else {
-      _updatePhysics(dt);
     }
+    // Mode physique : stepPhysics() est appelé par PlinkoGame.update() via sub-stepping
 
     // Enregistrer la position pour le trail (1 frame sur 2)
     _trailSkip++;
@@ -173,26 +172,38 @@ class Ball extends PositionComponent {
 
   // ── Mode physique (fallback) ───────────────────────────────────────────────
 
-  void _updatePhysics(double dt) {
+  /// Un seul pas de physique (gravité + déplacement + murs + atterrissage).
+  /// Appelé N fois par frame par le sub-stepping dans PlinkoGame.
+  void stepPhysics(double subDt) {
+    if (hasLanded) return;
+
     // Gravité
-    velocity.y += PlinkoConfig.gravity * dt;
+    velocity.y += PlinkoConfig.gravity * subDt;
 
     // Déplacement
-    position += velocity * dt;
+    position += velocity * subDt;
 
-    // Sortie du plateau (pas de parois) → perdu
-    if (position.x < -PlinkoConfig.ballRadius * 2 || position.x > PlinkoConfig.worldWidth + PlinkoConfig.ballRadius * 2) {
-      hasLanded = true;
-      landedSlotIndex = -1; // hors plateau = perdu
-      return;
+    // Murs latéraux — rebond
+    final r = PlinkoConfig.ballRadius;
+    if (position.x < r) {
+      position.x = r;
+      velocity.x = velocity.x.abs() * PlinkoConfig.wallRestitution;
+    } else if (position.x > PlinkoConfig.worldWidth - r) {
+      position.x = PlinkoConfig.worldWidth - r;
+      velocity.x = -velocity.x.abs() * PlinkoConfig.wallRestitution;
     }
 
     // Atterrissage
-    if (position.y >= PlinkoConfig.slotBaseY - PlinkoConfig.ballRadius) {
+    if (position.y >= PlinkoConfig.slotBaseY - r) {
       hasLanded = true;
-      position.y = PlinkoConfig.slotBaseY - PlinkoConfig.ballRadius;
+      position.y = PlinkoConfig.slotBaseY - r;
       landedSlotIndex = _detectSlot();
     }
+  }
+
+  // Legacy — appelé si pas de sub-stepping
+  void _updatePhysics(double dt) {
+    stepPhysics(dt);
   }
 
   /// Détection de case — alignée sur la grille triangulaire.

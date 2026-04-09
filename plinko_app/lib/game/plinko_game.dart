@@ -38,13 +38,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   final _rng = Random();
 
-  /// Compteur de frames physiques — utilisé pour le cooldown par picot.
-  int _physicsFrame = 0;
-
-  /// Cooldown par picot : pegIndex → frame à partir de laquelle la collision
-  /// est à nouveau active. Évite les rebonds répétés sur le même picot
-  /// qui causent l'effet d'orbite.
-  final Map<int, int> _pegCooldownFrames = {};
+  // (Cooldown picots retiré — le sub-stepping résout le tunneling proprement)
 
   @override
   Color backgroundColor() => const Color(0xFF08040f); // fond sombre opaque
@@ -245,15 +239,23 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   // ── Boucle principale ────────────────────────────────────────────────────
 
+  /// Nombre de sous-pas physiques par frame — empêche le tunneling.
+  static const int _physicsSubSteps = 4;
+
   @override
   void update(double dt) {
     super.update(dt);
 
-    // Les collisions physiques ne s'appliquent qu'en mode fallback
     final ball = _currentBall;
-    if (ball != null && !ball.isReplay) {
-      _resolvePegCollisions();
-      _resolveSlotDividerCollisions();
+
+    // Sub-stepping : physique + collisions ensemble à chaque sous-pas
+    if (ball != null && !ball.isReplay && !ball.hasLanded) {
+      final subDt = dt / _physicsSubSteps;
+      for (int s = 0; s < _physicsSubSteps; s++) {
+        ball.stepPhysics(subDt);
+        _resolvePegCollisions();
+        _resolveSlotDividerCollisions();
+      }
     }
 
     // En mode replay, détecter la proximité bille-picots pour le glow flash
@@ -265,25 +267,20 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     _checkLanded();
   }
 
-  /// Collision bille ↔ picots — physique pure.
+  /// Collision bille ↔ picots — physique réaliste.
   ///
-  /// Rebond classique : réflexion par rapport à la normale avec restitution.
-  /// Aucun forçage, aucun kick artificiel, aucun amortissement spécial.
+  /// Rebond par réflexion sur la normale. Pas de forçage de vitesse,
+  /// pas de cooldown artificiel. Le sub-stepping dans Ball._updatePhysics
+  /// garantit que la bille ne traverse pas les picots.
   void _resolvePegCollisions() {
     final ball = _currentBall;
     if (ball == null || ball.hasLanded) return;
 
-    _physicsFrame++;
-
     final collisionDist   = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius;
     final collisionDistSq = collisionDist * collisionDist;
-    const int cooldownDuration = 15;
-    const double separationGap = 0.10;
+    const double separationGap = 0.02;
 
     for (int i = 0; i < _pegPositions.length; i++) {
-      final coolUntil = _pegCooldownFrames[i];
-      if (coolUntil != null && _physicsFrame < coolUntil) continue;
-
       final pegPos = _pegPositions[i];
       final delta  = ball.position - pegPos;
       final distSq = delta.x * delta.x + delta.y * delta.y;
@@ -292,7 +289,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         final dist   = sqrt(distSq);
         final normal = delta / dist;
 
-        // Séparer la bille bien au-delà du picot
+        // Séparer la bille juste au bord du picot
         ball.position = pegPos + normal * (collisionDist + separationGap);
 
         // Réflexion classique : v' = v - (1 + e) * dot(v, n) * n
@@ -301,18 +298,11 @@ class PlinkoGame extends FlameGame with TapCallbacks {
           ball.velocity -= normal * (dot * (1 + PlinkoConfig.pegRestitution));
         }
 
-        // La gravité fait le reste — s'assurer que la bille descend toujours
-        if (ball.velocity.y < 1.0) {
-          ball.velocity.y = 1.0;
-        }
-
         // Squash & stretch au rebond
         ball.triggerBounce(normal);
 
         // Glow flash sur le picot touché
         _triggerPegHit(i);
-
-        _pegCooldownFrames[i] = _physicsFrame + cooldownDuration;
       }
     }
   }
@@ -427,8 +417,6 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     _currentBall = null;
     _ballInFlight = false;
     _resetPending = false;
-    _physicsFrame = 0;
-    _pegCooldownFrames.clear();
     debugTargetNotifier.value = null;
     camera.viewfinder.position = Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
   }
