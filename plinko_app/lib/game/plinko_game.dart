@@ -278,7 +278,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     final collisionDist   = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius;
     final collisionDistSq = collisionDist * collisionDist;
     const int cooldownDuration = 15;
-    const double separationGap = 0.20;
+    const double separationGap = 0.10;
 
     for (int i = 0; i < _pegPositions.length; i++) {
       final coolUntil = _pegCooldownFrames[i];
