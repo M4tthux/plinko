@@ -86,27 +86,27 @@ flutter doctor
 
 ---
 
-## Config plateau actuelle (validée — Session Design 2026-04-02)
+## Config plateau actuelle (resync builds 25-31 — 2026-04-08)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | 18.0 | Largeur en unités physiques |
+| `worldWidth` | **15.0** | Réduit de 18 pour mobile |
 | `worldHeight` | 24.0 | Hauteur totale |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | 18.0 | Unités/s² |
+| `gravity` | 15.0 | Unités/s² |
 | `rows` | 10 | Rangs 0–9 (grille triangulaire) |
-| `startRow` | 2 | Première rangée = 3 picots |
-| `pegGX` | 2.0 (calculé) | = worldWidth/slotCount — alignement parfait |
+| `startRow` | **0** | Toutes les rangées affichées |
+| `pegGX` | ~2.14 (calculé) | = worldWidth/slotCount |
 | `pegGY` | 2.0 | Espacement vertical |
 | `pegStartY` | 4.5 | Y du rang startRow |
-| `pegRadius` | 0.25 | Rayon picot |
-| `pegRestitution` | 0.50 | Rebond picot |
+| `pegRadius` | **0.20** | Picots plus petits |
+| `pegRestitution` | 0.55 | Rebond picot |
 | `ballRadius` | 0.40 | Rayon bille |
-| `ballRestitution` | 0.35 | |
-| `wallRestitution` | 0.55 | Rebond mur |
+| `ballRestitution` | **0.10** | Rebond très faible |
+| `wallRestitution` | 0.55 | Rebond mur — parois latérales présentes |
 | `minWallKick` | 1.5 | Kick minimum anti-couloir |
-| `slotCount` | 9 | Cases : 1€/2€/5€/50€/**500€**/50€/5€/2€/1€ |
-| `jackpotSlotIndex` | 4 | Centre (0-indexed) |
+| `slotCount` | **7** | Cases : 1€/10€/25€/**500€**/25€/10€/Perdu |
+| `jackpotSlotIndex` | **3** | Centre (0-indexed sur 7) |
 | `slotWallHeight` | 2.5 | Hauteur cases |
 
 ---

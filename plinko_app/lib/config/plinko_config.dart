@@ -5,19 +5,20 @@ import '../models/prize_lot.dart';
 ///
 /// Mécanique Plinko (validée game designer) :
 ///   - Grille triangulaire : rangée R a R+1 picots
-///   - 9 cases, rows=10 → rangée 9 a 10 picots alignés sur les 9 séparateurs
+///   - 7 cases, rows=10 → rangée 9 a 10 picots
 ///   - pegGX = worldWidth / slotCount → alignement parfait garanti
-///   - 8 rangées affichées (startRow=2), plateau dense
+///   - 10 rangées affichées (startRow=0), plateau complet
 ///   - Bille lancée depuis le centre, rebondit sur le picot central
+///   - Parois latérales présentes
 class PlinkoConfig {
   // ─── Monde physique ────────────────────────────────────────────────────────
-  static const double worldWidth  = 18.0;
+  static const double worldWidth  = 15.0;  // réduit de 18 pour mobile (build 26)
   static const double worldHeight = 24.0;
   static const double zoom        = 24.0;
 
   // ─── Grille triangulaire ───────────────────────────────────────────────────
-  static const int    rows       = 10;    // rangs logiques 0–9 (row 9 = 10 picots)
-  static const int    startRow   = 2;     // première rangée affichée (3 picots)
+  static const int    rows       = 10;    // rangs logiques 0–9
+  static const int    startRow   = 0;     // toutes les rangées affichées (build 31)
   static const double pegGY     = 2.0;   // espacement vertical centre à centre
   static const double pegStartY = 4.5;   // Y du rang startRow
 
@@ -50,18 +51,18 @@ class PlinkoConfig {
   // ─── Bille ─────────────────────────────────────────────────────────────────
   static const double ballStartY = 1.5;  // au-dessus de la première rangée
   static double ballRadius      = 0.40;
-  static double ballRestitution = 0.25;
+  static double ballRestitution = 0.10;  // build 30 — rebond très faible
 
   // ─── Gravité ───────────────────────────────────────────────────────────────
   static double gravity = 15.0;
 
   // ─── Picots ────────────────────────────────────────────────────────────────
-  static double pegRadius      = 0.25;
+  static double pegRadius      = 0.20;  // build 31 — picots plus petits
   static double pegRestitution = 0.55;
 
   // ─── Cases de récompense (pleine largeur) ──────────────────────────────────
-  static const int    slotCount         = 9;
-  static const int    jackpotSlotIndex  = 4; // centre (0-indexed)
+  static const int    slotCount         = 7;   // build 25 — 7 cases
+  static const int    jackpotSlotIndex  = 3;   // centre (0-indexed sur 7)
   static const double slotWallHeight    = 2.5;
   static const double slotWallThickness = 0.08;
 
@@ -75,23 +76,21 @@ class PlinkoConfig {
   static double get slotBaseY =>
       pegY(rows - 1) + pegGY + slotWallHeight;
 
-  // ─── Labels et couleurs des 9 cases (symétrique, jackpot central) ─────────
+  // ─── Labels et couleurs des 7 cases (symétrique, jackpot central) ─────────
   static const List<String> slotLabels = [
-    '1€', '2€', '5€', '50€',
+    '1€', '10€', '25€',
     '500€', // jackpot central
-    '50€', '5€', '2€', '1€',
+    '25€', '10€', 'Perdu',
   ];
 
   // Gradient chaud symétrique : rouge → orange → vert → or (jackpot)
   static const List<int> _slotColorValues = [
     0xFFff4444, // rouge
-    0xFFff6633, // rouge-orange
     0xFFff8c00, // orange
     0xFF44cc44, // vert
     0xFFf0c040, // or (jackpot)
     0xFF44cc44, // vert
     0xFFff8c00, // orange
-    0xFFff6633, // rouge-orange
     0xFFff4444, // rouge
   ];
 

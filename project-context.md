@@ -39,29 +39,29 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ## Configuration plateau actuelle (plinko_config.dart)
 
 > À conserver comme référence — permet de retrouver les valeurs validées.
-> Refonte grille triangulaire + alignement mécanique Plinko (Session Design 2026-04-02).
+> Resync builds 25-31 (session PC non committée) — 2026-04-08.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | 18.0 | Largeur en unités physiques |
-| `worldHeight` | 24.0 | Hauteur totale (réduit de 26) |
+| `worldWidth` | **15.0** | Réduit de 18 pour mobile (build 26) |
+| `worldHeight` | 24.0 | Hauteur totale |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | 15.0 | Unités/s² (réduit de 18 pour benchmark) |
+| `gravity` | 15.0 | Unités/s² |
 | `rows` | 10 | Rangs logiques 0–9 (grille triangulaire) |
-| `startRow` | 2 | Première rangée affichée (3 picots min) |
-| `pegGX` | 2.0 (calculé) | = worldWidth / slotCount — alignement parfait |
+| `startRow` | **0** | Toutes les rangées affichées (build 31) |
+| `pegGX` | ~2.14 (calculé) | = worldWidth / slotCount |
 | `pegGY` | 2.0 | Espacement vertical centre à centre |
 | `pegStartY` | 4.5 | Y du rang startRow |
-| `pegRadius` | 0.25 | Rayon picot |
-| `pegRestitution` | 0.55 | Rebond picot (ajusté benchmark) |
+| `pegRadius` | **0.20** | Réduit de 0.25 (build 31) |
+| `pegRestitution` | 0.55 | Rebond picot |
 | `ballRadius` | 0.40 | Rayon bille |
-| `ballRestitution` | 0.25 | En test (benchmark recommande 0.55, testé trop fort → réduit) |
-| `wallRestitution` | 0.55 | Rebond mur |
+| `ballRestitution` | **0.10** | Rebond très faible (build 30) |
+| `wallRestitution` | 0.55 | Rebond mur — parois latérales remises (build 27) |
 | `minWallKick` | 1.5 | Kick minimum anti-couloir |
-| `slotCount` | **9** | Cases symétriques (1€→500€→1€) |
-| `jackpotSlotIndex` | 4 | Centre (0-indexed) |
+| `slotCount` | **7** | 7 cases (build 25) |
+| `jackpotSlotIndex` | **3** | Centre (0-indexed sur 7) |
 | `slotWallHeight` | 2.5 | Hauteur des cases |
-| `slotLabels` | 1€,2€,5€,50€,**500€**,50€,5€,2€,1€ | Symétrique |
+| `slotLabels` | 1€,10€,25€,**500€**,25€,10€,Perdu | Symétrique + case Perdu |
 
 ---
 
@@ -83,9 +83,9 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - Pas de sons pour le MVP
 - Pas de trajectoire prévisionnelle — lancer à l'aveugle
 - **Lancement depuis le centre** : bille lancée au centre avec micro-jitter (±0.2), rebondit sur le picot central — standard industrie (Stake, BGaming)
-- **Pas de parois latérales** : bille sortie du plateau = Perdu
-- Jackpot unique centré : 500€ en case centrale (index 4) uniquement
-- 9 cases symétriques : 1€, 2€, 5€, 50€, 500€(jackpot), 50€, 5€, 2€, 1€
+- **Parois latérales** présentes (remises build 27)
+- Jackpot unique centré : 500€ en case centrale (index 3) uniquement
+- **7 cases** : 1€, 10€, 25€, 500€(jackpot), 25€, 10€, Perdu
 - Table de lots réelle : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot)
 - Ambiance : futuriste / arcade — néons, fond sombre, bille lumineuse
 

@@ -90,3 +90,10 @@
 | 2026-04-03 | Dev | **Glow dynamique** : halos bille modulés par vitesse (speedFactor). `ball.dart`. |
 | 2026-04-03 | Dev | **Particules d'impact** : 12 particules or à l'atterrissage (600ms). `ball.dart` + `plinko_game.dart`. |
 | 2026-04-03 | Game Design | **Slow-motion annulé** : pas de ralentissement derniers rangs (décision Matthieu). |
+| 2026-04-04 | Game Design | **7 cases** au lieu de 9 : 1€, 10€, 25€, 500€(jackpot), 25€, 10€, Perdu. (session PC non committée, resync build 25) |
+| 2026-04-04 | Dev | **worldWidth 15** (était 18) : adapté pour mobile. (build 26) |
+| 2026-04-04 | Dev | **Parois latérales remises** : murs physiques restaurés. (build 27) |
+| 2026-04-04 | Dev | **startRow=0** : toutes les rangées de picots affichées. (build 31) |
+| 2026-04-04 | Dev | **pegRadius 0.20** (était 0.25) : picots plus petits. (build 31) |
+| 2026-04-04 | Dev | **ballRestitution 0.10** (était 0.25) : rebond très faible + friction + nudge aléatoire. (build 30) |
+| 2026-04-08 | Process | **Resync source ← gh-pages** : 7 builds (25-31) déployés sans commit source. Code source resynchronisé. |
