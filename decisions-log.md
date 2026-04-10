@@ -97,3 +97,12 @@
 | 2026-04-04 | Dev | **pegRadius 0.20** (était 0.25) : picots plus petits. (build 31) |
 | 2026-04-04 | Dev | **ballRestitution 0.10** (était 0.25) : rebond très faible + friction + nudge aléatoire. (build 30) |
 | 2026-04-08 | Process | **Resync source ← gh-pages** : 7 builds (25-31) déployés sans commit source. Code source resynchronisé. |
+| 2026-04-09 | Process | **GitHub Action CI** créé : `.github/workflows/deploy-web.yml` — push master → build Flutter web → deploy gh-pages automatiquement. Plus besoin du PC pour déployer. URL : `m4tthux.github.io/plinko`. |
+| 2026-04-09 | Dev | **Build 33 — refonte physique complète** : sub-stepping 4 sous-pas/frame (anti-tunneling), ratio bille:picot 1:1 (0.30/0.25), restitution 0.75, gravity 12, suppression cooldown picots, suppression vitesse Y forcée. Basé sur benchmark Matter.js / Stake / BGaming. |
+| 2026-04-09 | Dev | **Build 34 — proportions standard** : worldWidth 15→12, startRow 0→2. Gap libre entre picots = 2× diamètre bille (standard). Commence à 3 picots. |
+| 2026-04-09 | Dev | **Build 35 — bords retirés + rebonds amortis** : suppression murs latéraux (sortie = perdu, comme vrais Plinko), restitution 0.75→0.35. La gravité domine, distribution binomiale pure. |
+| 2026-04-09 | Dev | **Build 36 — cases alignées sur picots du bas** : rows 10→8, pegGX découplé de slotCount et fixé à 1.70, worldWidth calculé dynamiquement = (rows-1)×pegGX + 2×pegRadius. Cases entre les picots de la dernière rangée. Perdu uniquement si bille hors périmètre des picots du bas. |
+| 2026-04-09 | Game Design | **Distribution 100% statistique** : pas de forçage central, lancement depuis le centre avec micro-jitter, distribution binomiale pure (comme les vrais Plinko). |
+| 2026-04-09 | Game Design | **Pas de parois latérales** : la bille sort = perdu. La grille triangulaire recentre naturellement via statistiques. |
+| 2026-04-09 | Game Design | **Rebonds amortis (0.35)** : la bille dévie légèrement, la gravité domine. Pas de gros rebonds qui font monter la bille. |
+| 2026-04-09 | Process | **Règle : incrémenter `kBuildTime`** à chaque modification qui affecte le runtime. Permet de vérifier facilement la version en ligne. |

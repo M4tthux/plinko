@@ -39,29 +39,40 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ## Configuration plateau actuelle (plinko_config.dart)
 
 > À conserver comme référence — permet de retrouver les valeurs validées.
-> Resync builds 25-31 (session PC non committée) — 2026-04-08.
+> Refonte physique Plinko standard (builds 33-36) — 2026-04-09.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | **15.0** | Réduit de 18 pour mobile (build 26) |
+| `worldWidth` | **12.40** (calculé) | = (rows-1) × pegGX + 2 × pegRadius — largeur exacte de la dernière rangée de picots |
 | `worldHeight` | 24.0 | Hauteur totale |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | 15.0 | Unités/s² |
-| `rows` | 10 | Rangs logiques 0–9 (grille triangulaire) |
-| `startRow` | **0** | Toutes les rangées affichées (build 31) |
-| `pegGX` | ~2.14 (calculé) | = worldWidth / slotCount |
+| `gravity` | **12.0** | Réduit pour sub-stepping propre |
+| `rows` | **8** | Rangs logiques 0–7 (last row = 8 picots → 7 gaps = 7 cases alignées) |
+| `startRow` | **2** | Commence à 3 picots (standard Plinko) — 6 rangées affichées |
+| `pegGX` | **1.70** (fixe) | Gap libre = 2× diamètre bille (standard Matter.js) |
 | `pegGY` | 2.0 | Espacement vertical centre à centre |
 | `pegStartY` | 4.5 | Y du rang startRow |
-| `pegRadius` | **0.20** | Réduit de 0.25 (build 31) |
-| `pegRestitution` | 0.55 | Rebond picot |
-| `ballRadius` | 0.40 | Rayon bille |
-| `ballRestitution` | **0.10** | Rebond très faible (build 30) |
-| `wallRestitution` | 0.55 | Rebond mur — parois latérales remises (build 27) |
-| `minWallKick` | 1.5 | Kick minimum anti-couloir |
-| `slotCount` | **7** | 7 cases (build 25) |
-| `jackpotSlotIndex` | **3** | Centre (0-indexed sur 7) |
+| `pegRadius` | **0.25** | Ratio ~1:1 avec ballRadius (standard Plinko) |
+| `pegRestitution` | **0.35** | Rebond amorti — la gravité domine |
+| `ballRadius` | **0.30** | Ratio ~1:1 avec pegRadius |
+| `ballRestitution` | **0.35** | Dévie légèrement, pas de gros rebond |
+| **Parois latérales** | **Aucune** | Sortie hors picots du bas = Perdu (standard) |
+| `slotCount` | 7 | 7 gaps entre 8 picots de la dernière rangée |
+| `jackpotSlotIndex` | 3 | Centre (0-indexed sur 7) |
+| `slotStartX` | = pegX(rows-1, 0) | 1er picot de la dernière rangée |
+| `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot de la dernière rangée |
+| `slotWidth` | = pegGX (1.70) | Entre deux picots |
 | `slotWallHeight` | 2.5 | Hauteur des cases |
 | `slotLabels` | 1€,10€,25€,**500€**,25€,10€,Perdu | Symétrique + case Perdu |
+
+### Architecture physique (build 33+)
+
+- **Sub-stepping** : 4 sous-pas physiques par frame (empêche le tunneling)
+- **Collision picots** : réflexion classique `v' = v - (1+e)·dot(v,n)·n` sans hack
+- **Pas de cooldown** sur les picots (le sub-stepping résout le tunneling proprement)
+- **Pas de vitesse Y forcée** (la gravité domine naturellement)
+- **Pas de parois** : sortie du périmètre picots du bas = Perdu
+- **Mode physique forcé** (`forcePhysicsMode = true`) — trajectoires pré-calculées désactivées
 
 ---
 
@@ -71,11 +82,14 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ### Tech & Architecture
 - Framework : Flutter (iOS + Android) — test via Chrome (`flutter run -d chrome`)
+- **CI GitHub Action** : chaque push master → build Flutter web + deploy gh-pages (auto)
+- URL déployée : `m4tthux.github.io/plinko`
 - Physique manuelle (Flame only) — Forge2D supprimé (incompatible Flutter Web)
+- **Sub-stepping** : 4 sous-pas physiques/frame pour éviter le tunneling
 - Config MVP codée en dur dans `plinko_config.dart`
-- Architecture trajectoires : pré-calculées (cases × zones × variantes) — fallback physique si manquante
-- Après tout changement de config plateau → régénérer trajectoires (obligatoire)
-- **Grille triangulaire** : rangée R a R+1 picots, alignement picots/séparateurs garanti par pegGX=worldWidth/slotCount
+- **Grille triangulaire** : rangée R a R+1 picots, dernière rangée = `rows` picots = `rows-1` gaps = `slotCount` cases alignées
+- `pegGX` fixé (1.70), `worldWidth` calculé dynamiquement depuis `rows` et `pegRadius`
+- Mode physique forcé pour le dev (`forcePhysicsMode = true`) — trajectoires pré-calculées en pause
 
 ### Game Design
 - Illusion de hasard totale — résultat pré-déterminé, trajectoire rejouée frame par frame
@@ -83,18 +97,23 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - Pas de sons pour le MVP
 - Pas de trajectoire prévisionnelle — lancer à l'aveugle
 - **Lancement depuis le centre** : bille lancée au centre avec micro-jitter (±0.2), rebondit sur le picot central — standard industrie (Stake, BGaming)
-- **Parois latérales** présentes (remises build 27)
+- **Pas de parois latérales** : la bille sort = Perdu (standard Plinko, la grille triangulaire recentre naturellement)
+- **Pas de forçage** : distribution gauche/droite purement statistique (binomiale), rebonds amortis, gravité domine
 - Jackpot unique centré : 500€ en case centrale (index 3) uniquement
 - **7 cases** : 1€, 10€, 25€, 500€(jackpot), 25€, 10€, Perdu
+- **8 rangées** (row 0–7, 6 visibles de row 2 à 7) : last row = 8 picots, 7 gaps = 7 cases alignées
 - Table de lots réelle : Perdu(33%), 1€(22%), 2€(18%), 5€(12%), 10€(8%), 25€(4%), 50€(2.5%), 500€(0.5% jackpot)
 - Ambiance : futuriste / arcade — néons, fond sombre, bille lumineuse
 
 ### Process (depuis migration Claude Code — 2026-03-31)
 - Workflow hybride : Claude Code (dev/fichiers/terminal/Git) — Chat (design visuel/screenshots/game design)
 - Un problème = une session
-- Commit propre en fin de chaque session
+- **Commit propre après chaque changement** (même mineur) + incrémenter `kBuildTime` à chaque build
+- **Push master** déclenche le déploiement auto via GitHub Action
+- **Toute modif code source doit être committée** (ne jamais déployer depuis un build local non tracé)
 - `CLAUDE.md` = référence native Claude Code (remplace plinko-context-loader)
 - `decisions-log.md` = historique complet de toutes les décisions
+- Mise à jour Notion Game Design + Board en fin de session
 
 ---
 
@@ -232,13 +251,26 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 | Domaine | Statut | Notes |
 |---|---|---|
-| **Game Design** | 🟢 Calé | Lancement centre validé (benchmark industrie). 1 question ouverte (écran intro). |
-| **Tech & Architecture** | 🟢 Spec MVP v2 validée | Architecture trajectoires implémentée et validée |
-| **Design & UI** | 🟡 En cours | Refonte visuelle néon. Phase 1 benchmark (trail, squash&stretch, glow picots) implémentée. À tester visuellement. |
-| **Dev** | 🟡 En cours | Physique validée. Phase 1 benchmark VFX terminée. Phase 2 (flash case, screen shake, scale pulse) à faire. |
-| **Test mobile** | 🟢 Opérationnel | Build web + serve local sur port 8080, testé sur iPhone via Safari. |
+| **Game Design** | 🟢 Calé | Standards Plinko appliqués (7 cases, 8 rangées, pas de bords, rebonds amortis). |
+| **Tech & Architecture** | 🟢 v2 validée | Sub-stepping + physique pure + géométrie alignée sur les picots du bas. |
+| **Design & UI** | 🟡 En cours | Phase 1 benchmark VFX implémentée. Phase 2 (flash case, screen shake, scale pulse) à faire. |
+| **Dev** | 🟡 En cours | Build 36 = physique standard. À tester / ajuster selon feedback visuel. |
+| **CI/CD** | 🟢 Done | GitHub Action auto-deploy master → gh-pages (`m4tthux.github.io/plinko`) |
+| **Test mobile** | 🟢 Opérationnel | Déploiement GitHub Pages accessible depuis Safari iPhone directement |
 | **Flutter** | 🟢 Installé | v3.41.6 stable, PATH configuré sur Windows — Git CMD opérationnel |
 | **Migration Claude Code** | 🟢 Done | CLAUDE.md + Git + decisions-log.md + DESIGN.md + brainstorm.skill créés. Workflow opérationnel. |
+
+---
+
+## Build actuel : **36** (2026-04-09)
+
+**Déployé sur** : `m4tthux.github.io/plinko`
+
+**Dernières modifs** :
+- Build 33 : refonte physique (sub-stepping, ratio 1:1, restitution 0.75)
+- Build 34 : proportions standard (worldWidth 12, pegGX 2× diamètre)
+- Build 35 : suppression bords + restitution amortie 0.35
+- Build 36 : cases alignées sur picots du bas, plus de zone morte (rows 8, pegGX fixe 1.70)
 
 ---
 
@@ -283,4 +315,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-03 — Session VFX Phase 1. Trail lumineux (10 positions, fade or), squash & stretch (15%, 120ms), glow flash picots (200ms blanc) implémentés. Phase 1 benchmark terminée. Prochaine étape : valider visuellement sur Chrome + Phase 2 (flash case, screen shake, scale pulse).*
+*Dernière mise à jour : 2026-04-09 — Session Physique Standard. Refonte complète de la physique selon benchmark Plinko (Stake/BGaming/Matter.js). Sub-stepping 4 sous-pas/frame, ratio bille:picot 1:1, restitution 0.35, pas de bords, cases alignées sur picots du bas. 8 rangées, pegGX fixe 1.70 (2× diamètre bille). GitHub Action CI déployé pour auto-deploy master → gh-pages. Build 36 en ligne sur `m4tthux.github.io/plinko`. Prochaine étape : validation visuelle + Phase 2 VFX (flash case, screen shake, scale pulse).*

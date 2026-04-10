@@ -86,28 +86,44 @@ flutter doctor
 
 ---
 
-## Config plateau actuelle (resync builds 25-31 — 2026-04-08)
+## Config plateau actuelle (refonte physique standard — 2026-04-09)
+
+> Build actuel : **36** (déployé sur `m4tthux.github.io/plinko`)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | **15.0** | Réduit de 18 pour mobile |
+| `worldWidth` | **12.40** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
 | `worldHeight` | 24.0 | Hauteur totale |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | 15.0 | Unités/s² |
-| `rows` | 10 | Rangs 0–9 (grille triangulaire) |
-| `startRow` | **0** | Toutes les rangées affichées |
-| `pegGX` | ~2.14 (calculé) | = worldWidth/slotCount |
+| `gravity` | **12.0** | Réduit pour sub-stepping |
+| `rows` | **8** | Last row = 8 picots → 7 gaps = 7 cases |
+| `startRow` | **2** | Commence à 3 picots (6 rangées visibles) |
+| `pegGX` | **1.70** (fixe) | Gap libre = 2× diamètre bille (standard) |
 | `pegGY` | 2.0 | Espacement vertical |
 | `pegStartY` | 4.5 | Y du rang startRow |
-| `pegRadius` | **0.20** | Picots plus petits |
-| `pegRestitution` | 0.55 | Rebond picot |
-| `ballRadius` | 0.40 | Rayon bille |
-| `ballRestitution` | **0.10** | Rebond très faible |
-| `wallRestitution` | 0.55 | Rebond mur — parois latérales présentes |
-| `minWallKick` | 1.5 | Kick minimum anti-couloir |
-| `slotCount` | **7** | Cases : 1€/10€/25€/**500€**/25€/10€/Perdu |
-| `jackpotSlotIndex` | **3** | Centre (0-indexed sur 7) |
+| `pegRadius` | **0.25** | Ratio ~1:1 avec bille |
+| `pegRestitution` | **0.35** | Rebond amorti |
+| `ballRadius` | **0.30** | Ratio ~1:1 avec picot |
+| `ballRestitution` | **0.35** | La gravité domine |
+| **Parois latérales** | **Aucune** | Sortie picots du bas = Perdu |
+| `slotCount` | 7 | 7 gaps entre 8 picots |
+| `jackpotSlotIndex` | 3 | Centre (0-indexed sur 7) |
+| `slotStartX` | = pegX(rows-1, 0) | 1er picot du bas |
+| `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot du bas |
+| `slotWidth` | = pegGX (1.70) | Entre 2 picots |
 | `slotWallHeight` | 2.5 | Hauteur cases |
+
+### Physique (refonte build 33-36)
+- **Sub-stepping** : 4 sous-pas physiques/frame (empêche le tunneling)
+- **Pas de cooldown picots** (inutile avec sub-stepping)
+- **Pas de vitesse Y forcée** (la gravité fait le travail)
+- **Pas de bords** : sortie = Perdu (standard Plinko)
+- **Mode physique forcé** : `forcePhysicsMode = true` (trajectoires en pause)
+
+### CI/CD
+- **GitHub Action** : push master → build Flutter web + deploy gh-pages
+- URL : `m4tthux.github.io/plinko`
+- Toujours incrémenter `kBuildTime` dans `main.dart` avant chaque commit
 
 ---
 
