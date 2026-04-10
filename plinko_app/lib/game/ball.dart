@@ -183,9 +183,10 @@ class Ball extends PositionComponent {
     // Déplacement
     position += velocity * subDt;
 
-    // Pas de murs — sortie du plateau = perdu (comme les vrais Plinko)
+    // Pas de murs — sortie du périmètre des picots de la dernière rangée = perdu
     final r = PlinkoConfig.ballRadius;
-    if (position.x < -r || position.x > PlinkoConfig.worldWidth + r) {
+    if (position.x < PlinkoConfig.slotStartX - r ||
+        position.x > PlinkoConfig.slotEndX + r) {
       hasLanded = true;
       landedSlotIndex = -1;
       return;
