@@ -92,6 +92,99 @@ class SideEdge extends PositionComponent {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// LaunchHole — trou sombre en haut du plateau d'où émerge la bille
+//
+// Rendu visuel uniquement (aucune physique). Donne l'illusion que la bille
+// vient d'un conduit caché derrière le plateau. Centré sur ballStartY.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class LaunchHole extends PositionComponent {
+  LaunchHole()
+      : super(
+          position: Vector2(
+            PlinkoConfig.worldWidth / 2,
+            PlinkoConfig.ballStartY,
+          ),
+          anchor: Anchor.center,
+          priority: -50, // derrière les picots, devant le fond
+        );
+
+  @override
+  void render(Canvas canvas) {
+    // Rayon calqué sur la bille (légèrement plus grand pour la marge visuelle)
+    final rBall = PlinkoConfig.ballRadius;
+    final rOuter = rBall * 1.75; // ouverture visible
+    final rInner = rBall * 1.25; // bord intérieur sombre
+    final rCore  = rBall * 1.05; // cœur noir
+
+    // ── Anneau extérieur : liseré violet glow (bordure du conduit) ──────────
+    canvas.drawCircle(
+      Offset.zero,
+      rOuter + 0.05,
+      Paint()
+        ..color       = const Color(0xFF9d7cdf).withOpacity(0.28)
+        ..style       = PaintingStyle.stroke
+        ..strokeWidth = 0.10
+        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.22),
+    );
+
+    // ── Plaque métallique extérieure (dégradé radial gris-violet) ──────────
+    final plateRect = Rect.fromCircle(center: Offset.zero, radius: rOuter);
+    canvas.drawCircle(Offset.zero, rOuter, Paint()
+      ..shader = RadialGradient(
+        center: const Alignment(-0.25, -0.35),
+        radius: 1.0,
+        colors: const [
+          Color(0xFF3a2a5c),
+          Color(0xFF1e1433),
+          Color(0xFF0a0616),
+        ],
+        stops: const [0.0, 0.55, 1.0],
+      ).createShader(plateRect));
+
+    // ── Liseré intérieur net (bord de l'ouverture) ─────────────────────────
+    canvas.drawCircle(
+      Offset.zero,
+      rInner,
+      Paint()
+        ..color       = const Color(0xFF7c5cbf).withOpacity(0.55)
+        ..style       = PaintingStyle.stroke
+        ..strokeWidth = 0.045,
+    );
+
+    // ── Ombre interne (profondeur du trou) ─────────────────────────────────
+    final holeRect = Rect.fromCircle(center: Offset.zero, radius: rInner);
+    canvas.drawCircle(Offset.zero, rInner, Paint()
+      ..shader = RadialGradient(
+        center: const Alignment(0.0, -0.35),
+        radius: 1.0,
+        colors: const [
+          Color(0xFF1a0f2e),
+          Color(0xFF050208),
+          Color(0xFF000000),
+        ],
+        stops: const [0.0, 0.65, 1.0],
+      ).createShader(holeRect));
+
+    // ── Cœur noir profond ──────────────────────────────────────────────────
+    canvas.drawCircle(
+      Offset.zero,
+      rCore,
+      Paint()..color = const Color(0xFF000000),
+    );
+
+    // ── Reflet spéculaire subtil sur la plaque (haut-gauche) ───────────────
+    canvas.drawCircle(
+      Offset(-rOuter * 0.35, -rOuter * 0.55),
+      rOuter * 0.22,
+      Paint()
+        ..color       = Colors.white.withOpacity(0.18)
+        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.08),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Wall plat (bas) — visuel uniquement
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -445,6 +538,8 @@ class PlinkoTitle extends PositionComponent {
 
 class BoardBuilder {
   static Background buildBackground() => Background();
+
+  static LaunchHole buildLaunchHole() => LaunchHole();
 
   static List<PositionComponent> buildWalls() {
     return []; // pas de contour — bords ouverts

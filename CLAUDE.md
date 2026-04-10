@@ -86,32 +86,34 @@ flutter doctor
 
 ---
 
-## Config plateau actuelle (refonte physique standard — 2026-04-09)
+## Config plateau actuelle (refonte 8 rangées / 9 cases — 2026-04-10)
 
-> Build actuel : **36** (déployé sur `m4tthux.github.io/plinko`)
+> Build actuel : **37** (déployé sur `m4tthux.github.io/plinko`)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | **12.40** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
+| `worldWidth` | **12.55** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
 | `worldHeight` | 24.0 | Hauteur totale |
 | `zoom` | 24.0 | Zoom caméra |
 | `gravity` | **12.0** | Réduit pour sub-stepping |
-| `rows` | **8** | Last row = 8 picots → 7 gaps = 7 cases |
-| `startRow` | **2** | Commence à 3 picots (6 rangées visibles) |
-| `pegGX` | **1.70** (fixe) | Gap libre = 2× diamètre bille (standard) |
-| `pegGY` | 2.0 | Espacement vertical |
-| `pegStartY` | 4.5 | Y du rang startRow |
-| `pegRadius` | **0.25** | Ratio ~1:1 avec bille |
+| `rows` | **10** | Last row = 10 picots → 9 gaps = 9 cases |
+| `startRow` | **2** | Commence à 3 picots (**8 rangées visibles**) |
+| `pegGX` | **1.35** | Espacement horizontal compact |
+| `pegGY` | **1.90** | Espacement vertical |
+| `pegStartY` | **4.0** | Y du rang startRow (laisse place au trou) |
+| `pegRadius` | **0.20** | Plus petit — la bille domine |
 | `pegRestitution` | **0.35** | Rebond amorti |
-| `ballRadius` | **0.30** | Ratio ~1:1 avec picot |
+| `ballRadius` | **0.35** | Ratio **~1.75×** pegRadius (bille dominante) |
+| `ballStartY` | **2.3** | Émerge du LaunchHole |
 | `ballRestitution` | **0.35** | La gravité domine |
 | **Parois latérales** | **Aucune** | Sortie picots du bas = Perdu |
-| `slotCount` | 7 | 7 gaps entre 8 picots |
-| `jackpotSlotIndex` | 3 | Centre (0-indexed sur 7) |
+| `slotCount` | **9** | 9 gaps entre 10 picots |
+| `jackpotSlotIndex` | **4** | Centre (0-indexed sur 9) |
 | `slotStartX` | = pegX(rows-1, 0) | 1er picot du bas |
 | `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot du bas |
-| `slotWidth` | = pegGX (1.70) | Entre 2 picots |
+| `slotWidth` | = pegGX (1.35) | Entre 2 picots |
 | `slotWallHeight` | 2.5 | Hauteur cases |
+| **LaunchHole** | nouveau | Trou sombre en haut du plateau (`board.dart`) d'où émerge la bille |
 
 ### Physique (refonte build 33-36)
 - **Sub-stepping** : 4 sous-pas physiques/frame (empêche le tunneling)

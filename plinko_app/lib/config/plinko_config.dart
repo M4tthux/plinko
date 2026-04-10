@@ -5,21 +5,21 @@ import '../models/prize_lot.dart';
 ///
 /// Mécanique Plinko (standard industrie) :
 ///   - Grille triangulaire : rangée R a R+1 picots
-///   - rows=8 → rangée 7 = 8 picots → 7 gaps = 7 cases naturellement alignées
-///   - pegGX fixé (ratio gap/diamètre bille ~2×)
+///   - rows=10, startRow=2 → 8 rangées affichées, last row = 10 picots → 9 cases
+///   - Bille plus grosse que les picots (ratio ~1.75×) → rebonds plus marqués
 ///   - worldWidth = largeur exacte de la dernière rangée de picots
 ///   - Cases entre les picots de la dernière rangée
 ///   - Pas de parois latérales — sortie = perdu
 class PlinkoConfig {
   // ─── Grille triangulaire ───────────────────────────────────────────────────
-  static const int    rows       = 8;     // rangs logiques 0–7 (last row = 8 picots)
-  static const int    startRow   = 2;     // commence à 3 picots (standard Plinko)
-  static const double pegGX     = 1.70;   // espacement horizontal = 2× diamètre bille
-  static const double pegGY     = 2.0;    // espacement vertical centre à centre
-  static const double pegStartY = 4.5;    // Y du rang startRow
+  static const int    rows       = 10;    // rangs logiques 0–9 (last row = 10 picots)
+  static const int    startRow   = 2;     // commence à 3 picots → 8 rangées affichées
+  static const double pegGX     = 1.35;   // espacement horizontal (compact, 9 cases)
+  static const double pegGY     = 1.90;   // espacement vertical centre à centre
+  static const double pegStartY = 4.0;    // Y du rang startRow (laisse place au trou)
 
   // ─── Picots ────────────────────────────────────────────────────────────────
-  static double pegRadius      = 0.25;
+  static double pegRadius      = 0.20;  // plus petit — la bille domine visuellement
   static double pegRestitution = 0.35;  // dévie légèrement, pas de gros rebond
 
   // ─── Monde physique ────────────────────────────────────────────────────────
@@ -52,16 +52,16 @@ class PlinkoConfig {
   }
 
   // ─── Bille ─────────────────────────────────────────────────────────────────
-  static const double ballStartY = 1.5;  // au-dessus de la première rangée
-  static double ballRadius      = 0.30;  // ratio ~1:1 avec pegRadius
+  static const double ballStartY = 2.3;  // émerge du trou (sous le titre PLINKO)
+  static double ballRadius      = 0.35;  // ratio ~1.75× avec pegRadius (bille dominante)
   static double ballRestitution = 0.35;  // rebond amorti — la gravité domine
 
   // ─── Gravité ───────────────────────────────────────────────────────────────
   static double gravity = 12.0;
 
   // ─── Cases de récompense (alignées sur les picots de la dernière rangée) ──
-  static const int    slotCount         = 7;   // 7 gaps entre 8 picots
-  static const int    jackpotSlotIndex  = 3;   // centre (0-indexed sur 7)
+  static const int    slotCount         = 9;   // 9 gaps entre 10 picots
+  static const int    jackpotSlotIndex  = 4;   // centre (0-indexed sur 9)
   static const double slotWallHeight    = 2.5;
   static const double slotWallThickness = 0.08;
 
@@ -78,21 +78,23 @@ class PlinkoConfig {
   static double get slotBaseY =>
       pegY(rows - 1) + pegGY + slotWallHeight;
 
-  // ─── Labels et couleurs des 7 cases (symétrique, jackpot central) ─────────
+  // ─── Labels et couleurs des 9 cases (symétrique, jackpot central) ─────────
   static const List<String> slotLabels = [
-    '1€', '10€', '25€',
+    'Perdu', '1€', '5€', '25€',
     '500€', // jackpot central
-    '25€', '10€', 'Perdu',
+    '25€', '5€', '1€', 'Perdu',
   ];
 
-  // Gradient chaud symétrique : rouge → orange → vert → or (jackpot)
+  // Gradient chaud symétrique : rouge → orange → jaune → vert → or (jackpot)
   static const List<int> _slotColorValues = [
     0xFFff4444, // rouge
+    0xFFff6a1f, // rouge-orange
     0xFFff8c00, // orange
     0xFF44cc44, // vert
     0xFFf0c040, // or (jackpot)
     0xFF44cc44, // vert
     0xFFff8c00, // orange
+    0xFFff6a1f, // rouge-orange
     0xFFff4444, // rouge
   ];
 

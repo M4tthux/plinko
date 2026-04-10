@@ -68,6 +68,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
     // Fond + plateau
     await world.add(BoardBuilder.buildBackground());
+    await world.add(BoardBuilder.buildLaunchHole());
     await world.addAll(BoardBuilder.buildWalls());
     await world.addAll(BoardBuilder.buildPegs());
     await world.addAll(BoardBuilder.buildSlotDividers());
