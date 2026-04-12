@@ -23862,7 +23862,7 @@ _.as=i
 _.at=j},
 aq3(){var s,r,q,p,o,n,m,l,k,j,i,h=null,g=A.c([],t.Hq)
 for(s=t.qw,r=t.gN,q=2;q<10;q=p){p=q+1
-o=4+(q-2)*1.9
+o=4+(q-2)*1.4
 for(n=q*1.35/2,m=0;m<p;++m){l=$.e0
 k=new Float32Array(2)
 k[1]=o
@@ -23893,7 +23893,7 @@ j[q]=p}return j},
 aq5(){var s,r,q,p,o,n,m,l=null,k=J.x1(9,t.FF)
 for(s=t.qw,r=t.gN,q=0;q<9;++q){p=$.e0
 o=new Float32Array(2)
-o[1]=20.449999999999996
+o[1]=16.45
 o[0]=(12.15+2*p)/2-6.075+0+q*1.35+0.675
 p=A.je()
 n=new A.au(new Float32Array(2))
@@ -79314,7 +79314,7 @@ q=s.a
 p=q[0]
 if(p<A.anw(9,0)-r||p>A.anw(9,9)+r){o.p2=!0
 o.p3=-1
-return}p=21.699999999999996-r
+return}p=17.7-r
 if(q[1]>=p){o.p2=!0
 s.Jr(p)
 s.T()
@@ -79415,7 +79415,7 @@ a.d3(new A.f(s,1.5),p*0.6,q)
 q=A.ac()
 q.r=A.N(56,B.iP.m()>>>16&255,B.iP.m()>>>8&255,B.iP.m()&255).gp()
 q.z=B.Jx
-a.d3(new A.f(s,21.699999999999996),p*0.45,q)}}
+a.d3(new A.f(s,17.7),p*0.45,q)}}
 A.I7.prototype={
 jZ(a){var s,r,q,p,o=null,n=$.os,m=n*1.75,l=n*1.25
 $.T()
@@ -79479,12 +79479,12 @@ s.r=A.N(46,B.aP.m()>>>16&255,B.aP.m()>>>8&255,B.aP.m()&255).gp()
 s.c=0.2
 s.b=B.af
 s.z=B.tS
-a.h7(new A.f(r,19.199999999999996),new A.f(r,21.699999999999996),s)
+a.h7(new A.f(r,15.2),new A.f(r,17.7),s)
 s=A.ac()
 s.r=A.N(140,B.iE.m()>>>16&255,B.iE.m()>>>8&255,B.iE.m()&255).gp()
 s.c=0.12
 s.b=B.af
-a.h7(new A.f(r,19.199999999999996),new A.f(r,21.699999999999996),s)}}
+a.h7(new A.f(r,15.2),new A.f(r,17.7),s)}}
 A.zv.prototype={
 jZ(a){var s,r,q,p,o,n,m,l,k,j,i,h=null,g=$.am2(),f=this.p1,e=9>f?g[f]:h
 g=e==null
@@ -79668,7 +79668,7 @@ return A.Q($async$eV,r)},
 K6(){var s,r,q,p,o,n,m,l=this.a3
 B.b.S(l)
 for(s=2;s<10;s=r){r=s+1
-q=4+(s-2)*1.9
+q=4+(s-2)*1.4
 for(p=s*1.35/2,o=0;o<r;++o){n=$.e0
 m=new Float32Array(2)
 m[1]=q
@@ -79813,7 +79813,7 @@ abE(){var s,r,q,p,o,n,m,l=this.bJ
 if(l==null||l.p2)return
 s=l.ax.e
 r=s.a
-if(r[1]<19.199999999999996)return
+if(r[1]<15.2)return
 for(q=0;q<=9;++q){p=(12.15+2*$.e0)/2-6.075+0+q*1.35
 o=r[0]-p
 n=$.os
@@ -85513,7 +85513,7 @@ B.T1=new A.dS("Tap pour lancer",null,B.RF,B.cn,null,null,null,null,null)
 B.LH=new A.oB(0,null,0,24,null,null,B.T1,null)
 B.Cl=new A.l(0.8,0,0.7843137254901961,1,B.e)
 B.Rw=new A.n(!0,B.Cl,null,null,null,null,14,B.bC,null,1,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.T0=new A.dS("2026-04-10 \xb7 build 37",null,B.Rw,B.cn,null,null,null,null,null)
+B.T0=new A.dS("2026-04-10 \xb7 build 38",null,B.Rw,B.cn,null,null,null,null,null)
 B.LI=new A.oB(0,8,0,null,null,null,B.T0,null)
 B.LJ=new A.yf(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.zY=new A.cP(-0.3,-0.4)
