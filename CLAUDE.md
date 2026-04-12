@@ -88,7 +88,7 @@ flutter doctor
 
 ## Config plateau actuelle (refonte 8 rangées / 9 cases — 2026-04-10)
 
-> Build actuel : **37** (déployé sur `m4tthux.github.io/plinko`)
+> Build actuel : **38** (déployé sur `m4tthux.github.io/plinko`)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
@@ -99,7 +99,7 @@ flutter doctor
 | `rows` | **10** | Last row = 10 picots → 9 gaps = 9 cases |
 | `startRow` | **2** | Commence à 3 picots (**8 rangées visibles**) |
 | `pegGX` | **1.35** | Espacement horizontal compact |
-| `pegGY` | **1.90** | Espacement vertical |
+| `pegGY` | **1.40** | Espacement vertical resserré (gap bille 1.43× diamètre) |
 | `pegStartY` | **4.0** | Y du rang startRow (laisse place au trou) |
 | `pegRadius` | **0.20** | Plus petit — la bille domine |
 | `pegRestitution` | **0.35** | Rebond amorti |

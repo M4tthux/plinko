@@ -15,7 +15,7 @@ class PlinkoConfig {
   static const int    rows       = 10;    // rangs logiques 0–9 (last row = 10 picots)
   static const int    startRow   = 2;     // commence à 3 picots → 8 rangées affichées
   static const double pegGX     = 1.35;   // espacement horizontal (compact, 9 cases)
-  static const double pegGY     = 1.90;   // espacement vertical centre à centre
+  static const double pegGY     = 1.40;   // espacement vertical resserré
   static const double pegStartY = 4.0;    // Y du rang startRow (laisse place au trou)
 
   // ─── Picots ────────────────────────────────────────────────────────────────
