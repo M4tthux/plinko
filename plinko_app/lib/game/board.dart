@@ -422,11 +422,12 @@ class SlotLabel extends PositionComponent {
       _drawCoins(canvas, topY);
     }
 
-    // ── Texte centré — plus gros ──────────────────────────────────────────────
+    // ── Texte centré — proportionnel à la largeur de case ────────────────────
     const textY = 0.0;
-    final baseSize = label.length > 4 ? 0.40
-                   : label.length > 3 ? 0.46
-                   : 0.52;
+    final sw = PlinkoConfig.slotWidth;
+    final baseSize = label.length > 4 ? sw * 0.30
+                   : label.length > 3 ? sw * 0.34
+                   : sw * 0.38;
     final fontSize = isJackpot ? baseSize * 1.15 : baseSize;
 
     final tp = TextPainter(
@@ -453,12 +454,14 @@ class SlotLabel extends PositionComponent {
 
   // ── Pièces dorées flottant au-dessus de la coupe jackpot ──────────────────
   void _drawCoins(Canvas canvas, double topY) {
+    // Positions scalées relativement à slotWidth (référence 1.35)
+    final sc = PlinkoConfig.slotWidth / 1.35;
     final coins = [
-      [-0.44, topY - 0.16, 0.113],
-      [ 0.06, topY - 0.37, 0.124],
-      [ 0.48, topY - 0.12, 0.106],
-      [-0.16, topY - 0.51, 0.094],
-      [ 0.28, topY - 0.43, 0.111],
+      [-0.44 * sc, topY - 0.16 * sc, 0.113 * sc],
+      [ 0.06 * sc, topY - 0.37 * sc, 0.124 * sc],
+      [ 0.48 * sc, topY - 0.12 * sc, 0.106 * sc],
+      [-0.16 * sc, topY - 0.51 * sc, 0.094 * sc],
+      [ 0.28 * sc, topY - 0.43 * sc, 0.111 * sc],
     ];
 
     for (final c in coins) {

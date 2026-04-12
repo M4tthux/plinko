@@ -86,34 +86,34 @@ flutter doctor
 
 ---
 
-## Config plateau actuelle (refonte 8 rangées / 9 cases — 2026-04-10)
+## Config plateau actuelle (refonte 16 rangées / 17 cases style Stake — 2026-04-12)
 
-> Build actuel : **38** (déployé sur `m4tthux.github.io/plinko`)
+> Build actuel : **39** (déployé sur `m4tthux.github.io/plinko`)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | **12.55** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
-| `worldHeight` | 24.0 | Hauteur totale |
+| `worldWidth` | **13.84** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
+| `worldHeight` | **18.0** | Recentré pour plateau compact |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | **12.0** | Réduit pour sub-stepping |
-| `rows` | **10** | Last row = 10 picots → 9 gaps = 9 cases |
-| `startRow` | **2** | Commence à 3 picots (**8 rangées visibles**) |
-| `pegGX` | **1.35** | Espacement horizontal compact |
-| `pegGY` | **1.40** | Espacement vertical resserré (gap bille 1.43× diamètre) |
-| `pegStartY` | **4.0** | Y du rang startRow (laisse place au trou) |
-| `pegRadius` | **0.20** | Plus petit — la bille domine |
-| `pegRestitution` | **0.35** | Rebond amorti |
-| `ballRadius` | **0.35** | Ratio **~1.75×** pegRadius (bille dominante) |
-| `ballStartY` | **2.3** | Émerge du LaunchHole |
-| `ballRestitution` | **0.35** | La gravité domine |
-| **Parois latérales** | **Aucune** | Sortie picots du bas = Perdu |
-| `slotCount` | **9** | 9 gaps entre 10 picots |
-| `jackpotSlotIndex` | **4** | Centre (0-indexed sur 9) |
+| `gravity` | 12.0 | Sub-stepping 4× |
+| `rows` | **18** | Last row = 18 picots → 17 gaps = 17 cases |
+| `startRow` | **2** | Commence à 3 picots (**16 rangées visibles**) |
+| `pegGX` | **0.80** | Espacement horizontal (17 cases) |
+| `pegGY` | **0.70** | Quasi-équilatéral (0.80×0.866=0.693) |
+| `pegStartY` | **3.0** | Y du rang startRow |
+| `pegRadius` | **0.12** | Petit — proportions Stake |
+| `pegRestitution` | 0.35 | Rebond amorti |
+| `ballRadius` | **0.16** | Ratio **~1.33×** pegRadius (légèrement plus grosse) |
+| `ballStartY` | **1.8** | Émerge du LaunchHole |
+| `ballRestitution` | 0.35 | La gravité domine |
+| **Parois latérales** | Aucune | Sortie picots du bas = Perdu |
+| `slotCount` | **17** | 17 gaps entre 18 picots |
+| `jackpotSlotIndex` | **8** | Centre (0-indexed sur 17) |
 | `slotStartX` | = pegX(rows-1, 0) | 1er picot du bas |
 | `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot du bas |
-| `slotWidth` | = pegGX (1.35) | Entre 2 picots |
-| `slotWallHeight` | 2.5 | Hauteur cases |
-| **LaunchHole** | nouveau | Trou sombre en haut du plateau (`board.dart`) d'où émerge la bille |
+| `slotWidth` | = pegGX (0.80) | Entre 2 picots |
+| `slotWallHeight` | **1.2** | Scaled pour grille compacte |
+| **LaunchHole** | maintenu | Trou sombre en haut, émergence bille |
 
 ### Physique (refonte build 33-36)
 - **Sub-stepping** : 4 sous-pas physiques/frame (empêche le tunneling)

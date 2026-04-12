@@ -5,28 +5,28 @@ import '../models/prize_lot.dart';
 ///
 /// Mécanique Plinko (standard industrie) :
 ///   - Grille triangulaire : rangée R a R+1 picots
-///   - rows=10, startRow=2 → 8 rangées affichées, last row = 10 picots → 9 cases
-///   - Bille plus grosse que les picots (ratio ~1.75×) → rebonds plus marqués
+///   - rows=18, startRow=2 → 16 rangées affichées, last row = 18 picots → 17 cases
+///   - Proportions style Stake : picots petits, bille ~1.33× picot, quasi-équilatéral
 ///   - worldWidth = largeur exacte de la dernière rangée de picots
 ///   - Cases entre les picots de la dernière rangée
 ///   - Pas de parois latérales — sortie = perdu
 class PlinkoConfig {
   // ─── Grille triangulaire ───────────────────────────────────────────────────
-  static const int    rows       = 10;    // rangs logiques 0–9 (last row = 10 picots)
-  static const int    startRow   = 2;     // commence à 3 picots → 8 rangées affichées
-  static const double pegGX     = 1.35;   // espacement horizontal (compact, 9 cases)
-  static const double pegGY     = 1.40;   // espacement vertical resserré
-  static const double pegStartY = 4.0;    // Y du rang startRow (laisse place au trou)
+  static const int    rows       = 18;    // rangs logiques 0–17 (last row = 18 picots)
+  static const int    startRow   = 2;     // commence à 3 picots → 16 rangées affichées
+  static const double pegGX     = 0.80;   // espacement horizontal (17 cases)
+  static const double pegGY     = 0.70;   // espacement vertical (quasi-équilatéral 0.866×)
+  static const double pegStartY = 3.0;    // Y du rang startRow (laisse place au trou)
 
   // ─── Picots ────────────────────────────────────────────────────────────────
-  static double pegRadius      = 0.20;  // plus petit — la bille domine visuellement
+  static double pegRadius      = 0.12;  // petit — proportions Stake
   static double pegRestitution = 0.35;  // dévie légèrement, pas de gros rebond
 
   // ─── Monde physique ────────────────────────────────────────────────────────
   /// Largeur = exactement la largeur de la dernière rangée de picots.
   /// (rows-1) espacements entre picots + 2 rayons de picot aux extrémités.
   static double get worldWidth => (rows - 1) * pegGX + 2 * pegRadius;
-  static const double worldHeight = 24.0;
+  static const double worldHeight = 18.0;  // ajusté pour plateau compact (y=1.8 à ~15.4)
   static const double zoom        = 24.0;
 
   static double get boardCenterX => worldWidth / 2;
@@ -52,18 +52,18 @@ class PlinkoConfig {
   }
 
   // ─── Bille ─────────────────────────────────────────────────────────────────
-  static const double ballStartY = 2.3;  // émerge du trou (sous le titre PLINKO)
-  static double ballRadius      = 0.35;  // ratio ~1.75× avec pegRadius (bille dominante)
+  static const double ballStartY = 1.8;  // émerge du trou (sous le titre PLINKO)
+  static double ballRadius      = 0.16;  // ratio ~1.33× avec pegRadius (légèrement plus grosse)
   static double ballRestitution = 0.35;  // rebond amorti — la gravité domine
 
   // ─── Gravité ───────────────────────────────────────────────────────────────
   static double gravity = 12.0;
 
   // ─── Cases de récompense (alignées sur les picots de la dernière rangée) ──
-  static const int    slotCount         = 9;   // 9 gaps entre 10 picots
-  static const int    jackpotSlotIndex  = 4;   // centre (0-indexed sur 9)
-  static const double slotWallHeight    = 2.5;
-  static const double slotWallThickness = 0.08;
+  static const int    slotCount         = 17;  // 17 gaps entre 18 picots
+  static const int    jackpotSlotIndex  = 8;   // centre (0-indexed sur 17)
+  static const double slotWallHeight    = 1.2; // scaled pour grille compacte
+  static const double slotWallThickness = 0.06;
 
   /// Largeur d'une case = espacement entre deux picots de la dernière rangée.
   static double get slotWidth => pegGX;
@@ -78,23 +78,31 @@ class PlinkoConfig {
   static double get slotBaseY =>
       pegY(rows - 1) + pegGY + slotWallHeight;
 
-  // ─── Labels et couleurs des 9 cases (symétrique, jackpot central) ─────────
+  // ─── Labels et couleurs des 17 cases (symétrique, jackpot central) ────────
   static const List<String> slotLabels = [
-    'Perdu', '1€', '5€', '25€',
-    '500€', // jackpot central
-    '25€', '5€', '1€', 'Perdu',
+    'Perdu', 'Perdu', '1€', '1€', '2€', '5€', '10€', '25€',
+    '500€', // jackpot central (index 8)
+    '25€', '10€', '5€', '2€', '1€', '1€', 'Perdu', 'Perdu',
   ];
 
-  // Gradient chaud symétrique : rouge → orange → jaune → vert → or (jackpot)
+  // Gradient chaud symétrique : rouge (bords) → or (centre)
   static const List<int> _slotColorValues = [
     0xFFff4444, // rouge
-    0xFFff6a1f, // rouge-orange
-    0xFFff8c00, // orange
-    0xFF44cc44, // vert
+    0xFFff5a2a, // rouge-orange
+    0xFFff7a14, // orange
+    0xFFff9500, // orange clair
+    0xFFffae00, // jaune-orange
+    0xFFffc400, // jaune
+    0xFFaac444, // jaune-vert
+    0xFF66cc44, // vert clair
     0xFFf0c040, // or (jackpot)
-    0xFF44cc44, // vert
-    0xFFff8c00, // orange
-    0xFFff6a1f, // rouge-orange
+    0xFF66cc44, // vert clair
+    0xFFaac444, // jaune-vert
+    0xFFffc400, // jaune
+    0xFFffae00, // jaune-orange
+    0xFFff9500, // orange clair
+    0xFFff7a14, // orange
+    0xFFff5a2a, // rouge-orange
     0xFFff4444, // rouge
   ];
 
