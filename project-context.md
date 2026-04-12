@@ -39,31 +39,33 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ## Configuration plateau actuelle (plinko_config.dart)
 
 > À conserver comme référence — permet de retrouver les valeurs validées.
-> Refonte physique Plinko standard (builds 33-36) — 2026-04-09.
+> Refonte layout Stake + mode multiplicateur casino (builds 37-41) — 2026-04-12.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | **12.40** (calculé) | = (rows-1) × pegGX + 2 × pegRadius — largeur exacte de la dernière rangée de picots |
-| `worldHeight` | 24.0 | Hauteur totale |
+| `worldWidth` | **13.84** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
+| `worldHeight` | **18.0** | Recentré pour plateau compact |
 | `zoom` | 24.0 | Zoom caméra |
-| `gravity` | **12.0** | Réduit pour sub-stepping propre |
-| `rows` | **8** | Rangs logiques 0–7 (last row = 8 picots → 7 gaps = 7 cases alignées) |
-| `startRow` | **2** | Commence à 3 picots (standard Plinko) — 6 rangées affichées |
-| `pegGX` | **1.70** (fixe) | Gap libre = 2× diamètre bille (standard Matter.js) |
-| `pegGY` | 2.0 | Espacement vertical centre à centre |
-| `pegStartY` | 4.5 | Y du rang startRow |
-| `pegRadius` | **0.25** | Ratio ~1:1 avec ballRadius (standard Plinko) |
-| `pegRestitution` | **0.35** | Rebond amorti — la gravité domine |
-| `ballRadius` | **0.30** | Ratio ~1:1 avec pegRadius |
-| `ballRestitution` | **0.35** | Dévie légèrement, pas de gros rebond |
-| **Parois latérales** | **Aucune** | Sortie hors picots du bas = Perdu (standard) |
-| `slotCount` | 7 | 7 gaps entre 8 picots de la dernière rangée |
-| `jackpotSlotIndex` | 3 | Centre (0-indexed sur 7) |
-| `slotStartX` | = pegX(rows-1, 0) | 1er picot de la dernière rangée |
-| `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot de la dernière rangée |
-| `slotWidth` | = pegGX (1.70) | Entre deux picots |
-| `slotWallHeight` | 2.5 | Hauteur des cases |
-| `slotLabels` | 1€,10€,25€,**500€**,25€,10€,Perdu | Symétrique + case Perdu |
+| `gravity` | 12.0 | Sub-stepping 4× |
+| `rows` | **18** | Rangs logiques 0–17 (last row = 18 picots → 17 cases) |
+| `startRow` | **2** | Commence à 3 picots — **16 rangées visibles** |
+| `pegGX` | **0.80** | Espacement horizontal (17 cases) |
+| `pegGY` | **0.70** | Quasi-équilatéral (0.80 × 0.866 = 0.693) |
+| `pegStartY` | **3.0** | Y du rang startRow |
+| `pegRadius` | **0.12** | Petit — proportions Stake |
+| `pegRestitution` | 0.35 | Rebond amorti |
+| `ballRadius` | **0.16** | Ratio ~1.33× pegRadius (légèrement plus grosse) |
+| `ballStartY` | **1.8** | Émerge du LaunchHole |
+| `ballRestitution` | 0.35 | La gravité domine |
+| **Parois latérales** | Aucune | Sortie picots du bas = ball lost |
+| `slotCount` | **17** | 17 gaps entre 18 picots |
+| `jackpotSlotIndex` | **8** | Centre (legacy — en mode multiplicateur les bords sont les "jackpots") |
+| `slotWidth` | = pegGX (0.80) | Entre deux picots |
+| `slotWallHeight` | **1.2** | Scaled pour grille compacte |
+| `slotMultipliers` | x100,x25,x10,x5,x2,x0.5,x0.2,x0.1 (×3 centre) … miroir | Positionnel symétrique |
+| **LaunchHole** | nouveau (build 37) | Trou sombre en haut d'où émerge la bille |
+| **Balance** | **50 €** initiale | Tap = -1€, landing = +1€ × mult |
+| **Animation gain** | build 41 | Popup "+X€" center screen, scale bump + fade (900ms) |
 
 ### Architecture physique (build 33+)
 

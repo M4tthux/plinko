@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flame/game.dart';
 import 'package:flame/events.dart';
@@ -30,6 +31,11 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   /// Balance en € — démarre à 50€. Source de vérité du score.
   final ValueNotifier<double> balanceNotifier = ValueNotifier<double>(50.0);
+
+  /// Stream des gains crédités — 1 event par bille atterrissant dans une case.
+  /// Écouté par l'UI pour afficher l'animation "+X€" flottante.
+  final StreamController<double> gainEvents =
+      StreamController<double>.broadcast();
 
   /// Billes actuellement en vol ou en phase de linger post-atterrissage.
   final List<Ball> _activeBalls = [];
@@ -166,6 +172,9 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     final mult = PlinkoConfig.slotMultiplierAt(slotIdx);
     final gain = kBallCost * mult;
     balanceNotifier.value = balanceNotifier.value + gain;
+
+    // Émet le gain pour l'animation "+X€" flottante
+    gainEvents.add(gain);
 
     // Particules d'impact (plus intense si case majeure)
     world.add(ImpactParticles(

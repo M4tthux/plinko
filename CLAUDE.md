@@ -88,7 +88,7 @@ flutter doctor
 
 ## Config plateau actuelle (refonte 16 rangées / 17 cases style Stake — 2026-04-12)
 
-> Build actuel : **40** (déployé sur `m4tthux.github.io/plinko`)
+> Build actuel : **41** (déployé sur `m4tthux.github.io/plinko`)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
@@ -162,8 +162,13 @@ sont despawnées 0.8s après atterrissage (linger visuel).
 
 **Plus d'overlay récompense** — la balance en coin d'écran suffit.
 
+**Animation "+X€"** (build 41) : chaque atterrissage dans une case déclenche
+un popup flottant au centre de l'écran (scale bump + fade out, 900ms). Couleur
+et taille adaptées au montant (gold pour gain ≥ 1€, discret bleuté pour <1€).
+
 Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` dans
 `plinko_config.dart`. Logique de crédit : `PlinkoGame._creditLanding()`.
+Popup animé : `_GainPopup` dans `main.dart`, alimenté par `gainEvents` stream.
 
 ---
 
