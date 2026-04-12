@@ -323,12 +323,9 @@ class SlotLabel extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    // Lire l'assignation dynamique
-    final lot = (PlinkoConfig.currentSlotAssignment.length > _index)
-        ? PlinkoConfig.currentSlotAssignment[_index]
-        : null;
-    final label     = lot?.name ?? PlinkoConfig.slotLabelAt(_index);
-    final isJackpot = lot?.isJackpot ?? PlinkoConfig.slotIsJackpot(_index);
+    // Lire directement le multiplicateur de la case
+    final label     = PlinkoConfig.slotMultiplierLabel(_index);
+    final isJackpot = PlinkoConfig.slotIsMajor(_index);
     final color     = PlinkoConfig.slotColorAt(_index);
 
     // ── Dimensions de la coupe ────────────────────────────────────────────────

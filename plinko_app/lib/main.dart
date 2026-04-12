@@ -4,11 +4,10 @@ import 'package:flutter/services.dart';
 import 'data/trajectory_loader.dart';
 import 'game/plinko_game.dart';
 import 'ui/config_panel.dart';
-import 'ui/reward_overlay.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-12 · build 39';
+const String kBuildTime = '2026-04-12 · build 40';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,7 +75,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 left: 0,
                 right: 0,
                 child: Text(
-                  'Tap pour lancer',
+                  'Tap pour lancer (1€ / bille)',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Color(0x8800c8ff),
@@ -103,47 +102,74 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 ),
               ),
 
-              // Overlay récompense — apparaît à l'atterrissage de la bille
-              ValueListenableBuilder(
-                valueListenable: _game.landedSlotNotifier,
-                builder: (context, result, _) {
-                  if (result == null) return const SizedBox.shrink();
-                  return RewardOverlay(
-                    prizeName: result.prizeName,
-                    isJackpot: result.isJackpot,
-                    isLoss: result.isLoss,
-                    onDismiss: _game.dismissReward,
-                  );
-                },
-              ),
-
-              // Badge DEBUG — lot tiré + case cible (visible pendant le lancer)
-              ValueListenableBuilder(
-                valueListenable: _game.debugTargetNotifier,
-                builder: (context, target, _) {
-                  if (target == null) return const SizedBox.shrink();
-                  return Positioned(
-                    top: 16,
-                    left: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              // Balance — coin haut-gauche, au-dessus du plateau
+              Positioned(
+                top: 40,
+                left: 16,
+                child: ValueListenableBuilder<double>(
+                  valueListenable: _game.balanceNotifier,
+                  builder: (context, balance, _) {
+                    final positive = balance >= 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xEE0a0a18),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF7c5cbf)),
-                      ),
-                      child: Text(
-                        '🎯 $target',
-                        style: const TextStyle(
-                          color: Color(0xFFccaaff),
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF1a1033).withOpacity(0.92),
+                            const Color(0xFF0a0618).withOpacity(0.92),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: positive
+                              ? const Color(0xFFf0c040).withOpacity(0.55)
+                              : const Color(0xFFff4444).withOpacity(0.55),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (positive
+                                    ? const Color(0xFFf0c040)
+                                    : const Color(0xFFff4444))
+                                .withOpacity(0.25),
+                            blurRadius: 10,
+                            spreadRadius: 0,
+                          ),
+                        ],
                       ),
-                    ),
-                  );
-                },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'BALANCE',
+                            style: TextStyle(
+                              color: Color(0x99e8d0ff),
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${balance.toStringAsFixed(2)} €',
+                            style: TextStyle(
+                              color: positive
+                                  ? const Color(0xFFffe680)
+                                  : const Color(0xFFff9a9a),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                              height: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
 
               // Panneau de config DEBUG (icône ⚙ en haut à droite)

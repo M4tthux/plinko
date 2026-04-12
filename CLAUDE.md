@@ -88,7 +88,7 @@ flutter doctor
 
 ## Config plateau actuelle (refonte 16 rangées / 17 cases style Stake — 2026-04-12)
 
-> Build actuel : **39** (déployé sur `m4tthux.github.io/plinko`)
+> Build actuel : **40** (déployé sur `m4tthux.github.io/plinko`)
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
@@ -141,13 +141,29 @@ flutter doctor
 
 ---
 
-## Système de lots
+## Système de multiplicateurs (build 40+)
 
-- `PrizeLot` dans `models/prize_lot.dart` — nom, probabilité, isJackpot
-- Valeurs par défaut : 1€(30%), 2€(25%), 5€(20%), 10€(13%), 20€(7%), 50€(3%), 1000€(2%)
-- **Jackpot unique centré** : case centrale uniquement, jamais en décor sur autres cases
-- Tirage : `_drawLot()` dans `plinko_game.dart` — probabiliste avant le lancer
-- Assignation cases : `_assignSlots()` + `_assignSlotsDecor()`
+Plus de PrizeLot / tirage probabiliste. Les 17 cases ont des multiplicateurs
+**positionnels fixes**, symétriques : x100 aux extrémités → x0.1 au centre.
+
+```
+Index :  0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
+Mult  :  x100 x25  x10  x5   x2   x0.5 x0.2 x0.1 x0.1 x0.1 x0.2 x0.5 x2   x5   x10  x25  x100
+```
+
+**Économie du jeu :**
+- Balance initiale : **50€**
+- Chaque tap = **-1€** (une nouvelle bille lancée)
+- Atterrissage case i = **+1€ × multiplicateur[i]** (0.1€ au centre, 100€ aux bords)
+- Bille sortie du plateau = pas de crédit (mise perdue)
+
+**Multi-ball :** 1 tap = 1 bille, lancements simultanés possibles. Les billes
+sont despawnées 0.8s après atterrissage (linger visuel).
+
+**Plus d'overlay récompense** — la balance en coin d'écran suffit.
+
+Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` dans
+`plinko_config.dart`. Logique de crédit : `PlinkoGame._creditLanding()`.
 
 ---
 

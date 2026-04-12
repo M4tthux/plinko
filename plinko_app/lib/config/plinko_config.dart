@@ -78,36 +78,49 @@ class PlinkoConfig {
   static double get slotBaseY =>
       pegY(rows - 1) + pegGY + slotWallHeight;
 
-  // ─── Labels et couleurs des 17 cases (symétrique, jackpot central) ────────
-  static const List<String> slotLabels = [
-    'Perdu', 'Perdu', '1€', '1€', '2€', '5€', '10€', '25€',
-    '500€', // jackpot central (index 8)
-    '25€', '10€', '5€', '2€', '1€', '1€', 'Perdu', 'Perdu',
+  // ─── Multiplicateurs des 17 cases (symétrique, x100 aux extrémités) ───────
+  // Index 7-8-9 (centre) = x0.1 (le pire), extrémités = x100 (jackpot)
+  static const List<double> slotMultipliers = [
+    100.0, 25.0, 10.0, 5.0, 2.0, 0.5, 0.2, 0.1,
+    0.1,  // centre (index 8)
+    0.1, 0.2, 0.5, 2.0, 5.0, 10.0, 25.0, 100.0,
   ];
 
-  // Gradient chaud symétrique : rouge (bords) → or (centre)
+  /// Gradient aligné sur le multiplicateur : extrêmes chauds → centre terne.
   static const List<int> _slotColorValues = [
-    0xFFff4444, // rouge
-    0xFFff5a2a, // rouge-orange
-    0xFFff7a14, // orange
-    0xFFff9500, // orange clair
-    0xFFffae00, // jaune-orange
-    0xFFffc400, // jaune
-    0xFFaac444, // jaune-vert
-    0xFF66cc44, // vert clair
-    0xFFf0c040, // or (jackpot)
-    0xFF66cc44, // vert clair
-    0xFFaac444, // jaune-vert
-    0xFFffc400, // jaune
-    0xFFffae00, // jaune-orange
-    0xFFff9500, // orange clair
-    0xFFff7a14, // orange
-    0xFFff5a2a, // rouge-orange
-    0xFFff4444, // rouge
+    0xFFff1a1a, // x100 rouge vif
+    0xFFff4422, // x25  rouge-orange
+    0xFFff7a00, // x10  orange
+    0xFFffa500, // x5   orange clair
+    0xFFffcc00, // x2   jaune
+    0xFFb4c240, // x0.5 jaune-vert
+    0xFF6ecc70, // x0.2 vert clair
+    0xFF3aa5bf, // x0.1 bleu-vert (tiède)
+    0xFF2d6fa8, // x0.1 bleu (centre — le moins intéressant)
+    0xFF3aa5bf, // x0.1 bleu-vert
+    0xFF6ecc70, // x0.2 vert clair
+    0xFFb4c240, // x0.5 jaune-vert
+    0xFFffcc00, // x2   jaune
+    0xFFffa500, // x5   orange clair
+    0xFFff7a00, // x10  orange
+    0xFFff4422, // x25  rouge-orange
+    0xFFff1a1a, // x100 rouge vif
   ];
 
-  static String slotLabelAt(int i) => slotLabels[i];
-  static bool   slotIsJackpot(int i) => i == jackpotSlotIndex;
+  /// Formate un multiplicateur en label affiché ("x100", "x0.1"…).
+  static String slotMultiplierLabel(int i) {
+    final m = slotMultipliers[i];
+    // Entier si pas de décimale, sinon 1 chiffre après la virgule
+    final text = (m == m.roundToDouble()) ? m.toStringAsFixed(0) : m.toString();
+    return 'x$text';
+  }
+
+  static double slotMultiplierAt(int i) => slotMultipliers[i];
+  static String slotLabelAt(int i) => slotMultiplierLabel(i);
+  /// Une case est "majeure" (visuel jackpot : pièces, glow fort) si x25 ou plus.
+  static bool   slotIsMajor(int i) => slotMultipliers[i] >= 25.0;
+  /// Backward-compat — traité comme slotIsMajor pour le rendu existant.
+  static bool   slotIsJackpot(int i) => slotIsMajor(i);
   static Color  slotColorAt(int i) => Color(_slotColorValues[i]);
 
   // ─── Zones de lancement ─────────────────────────────────────────────────────
@@ -134,19 +147,9 @@ class PlinkoConfig {
   static bool forcePhysicsMode = true;  // TEST — physique pure sans trajectoires
   static int? highlightedSlotIndex;
 
-  // ─── Table de lots ────────────────────────────────────────────────────────
-  static List<PrizeLot> lots = [
-    PrizeLot(name: '500€',  probability: 0.5,  isJackpot: true),
-    PrizeLot(name: '50€',   probability: 2.5),
-    PrizeLot(name: '25€',   probability: 4.0),
-    PrizeLot(name: '10€',   probability: 8.0),
-    PrizeLot(name: '5€',    probability: 12.0),
-    PrizeLot(name: '2€',    probability: 18.0),
-    PrizeLot(name: '1€',    probability: 22.0),
-    PrizeLot(name: 'Perdu', probability: 33.0, isLoss: true),
-  ];
-
-  static List<PrizeLot?> currentSlotAssignment = List.filled(slotCount, null);
+  // ─── Table de lots (legacy, non utilisée en mode multiplicateur) ──────────
+  // Conservée pour rétro-compat de config_panel.dart (affichage/édition lots).
+  static List<PrizeLot> lots = [];
 
   // ─── Validation ────────────────────────────────────────────────────────────
 
@@ -157,6 +160,5 @@ class PlinkoConfig {
   static double get totalLotProbability =>
       lots.fold(0.0, (sum, l) => sum + l.probability);
 
-  static bool get lotsAreValid =>
-      (totalLotProbability - 100.0).abs() < 0.01 && lots.isNotEmpty;
+  static bool get lotsAreValid => true; // mode multiplicateur — toujours valide
 }

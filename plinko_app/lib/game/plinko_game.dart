@@ -5,43 +5,48 @@ import 'package:flame/components.dart';
 import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter/material.dart' show Color;
 import '../config/plinko_config.dart';
-import '../models/prize_lot.dart';
-import '../data/trajectory_loader.dart';
 import 'board.dart';
 import 'ball.dart';
 
 /// Jeu principal Plinko — Balleck Team.
 ///
-/// Dev Session 1 : rendu visuel, physique manuelle, collisions bille-picots.
-/// Dev Session 2 : trajectoires pré-calculées JSON + mode replay.
-/// Dev Session 4 : overlay récompense via ValueNotifier.
-/// Dev Session 5 : système de lots (table de prix + draw probabiliste).
-///   - drawLot() : tire un lot au sort selon les probabilités configurées.
-///   - assignSlots() : place le lot gagnant dans une case, remplit les autres
-///     avec des lots aléatoires (décor). Jackpot → toujours case centrale.
-///   - landedSlotNotifier → LandedResult (nom + isJackpot).
+/// Refonte build 40 : mode casino multiplicateur.
+///   - 17 cases avec multiplicateurs positionnels (x0.1 au centre → x100 aux bords)
+///   - Chaque tap = 1€ dépensé → une nouvelle bille lancée (multi-ball)
+///   - Atterrissage → balance créditée de (multiplicateur × 1€)
+///   - Plus d'overlay récompense : la balance affichée en coin d'écran suffit
 class PlinkoGame extends FlameGame with TapCallbacks {
-  Ball? _currentBall;
-  bool _ballInFlight = false;
-  bool _resetPending = false;
+  /// Mise unitaire pour une bille (en €).
+  static const double kBallCost = 1.0;
 
-  /// Notifie le widget Flutter de l'atterrissage avec le lot gagné.
-  /// null = pas d'overlay affiché.
-  final ValueNotifier<LandedResult?> landedSlotNotifier = ValueNotifier(null);
+  /// Durée pendant laquelle la bille reste visible après atterrissage
+  /// avant d'être retirée du monde (permet de voir la case d'arrivée).
+  static const double _lingerAfterLand = 0.8; // secondes
 
-  /// DEBUG — affiche le lot tiré + la case cible avant l'atterrissage.
-  /// Format : "Café offert · Case 2". null = aucun lancer en cours.
-  final ValueNotifier<String?> debugTargetNotifier = ValueNotifier(null);
+  /// Nombre de sous-pas physiques par frame — empêche le tunneling.
+  static const int _physicsSubSteps = 4;
 
-  /// Positions des picots — pour les collisions en mode physique (fallback).
+  // ── État du jeu ──────────────────────────────────────────────────────────
+
+  /// Balance en € — démarre à 50€. Source de vérité du score.
+  final ValueNotifier<double> balanceNotifier = ValueNotifier<double>(50.0);
+
+  /// Billes actuellement en vol ou en phase de linger post-atterrissage.
+  final List<Ball> _activeBalls = [];
+
+  /// Billes dont l'atterrissage a déjà été crédité (évite double-compte).
+  final Set<Ball> _creditedBalls = {};
+
+  /// Temps écoulé depuis l'atterrissage (pour le linger avant despawn).
+  final Map<Ball, double> _landedLinger = {};
+
+  /// Positions des picots — pour les collisions physiques.
   final List<Vector2> _pegPositions = [];
 
   final _rng = Random();
 
-  // (Cooldown picots retiré — le sub-stepping résout le tunneling proprement)
-
   @override
-  Color backgroundColor() => const Color(0xFF08040f); // fond sombre opaque
+  Color backgroundColor() => const Color(0xFF08040f);
 
   // ── Chargement initial ───────────────────────────────────────────────────
 
@@ -49,24 +54,17 @@ class PlinkoGame extends FlameGame with TapCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Assert : la bille passe entre les picots
     assert(PlinkoConfig.ballFitsThrough,
         'GX (${PlinkoConfig.pegGX}) doit être > 2×PEG_RADIUS + 2×BALL_RADIUS '
         '(${2 * PlinkoConfig.pegRadius + 2 * PlinkoConfig.ballRadius})');
 
-    // Configurer la caméra — fixe, centrée sur tout le plateau
     camera.viewfinder.zoom = PlinkoConfig.zoom;
     camera.viewfinder.anchor = Anchor.center;
     camera.viewfinder.position =
         Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
 
-    // Précalculer les positions des picots (grille triangulaire)
     _buildPegPositions();
 
-    // Assigner des lots aux cases dès le démarrage (décor)
-    _assignSlotsDecor();
-
-    // Fond + plateau
     await world.add(BoardBuilder.buildBackground());
     await world.add(BoardBuilder.buildLaunchHole());
     await world.addAll(BoardBuilder.buildWalls());
@@ -89,193 +87,98 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     }
   }
 
-  // ── Tap pour lancer ──────────────────────────────────────────────────────
+  // ── Tap pour lancer (multi-ball) ─────────────────────────────────────────
 
   @override
   void onTapUp(TapUpEvent event) {
-    if (_ballInFlight) {
-      // Si une bille est déjà en vol avec overlay affiché, fermer l'overlay
-      if (_resetPending) dismissReward();
-      return;
-    }
+    // Chaque tap = 1 bille lancée, pas de blocage
     _launchBall();
   }
 
-  // ── Système de lots ──────────────────────────────────────────────────────
-
-  /// Tire un lot au sort selon les probabilités de la table de lots.
-  PrizeLot _drawLot() {
-    final lots = PlinkoConfig.lots;
-    if (lots.isEmpty) {
-      return PrizeLot(name: '?', probability: 100);
-    }
-    final roll = _rng.nextDouble() * 100.0;
-    double cumulative = 0.0;
-    for (final lot in lots) {
-      cumulative += lot.probability;
-      if (roll < cumulative) return lot;
-    }
-    return lots.last;
-  }
-
-  /// Assigne les lots aux cases pour la partie :
-  ///   - Le lot gagnant est placé dans une case choisie selon ses règles.
-  ///   - Les cases restantes sont remplies avec des lots aléatoires (décor).
-  /// Retourne l'index de la case du lot gagnant.
-  int _assignSlots(PrizeLot winner) {
-    final assignment =
-        List<PrizeLot?>.filled(PlinkoConfig.slotCount, null);
-
-    // Choisir la case du lot gagnant
-    final int winnerSlot;
-    if (winner.isJackpot) {
-      // Jackpot → toujours au centre
-      winnerSlot = PlinkoConfig.jackpotSlotIndex;
-    } else {
-      // Autres lots → case aléatoire (on évite le centre pour garder le jackpot spécial)
-      final available = List<int>.generate(PlinkoConfig.slotCount, (i) => i)
-        ..remove(PlinkoConfig.jackpotSlotIndex);
-      available.shuffle(_rng);
-      winnerSlot = available.first;
-    }
-    assignment[winnerSlot] = winner;
-
-    // La case centrale affiche TOUJOURS le jackpot (décor ou gagnant).
-    // Si le gagnant n'est pas le jackpot, on place le lot jackpot en décor au centre.
-    if (!winner.isJackpot && assignment[PlinkoConfig.jackpotSlotIndex] == null) {
-      final jackpotLot = PlinkoConfig.lots.where((l) => l.isJackpot).firstOrNull;
-      if (jackpotLot != null) {
-        assignment[PlinkoConfig.jackpotSlotIndex] = jackpotLot;
-      }
-    }
-
-    // Remplir les cases restantes avec des lots au hasard (décor)
-    // Le jackpot est exclu des fillers — il n'apparaît QUE au centre.
-    final fillers = PlinkoConfig.lots.where((l) => !l.isJackpot).toList();
-    for (int i = 0; i < PlinkoConfig.slotCount; i++) {
-      if (assignment[i] == null) {
-        if (fillers.isNotEmpty) {
-          fillers.shuffle(_rng);
-          assignment[i] = fillers.first;
-        } else {
-          assignment[i] = winner;
-        }
-      }
-    }
-
-    PlinkoConfig.currentSlotAssignment = assignment;
-    return winnerSlot;
-  }
-
-  /// Assigne des lots aléatoirement aux cases (décor uniquement, sans tirage gagnant).
-  /// Utilisé à l'initialisation et après application de la table de lots.
-  void _assignSlotsDecor() {
-    final lots = PlinkoConfig.lots;
-    if (lots.isEmpty) {
-      PlinkoConfig.currentSlotAssignment = List.filled(PlinkoConfig.slotCount, null);
-      return;
-    }
-    final assignment = List<PrizeLot?>.filled(PlinkoConfig.slotCount, null);
-    // Jackpot au centre si disponible
-    final jackpot = lots.where((l) => l.isJackpot).toList();
-    if (jackpot.isNotEmpty) {
-      assignment[PlinkoConfig.jackpotSlotIndex] = jackpot.first;
-    }
-    // Remplir les autres cases — jackpot exclu des fillers
-    final fillers = lots.where((l) => !l.isJackpot).toList();
-    for (int i = 0; i < PlinkoConfig.slotCount; i++) {
-      if (assignment[i] == null) {
-        fillers.shuffle(_rng);
-        assignment[i] = fillers.first;
-      }
-    }
-    PlinkoConfig.currentSlotAssignment = assignment;
-  }
-
-  // ── Lancement ────────────────────────────────────────────────────────────
-
   void _launchBall() {
-    // Lancement depuis le centre avec micro-jitter (±0.2)
-    // La bille tombe sur le picot central et rebondit naturellement gauche/droite
+    // Déduction immédiate de la mise
+    balanceNotifier.value = balanceNotifier.value - kBallCost;
+
+    // Lancement depuis le centre avec micro-jitter
     final jitter = (_rng.nextDouble() - 0.5) * 0.4;
     final startX = PlinkoConfig.boardCenterX + jitter;
     final startPos = Vector2(startX, PlinkoConfig.ballStartY);
 
-    // 1. Draw winning lot
-    final winner = _drawLot();
-
-    // 2. Assign slots — returns winning slot index
-    final targetSlot = _assignSlots(winner);
-
-    // 3. Load pre-calculated trajectory
-    final trajectory = PlinkoConfig.forcePhysicsMode
-        ? null
-        : TrajectoryLoader.select(
-            slotIndex: targetSlot,
-            fingerX: PlinkoConfig.boardCenterX,
-          );
-
-    if (trajectory != null) {
-      _currentBall = Ball.replay(startPos, trajectory.frames);
-    } else {
-      _currentBall = Ball(startPos);
-    }
-
-    debugTargetNotifier.value = '${winner.name} · Case $targetSlot';
-
-    world.add(_currentBall!);
-    _ballInFlight = true;
-  }
-
-  // ── Conversion écran → monde ─────────────────────────────────────────────
-
-  Vector2 _screenToWorld(Vector2 screenPos) {
-    final screenCenter = size / 2;
-    final zoom = camera.viewfinder.zoom;
-    return Vector2(
-      camera.viewfinder.position.x + (screenPos.x - screenCenter.x) / zoom,
-      camera.viewfinder.position.y + (screenPos.y - screenCenter.y) / zoom,
-    );
+    final ball = Ball(startPos);
+    world.add(ball);
+    _activeBalls.add(ball);
   }
 
   // ── Boucle principale ────────────────────────────────────────────────────
-
-  /// Nombre de sous-pas physiques par frame — empêche le tunneling.
-  static const int _physicsSubSteps = 4;
 
   @override
   void update(double dt) {
     super.update(dt);
 
-    final ball = _currentBall;
+    final subDt = dt / _physicsSubSteps;
+    final toRemove = <Ball>[];
 
-    // Sub-stepping : physique + collisions ensemble à chaque sous-pas
-    if (ball != null && !ball.isReplay && !ball.hasLanded) {
-      final subDt = dt / _physicsSubSteps;
-      for (int s = 0; s < _physicsSubSteps; s++) {
-        ball.stepPhysics(subDt);
-        _resolvePegCollisions();
-        _resolveSlotDividerCollisions();
+    for (final ball in _activeBalls) {
+      // Physique tant que la bille n'a pas atterri
+      if (!ball.hasLanded) {
+        for (int s = 0; s < _physicsSubSteps; s++) {
+          ball.stepPhysics(subDt);
+          _resolvePegCollisionsFor(ball);
+          _resolveSlotDividerCollisionsFor(ball);
+          if (ball.hasLanded) break;
+        }
+      }
+
+      // Traitement du crédit à l'atterrissage (une seule fois par bille)
+      if (ball.hasLanded && !_creditedBalls.contains(ball)) {
+        _creditedBalls.add(ball);
+        _creditLanding(ball);
+        _landedLinger[ball] = 0;
+      }
+
+      // Linger : on laisse la bille visible un court instant puis on despawn
+      if (ball.hasLanded) {
+        final t = (_landedLinger[ball] ?? 0) + dt;
+        _landedLinger[ball] = t;
+        if (t > _lingerAfterLand) {
+          toRemove.add(ball);
+        }
       }
     }
 
-    // En mode replay, détecter la proximité bille-picots pour le glow flash
-    if (ball != null && ball.isReplay) {
-      _checkReplayPegProximity();
+    // Nettoyage des billes à supprimer
+    for (final ball in toRemove) {
+      ball.removeFromParent();
+      _activeBalls.remove(ball);
+      _creditedBalls.remove(ball);
+      _landedLinger.remove(ball);
     }
-
-    _followBall();
-    _checkLanded();
   }
 
-  /// Collision bille ↔ picots — physique réaliste.
-  ///
-  /// Rebond par réflexion sur la normale. Pas de forçage de vitesse,
-  /// pas de cooldown artificiel. Le sub-stepping dans Ball._updatePhysics
-  /// garantit que la bille ne traverse pas les picots.
-  void _resolvePegCollisions() {
-    final ball = _currentBall;
-    if (ball == null || ball.hasLanded) return;
+  /// Crédite la balance du multiplicateur × mise, et joue les particules.
+  void _creditLanding(Ball ball) {
+    final slotIdx = ball.landedSlotIndex;
+    if (slotIdx == null || slotIdx < 0 || slotIdx >= PlinkoConfig.slotCount) {
+      // Bille sortie du plateau → pas de crédit (la mise est déjà déduite)
+      return;
+    }
+
+    final mult = PlinkoConfig.slotMultiplierAt(slotIdx);
+    final gain = kBallCost * mult;
+    balanceNotifier.value = balanceNotifier.value + gain;
+
+    // Particules d'impact (plus intense si case majeure)
+    world.add(ImpactParticles(
+      ball.position.clone(),
+      isJackpot: PlinkoConfig.slotIsMajor(slotIdx),
+    ));
+  }
+
+  // ── Collisions ───────────────────────────────────────────────────────────
+
+  /// Collision bille ↔ picots — réflexion sur la normale.
+  void _resolvePegCollisionsFor(Ball ball) {
+    if (ball.hasLanded) return;
 
     final collisionDist   = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius;
     final collisionDistSq = collisionDist * collisionDist;
@@ -290,28 +193,22 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         final dist   = sqrt(distSq);
         final normal = delta / dist;
 
-        // Séparer la bille juste au bord du picot
         ball.position = pegPos + normal * (collisionDist + separationGap);
 
-        // Réflexion classique : v' = v - (1 + e) * dot(v, n) * n
         final dot = ball.velocity.dot(normal);
         if (dot < 0) {
           ball.velocity -= normal * (dot * (1 + PlinkoConfig.pegRestitution));
         }
 
-        // Squash & stretch au rebond
         ball.triggerBounce(normal);
-
-        // Glow flash sur le picot touché
         _triggerPegHit(i);
       }
     }
   }
 
-  /// Collision bille ↔ séparateurs de cases — mode physique uniquement.
-  void _resolveSlotDividerCollisions() {
-    final ball = _currentBall;
-    if (ball == null || ball.hasLanded) return;
+  /// Collision bille ↔ séparateurs de cases.
+  void _resolveSlotDividerCollisionsFor(Ball ball) {
+    if (ball.hasLanded) return;
 
     final slotZoneTop = PlinkoConfig.slotBaseY - PlinkoConfig.slotWallHeight;
     if (ball.position.y < slotZoneTop) return;
@@ -337,97 +234,17 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     }
   }
 
-  /// Détecte la proximité bille-picots en mode replay et déclenche le glow.
-  void _checkReplayPegProximity() {
-    final ball = _currentBall;
-    if (ball == null || ball.hasLanded) return;
-
-    final hitDist = PlinkoConfig.ballRadius + PlinkoConfig.pegRadius + 0.15;
-    final hitDistSq = hitDist * hitDist;
-    final pegs = world.children.whereType<Peg>().toList();
-
-    for (int i = 0; i < _pegPositions.length && i < pegs.length; i++) {
-      final delta = ball.position - _pegPositions[i];
-      final distSq = delta.x * delta.x + delta.y * delta.y;
-      if (distSq < hitDistSq) {
-        pegs[i].triggerHit();
-      }
-    }
-  }
-
-  /// Caméra qui suit la bille avec lerp.
-  void _followBall() {
-    // Caméra fixe — plateau toujours visible en entier (board frame PNG overlay).
-  }
-
-  /// Vérifie si la bille a atterri et notifie le widget Flutter.
-  /// Délai 300ms avant l'overlay pour laisser le joueur voir la bille se poser.
-  void _checkLanded() {
-    final ball = _currentBall;
-    if (ball == null) return;
-    if (ball.hasLanded && _ballInFlight && !_resetPending) {
-      _resetPending = true;
-
-      // Particules d'impact à l'atterrissage (sauf sortie hors plateau)
-      final slotIdx = ball.landedSlotIndex;
-      if (slotIdx != null && slotIdx >= 0 && slotIdx < PlinkoConfig.slotCount) {
-        final lot = PlinkoConfig.currentSlotAssignment[slotIdx];
-        world.add(ImpactParticles(
-          ball.position.clone(),
-          isJackpot: lot?.isJackpot ?? false,
-        ));
-      }
-
-      // Délai avant l'overlay — le joueur voit la bille se poser
-      Future.delayed(const Duration(milliseconds: 300), () {
-        // Bille sortie du plateau → Perdu
-        if (slotIdx == null || slotIdx < 0 || slotIdx >= PlinkoConfig.slotCount) {
-          landedSlotNotifier.value = LandedResult(
-            prizeName: 'Perdu',
-            isJackpot: false,
-            isLoss: true,
-          );
-          return;
-        }
-
-        final lot = PlinkoConfig.currentSlotAssignment[slotIdx];
-
-        // Jackpot → highlight la case gagnante (toutes les autres s'estompent)
-        if (lot?.isJackpot ?? false) {
-          PlinkoConfig.highlightedSlotIndex = slotIdx;
-        }
-
-        landedSlotNotifier.value = LandedResult(
-          prizeName: lot?.name ?? '?',
-          isJackpot: lot?.isJackpot ?? false,
-          isLoss: lot?.isLoss ?? false,
-        );
-      });
-    }
-  }
-
-  /// Appelée par RewardOverlay quand l'utilisateur tape pour fermer.
-  void dismissReward() {
-    PlinkoConfig.highlightedSlotIndex = null;
-    landedSlotNotifier.value = null;
-    _resetBall();
-  }
-
-  void _resetBall() {
-    _currentBall?.removeFromParent();
-    _currentBall = null;
-    _ballInFlight = false;
-    _resetPending = false;
-    debugTargetNotifier.value = null;
-    camera.viewfinder.position = Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
-  }
-
   // ── Reconstruction du plateau (appelée par ConfigPanel) ──────────────────
 
-  /// Reconstruit entièrement le plateau avec la config actuelle de PlinkoConfig.
-  /// Appelé après modification des sliders physiques.
+  /// Reconstruit entièrement le plateau avec la config actuelle.
   void rebuildBoard() {
-    _resetBall();
+    // Nettoyer toutes les billes en vol
+    for (final ball in _activeBalls) {
+      ball.removeFromParent();
+    }
+    _activeBalls.clear();
+    _creditedBalls.clear();
+    _landedLinger.clear();
 
     world.removeAll(world.children.whereType<Peg>().toList());
     world.removeAll(world.children.whereType<SlotDivider>().toList());
@@ -440,11 +257,8 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     _buildPegPositions();
   }
 
-  /// Rafraîchit les labels des cases sans reconstruire le plateau.
-  /// Appelé après modification de la table de lots via ConfigPanel.
+  /// Hook legacy (ConfigPanel) — no-op en mode multiplicateur.
   void refreshLotLabels() {
-    _assignSlotsDecor();
-    // SlotLabel.render() lit PlinkoConfig.currentSlotAssignment dynamiquement
-    // → pas besoin de recréer les composants, la mise à jour est automatique.
+    // SlotLabel lit directement slotMultiplierLabel — rien à rafraîchir.
   }
 }
