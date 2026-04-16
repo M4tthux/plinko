@@ -227,3 +227,7 @@ Statuts Board : Backlog / En cours / En test / Done / Bloqué.
 | Chrome | — | Cible de test principale (`flutter run -d chrome`) |
 
 **Cibles dispo** : Chrome uniquement en local. iOS/Android → via déploiement web GitHub Pages ou futur Mac/Android Studio.
+
+---
+
+*Dernière mise à jour : 2026-04-17 (session cleanup archi repo + refonte Build 41)*
