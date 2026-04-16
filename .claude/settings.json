@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '=== PLINKO SESSION START ==='; git pull 2>&1; echo ''; echo '=== project-context.md ==='; cat project-context.md; echo ''; echo '=== Dernier log de session ==='; ls -t sessions/*.md 2>/dev/null | head -1 | xargs -I{} cat {}",
+            "timeout": 30,
+            "statusMessage": "Plinko — git pull + lecture contexte"
+          }
+        ]
+      }
+    ]
+  }
+}
