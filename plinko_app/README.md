@@ -1,17 +1,34 @@
 # plinko_app
 
-A new Flutter project.
+Flutter app du projet Plinko (Balleck Team) — mini-jeu promotionnel type Plinko avec 17 cases à multiplicateurs et physique manuelle Flame.
 
-## Getting Started
+Déployé sur `https://m4tthux.github.io/plinko/` à chaque push master (voir [`../.github/workflows/deploy-web.yml`](../.github/workflows/deploy-web.yml)).
 
-This project is a starting point for a Flutter application.
+## Commandes
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+# Dev local (Chrome)
+flutter run -d chrome
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+# Build web release
+flutter build web --release
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Build web + serveur local pour test mobile (même Wi-Fi)
+bash ../scripts/serve_web.sh
+```
+
+Sur Windows : **Git CMD uniquement** — le PATH `C:\flutter\bin` n'est pas reconnu depuis PowerShell.
+
+## Structure
+
+- `lib/config/plinko_config.dart` — config centrale du plateau
+- `lib/game/` — `plinko_game.dart`, `ball.dart`, `board.dart`
+- `lib/ui/` — `reward_overlay.dart`, `config_panel.dart`
+- `lib/main.dart` — UI principale, balance, popups gain
+- `assets/trajectories.json` — 70 trajectoires pré-calculées (70 trajectoires × 9 cases historiques)
+
+## Documentation
+
+- [`../CLAUDE.md`](../CLAUDE.md) — référence Claude Code
+- [`../project-context.md`](../project-context.md) — source de vérité projet
+- [`../decisions-log.md`](../decisions-log.md) — historique complet des décisions
