@@ -25,7 +25,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-## Règles de session (rétrospective 2026-03-31)
+## Règles de session
 
 - **Un problème = une session** — ne pas traiter plusieurs bugs dans la même session
 - **Commit propre en fin de chaque session** — toujours committer avant de clore
@@ -61,26 +61,17 @@ flutter doctor
 
 ---
 
-## Convention de commit (défaut projet)
+## Convention de commit
 
-Tous les commits de ce projet suivent ce format :
-
-1. **Titre** (1 ligne, ≤ 72 caractères) — type court + description au présent
-   - Préfixes usuels : `Build N —`, `Fix —`, `Cleanup Phase N —`, `Session N —`, `Refacto —`, `Docs —`
-2. **Ligne vide**
-3. **Corps** (optionnel mais recommandé dès qu'il y a > 1 changement) — bullets ou paragraphes courts qui expliquent **le quoi + le pourquoi**, pas le comment
-4. **Ligne vide**
-5. **Trailer** `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
-
-**Toujours passer le message via HEREDOC** pour préserver le formatage multi-ligne :
+**Format** : titre préfixé (≤72 car.) + corps bullets (quoi + pourquoi) + trailer `Co-Authored-By`.
+Préfixes : `Build N —`, `Fix —`, `Cleanup Phase N —`, `Session N —`, `Refacto —`, `Docs —`.
+**Toujours via HEREDOC** pour préserver le formatage multi-ligne.
 
 ```bash
 git commit -m "$(cat <<'EOF'
-Build 42 — exemple de titre court et clair
+Build 42 — titre court
 
-- Point saillant #1 (le quoi)
-- Point saillant #2 (le pourquoi, pas le comment)
-- Référence code : `fichier.dart:ligne` si pertinent
+- Quoi + pourquoi (pas le comment)
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
@@ -88,12 +79,11 @@ EOF
 ```
 
 **Règles dures :**
-- Ne jamais `git add -A` / `git add .` — toujours lister les fichiers par nom
-- Ne jamais `--no-verify` / `--amend` sans instruction explicite
-- Un commit = un changement cohérent (pas de commit fourre-tout)
-- Avant chaque build qui sera déployé : incrémenter `kBuildTime` dans `main.dart`
-
-**Important** : Flutter fonctionne uniquement dans **Git CMD** sur Windows (PATH `C:\flutter\bin` configuré via variables d'environnement utilisateur, pas dans PowerShell/cmd standard).
+- Jamais `git add -A` / `git add .` — lister les fichiers par nom
+- Jamais `--no-verify` / `--amend` sans instruction explicite
+- 1 commit = 1 changement cohérent
+- Avant chaque build déployé : incrémenter `kBuildTime` dans `main.dart`
+- Flutter ne tourne que dans **Git CMD** sur Windows (PATH `C:\flutter\bin`)
 
 ---
 
@@ -117,9 +107,9 @@ EOF
 
 ---
 
-## Config plateau actuelle (refonte 16 rangées / 17 cases style Stake — 2026-04-12)
+## Config plateau actuelle
 
-> Build actuel : **41** (déployé sur `m4tthux.github.io/plinko`)
+> Build **41** — `m4tthux.github.io/plinko`. Grille 16 rangées visibles / 17 cases (style Stake).
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
@@ -146,7 +136,7 @@ EOF
 | `slotWallHeight` | **1.2** | Scaled pour grille compacte |
 | **LaunchHole** | maintenu | Trou sombre en haut, émergence bille |
 
-### Physique (refonte build 33-36)
+### Physique
 - **Sub-stepping** : 4 sous-pas physiques/frame (empêche le tunneling)
 - **Pas de cooldown picots** (inutile avec sub-stepping)
 - **Pas de vitesse Y forcée** (la gravité fait le travail)
@@ -172,50 +162,34 @@ EOF
 
 ---
 
-## Système de multiplicateurs (build 40+)
+## Système de multiplicateurs
 
-Plus de PrizeLot / tirage probabiliste. Les 17 cases ont des multiplicateurs
-**positionnels fixes**, symétriques : x100 aux extrémités → x0.1 au centre.
+17 cases, multiplicateurs positionnels fixes symétriques (pas de PrizeLot depuis Build 40).
 
 ```
 Index :  0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
 Mult  :  x100 x25  x10  x5   x2   x0.5 x0.2 x0.1 x0.1 x0.1 x0.2 x0.5 x2   x5   x10  x25  x100
 ```
 
-**Économie du jeu :**
-- Balance initiale : **50€**
-- Chaque tap = **-1€** (une nouvelle bille lancée)
-- Atterrissage case i = **+1€ × multiplicateur[i]** (0.1€ au centre, 100€ aux bords)
-- Bille sortie du plateau = pas de crédit (mise perdue)
+**Économie :** balance 50€, tap = −1€ (1 bille), gain = 1€ × mult[case], sortie du plateau = perdu.
+**Multi-ball :** 1 tap = 1 bille, despawn 0.8s après landing.
+**Animation "+X€"** (Build 41) : popup center screen (scale bump + fade 900ms), or si ≥1€, bleuté sinon.
 
-**Multi-ball :** 1 tap = 1 bille, lancements simultanés possibles. Les billes
-sont despawnées 0.8s après atterrissage (linger visuel).
-
-**Plus d'overlay récompense** — la balance en coin d'écran suffit.
-
-**Animation "+X€"** (build 41) : chaque atterrissage dans une case déclenche
-un popup flottant au centre de l'écran (scale bump + fade out, 900ms). Couleur
-et taille adaptées au montant (gold pour gain ≥ 1€, discret bleuté pour <1€).
-
-Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` dans
-`plinko_config.dart`. Logique de crédit : `PlinkoGame._creditLanding()`.
-Popup animé : `_GainPopup` dans `main.dart`, alimenté par `gainEvents` stream.
+Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` — crédit : `PlinkoGame._creditLanding()` — popup : `_GainPopup` dans `main.dart` (stream `gainEvents`).
 
 ---
 
 ## Backlog actif
 
+> Questions ouvertes détaillées dans [`project-context.md`](project-context.md).
+
 ### Haute priorité
-- **Visuel end game** : overlay récompense refonte — feux d'artifice, halo, icône €, jackpot or spectaculaire
+- **Visuel end game** : overlay jackpot x100 spectaculaire (feux d'artifice, halo, jackpot or) — à cadrer avec Matthieu
+- **VFX Phase 2** : flash case, screen shake, scale pulse à l'atterrissage
 
 ### Basse priorité
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) dans `board.dart` : à retirer avant prod
-
-### Backlog cadrage requis
-- **Lourdeur bille** : gravity=18.0 — augmenter ou ajuster replayStride ?
-- **Jackpot unique** : hardcoder slot central = jackpot dans `_assignSlots()`
-- **Émotion win/lose** : direction visuelle à cadrer avant dev (sobre vs spectaculaire)
-- **Build iOS** : nécessite Mac + Xcode + compte Apple Developer
+- **Build natif iOS/Android** : Mac + Xcode requis (ou CI cloud Codemagic / Bitrise)
 
 ---
 

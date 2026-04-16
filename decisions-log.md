@@ -6,6 +6,29 @@
 
 ---
 
+## 📦 Index — repères rapides
+
+> Les entrées détaillées ci-dessous restent intactes. Ce bloc sert d'index de navigation.
+
+| Période | Builds | Résumé |
+|---|---|---|
+| 2026-03-19 → 2026-03-26 | setup | Cadrage équipe, stack (Flutter + Flame, pas Forge2D), MVP scope, ambiance futuriste, illusion de hasard pré-déterminée |
+| 2026-03-27 → 2026-03-28 | 1-10 | Stabilisation physique (formule rebond, séparateurs solides, sub-stepping naissant), génération trajectoires Python, overlay récompense, ConfigPanel, **Système PrizeLot** (obsolète depuis Build 40) |
+| 2026-03-29 → 2026-03-31 | 11-12 | Toggle mode physique forcé, jackpot unique centré (PrizeLot), filtre anti-stagnation trajectoires, migration Claude Code, CLAUDE.md + decisions-log créés |
+| 2026-04-03 → 2026-04-04 | 13-27 | VFX Phase 1 (trail, squash&stretch, glow picots, particules), 7 cases, parois latérales toggle, resync source ← gh-pages (builds sans commit) |
+| 2026-04-09 → 2026-04-12 | 28-39 | **Refonte physique complète** (sub-stepping ×4, ratio 1:1, gravité domine), CI GitHub Action auto gh-pages, grille triangulaire, proportions Stake 16 rangées |
+| 2026-04-12 → 2026-04-17 | 40-41 | **Mode multiplicateur casino** (fin PrizeLot), 17 cases x100→x0.1, balance 50€, multi-ball, animation "+X€". Cleanup archi repo (−65 Mo, −4115 lignes). Convention commit formalisée. |
+
+**Systèmes obsolètes** (conservés dans l'historique pour contexte) :
+- `PrizeLot` / `LandedResult` / tirage probabiliste — remplacé par multiplicateurs positionnels fixes (Build 40)
+- Parois latérales solides — retirées Build 35 (sortie = perdu)
+- Overlay récompense plein écran — remplacé par popup "+X€" (Build 41)
+- `_visualScale`, cooldown picots, minExitSpeed, anti-orbite — neutralisés par sub-stepping ×4 (Build 33)
+
+---
+
+## Journal complet
+
 | Date | Domaine | Décision |
 |---|---|---|
 | 2026-03-26 | Équipe | Nom de l'équipe : Balleck Team |
