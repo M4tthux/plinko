@@ -26,21 +26,6 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-## Build actuel : 41 (2026-04-12)
-
-URL : `m4tthux.github.io/plinko` — CI/CD auto sur push master.
-
-Ce que fait le build :
-- Tap = 1 bille lancée (−1€) depuis le centre avec micro-jitter
-- Balance 50€ affichée coin haut-gauche, multi-ball
-- 17 cases à multiplicateurs fixes symétriques (x100 bords → x0.1 centre)
-- Gain = 1€ × mult[case], popup "+X€" flottant (900ms, or si ≥1€)
-- Sortie du plateau = mise perdue
-
-Config plateau détaillée, multiplicateurs, physique, architecture trajectoires → [`CLAUDE.md`](CLAUDE.md).
-
----
-
 ## Décisions actives (le *pourquoi*)
 
 > Les *quoi* sont dans CLAUDE.md. Cette section garde les raisons que le code ne montre pas.
@@ -59,12 +44,6 @@ Config plateau détaillée, multiplicateurs, physique, architecture trajectoires
 - **Lancement centre + jitter, pas de parois** — distribution binomiale pure comme les vrais Plinko
 - **Pas de sons / haptique au MVP** — repoussé Post-MVP pour ne pas figer le contrat son/marque
 - **Ambiance futuriste / arcade** — néons, fond sombre, bille lumineuse
-
-### Process
-- **Un problème = une session** — éviter les sessions fourre-tout
-- **Commit propre en fin** — incrémenter `kBuildTime` avant tout build déployé
-- **Workflow hybride** — Claude Code (dev/Git/Flutter) + Chat (design visuel, screenshots)
-- **CLAUDE.md = quick ref**, **project-context.md = source de vérité produit**, **decisions-log.md = historique immuable**
 
 ---
 

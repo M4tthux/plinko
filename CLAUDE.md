@@ -5,15 +5,6 @@
 
 ---
 
-## Projet
-
-Mini-jeu mobile promotionnel type Plinko, développé en Flutter (Chrome pour dev, iOS+Android pour prod).
-Le joueur lance une bille qui rebondit sur des picots vers des cases de récompense.
-Le résultat est **pré-déterminé** — la trajectoire est pré-calculée et rejouée frame par frame (illusion de hasard totale).
-Destiné à être intégré comme expérience d'engagement pour des marques clientes.
-
----
-
 ## Équipe
 
 | Qui | Rôle |
