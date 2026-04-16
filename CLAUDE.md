@@ -34,6 +34,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - Claude itère en delta — ne réécrit pas tout à chaque feedback
 - Claude met à jour `project-context.md` et crée un log `sessions/` en fin de session
 - **Toute décision validée en cours de session** → écrire dans `project-context.md` immédiatement, sans attendre la fin
+- **Cohérence docs** : en fin de session, vérifier que `project-context.md` n'a ni doublons ni contradictions avec `CLAUDE.md` (cf. checklist fin de session)
 - **Session > 45 min** → checkpoint automatique (écriture fichiers + proposition de commit) sans que Matthieu ait à le demander
 - Ne pas pousser en production sans validation explicite de Matthieu
 
@@ -260,8 +261,9 @@ Statuts : Backlog / En cours / En test / Done / Bloqué
 ## Fin de session — checklist
 
 1. Mettre à jour `project-context.md` (décisions, état d'avancement)
-2. Créer log dans `sessions/YYYY-MM-DD_nom-session.md`
-3. Committer : `git commit -m "Session X — description"`
-4. `git push` — **obligatoire** pour sync multi-device
-5. Mettre à jour la board Notion si tâches changent de statut
-6. Mettre à jour les specs Notion si elles ont évolué
+2. **Cohérence docs** : vérifier que `project-context.md` n'a ni doublons ni contradictions avec `CLAUDE.md` (config plateau, décisions, build actuel, état d'avancement). En cas de divergence → CLAUDE.md = quick ref, project-context.md = source de vérité : corriger CLAUDE.md si project-context vient d'être mis à jour.
+3. Créer log dans `sessions/YYYY-MM-DD_nom-session.md`
+4. Committer : `git commit -m "Session X — description"`
+5. `git push` — **obligatoire** pour sync multi-device
+6. Mettre à jour la board Notion si tâches changent de statut
+7. Mettre à jour les specs Notion si elles ont évolué
