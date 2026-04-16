@@ -30,6 +30,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 > Les *quoi* sont dans CLAUDE.md. Cette section garde les raisons que le code ne montre pas.
 
+### Process / Docs
+- **Hiérarchie docs** (Phase 1 refacto 2026-04-17) — project-context.md = source de vérité (vision + décisions + statut), CLAUDE.md = quick ref technique pure, decisions-log.md = historique immuable. Vision uniquement dans project-context.md, §Projet retiré de CLAUDE.md pour supprimer le doublon.
+- **Phase 2 différée** — refonte hook + skill plinko-context-loader (aujourd'hui ils doublonnent : hook lit project-context + dernier log, skill relit tout + Notion). À faire après 2 sessions de test Phase 1.
+
 ### Tech
 - **Flame + physique manuelle** — Forge2D supprimé car incompatible Flutter Web
 - **Sub-stepping ×4** — anti-tunneling validé via benchmark Stake / BGaming / Matter.js
@@ -82,4 +86,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-17 — allègement contexte (virer doublons CLAUDE.md + narratif).*
+*Dernière mise à jour : 2026-04-17 — audit archi contexte + Phase 1 dedup (vision recentrée ici, §Projet retiré de CLAUDE.md).*
