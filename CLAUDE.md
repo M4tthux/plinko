@@ -55,13 +55,43 @@ python generate_trajectories.py
 # → Vérifier 70/70 dans la sortie console
 # → Le fichier est écrit directement dans plinko_app/assets/trajectories.json
 
-# Git — commit de fin de session
-git add <fichiers>
-git commit -m "Session X — description courte"
-
 # Vérifier l'état du projet
 flutter doctor
 ```
+
+---
+
+## Convention de commit (défaut projet)
+
+Tous les commits de ce projet suivent ce format :
+
+1. **Titre** (1 ligne, ≤ 72 caractères) — type court + description au présent
+   - Préfixes usuels : `Build N —`, `Fix —`, `Cleanup Phase N —`, `Session N —`, `Refacto —`, `Docs —`
+2. **Ligne vide**
+3. **Corps** (optionnel mais recommandé dès qu'il y a > 1 changement) — bullets ou paragraphes courts qui expliquent **le quoi + le pourquoi**, pas le comment
+4. **Ligne vide**
+5. **Trailer** `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
+
+**Toujours passer le message via HEREDOC** pour préserver le formatage multi-ligne :
+
+```bash
+git commit -m "$(cat <<'EOF'
+Build 42 — exemple de titre court et clair
+
+- Point saillant #1 (le quoi)
+- Point saillant #2 (le pourquoi, pas le comment)
+- Référence code : `fichier.dart:ligne` si pertinent
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Règles dures :**
+- Ne jamais `git add -A` / `git add .` — toujours lister les fichiers par nom
+- Ne jamais `--no-verify` / `--amend` sans instruction explicite
+- Un commit = un changement cohérent (pas de commit fourre-tout)
+- Avant chaque build qui sera déployé : incrémenter `kBuildTime` dans `main.dart`
 
 **Important** : Flutter fonctionne uniquement dans **Git CMD** sur Windows (PATH `C:\flutter\bin` configuré via variables d'environnement utilisateur, pas dans PowerShell/cmd standard).
 
