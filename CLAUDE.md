@@ -102,30 +102,7 @@ EOF
 
 > Build **45** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. Plein écran + zoom dynamique fit-largeur.
 
-| Paramètre | Valeur | Notes |
-|---|---|---|
-| `worldWidth` | **8.88** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
-| `worldHeight` | **18.0** | Conservé — caméra centre sur le contenu réel |
-| `zoom` | **dynamique** | `screenWidth × 0.96 / worldWidth` (plus de constante) |
-| `gravity` | 12.0 | Sub-stepping 4× |
-| `rows` | **12** | Last row = 12 picots |
-| `startRow` | **2** | Commence à 3 picots (**10 rangées visibles**) |
-| `pegGX` | **0.80** | Espacement horizontal entre picots |
-| `pegGY` | **0.70** | Quasi-équilatéral (0.80×0.866=0.693) |
-| `pegStartY` | **3.0** | Y du rang startRow |
-| `pegRadius` | **0.14** | +20% vs Build 41 (lisibilité mobile) |
-| `pegRestitution` | 0.35 | Rebond amorti |
-| `ballRadius` | **0.19** | Ratio **~1.36×** pegRadius |
-| `ballStartY` | **1.8** | Émerge du LaunchHole |
-| `ballRestitution` | 0.35 | La gravité domine |
-| **Parois latérales** | Aucune | Sortie picots du bas = Perdu |
-| `slotCount` | **9** | Découplé des picots |
-| `jackpotSlotIndex` | **4** | Centre (0-indexed sur 9) |
-| `slotStartX` | = pegX(rows-1, 0) | 1er picot du bas |
-| `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot du bas |
-| `slotWidth` | = (slotEndX − slotStartX) / 9 | **Découplé** : ne dépend plus de pegGX |
-| `slotWallHeight` | **1.2** | Scaled pour grille compacte |
-| **LaunchHole** | maintenu | Trou sombre en haut, émergence bille |
+Valeurs actuelles: voir plinko_app/lib/config/plinko_config.dart (source de vérité). Pour une vue d'ensemble du plateau, lire ce fichier avant toute modif physique.
 
 ### Physique
 - **Sub-stepping** : 4 sous-pas physiques/frame (empêche le tunneling)
