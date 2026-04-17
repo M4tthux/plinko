@@ -56,6 +56,15 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **Réduction grille 17→9 cases, 16→10 rangées visibles** — cases 2× plus larges à l'écran. Trajectoires obsolètes mais `forcePhysicsMode = true` donc no-op (à régénérer si on relance le replay)
 - **Picots/bille +20%** — `pegRadius 0.12→0.14`, `ballRadius 0.16→0.19` (ratio bille/picot maintenu ~1.36)
 
+### Responsive mobile + desktop (Build 46)
+- **Breakpoint unique 1024px** — viewport < 1024 = mode mobile, ≥ 1024 = mode desktop. Une seule règle, pas de zone grise tablette.
+- **Board plafonné à 500px** — même plateau sur tous les devices, jamais de stretching. Sur mobile : `width = (viewport × 0.92).clamp(0, 500)` centré. Décision : le format portrait du plateau prime, sur iPad/desktop on ajoute du décor autour plutôt que de déformer.
+- **Mode desktop = 3 colonnes** — layout `[panel 240 | gap 20 | board 500 | gap 20 | panel 240]` = 1020px centré. Les panneaux latéraux sont des placeholders dashed border + label "panel left/right" en attendant le contenu réel (stats, historique, branding marque).
+- **HUD relatif au conteneur du plateau, pas au viewport** — balance, build badge, instructions, popups, config panel positionnés dans le Stack 500px → se recentrent automatiquement avec le plateau en mode desktop. Évite que le HUD parte se coller aux bords d'un écran 1440px.
+- **Constantes centralisées** — `kDesktopBreakpoint`, `kBoardMaxWidth`, `kSidePanelWidth`, `kDesktopGap` en tête de `main.dart` pour ajustement rapide.
+- **Impact zéro sur physique et trajectoires** — `worldWidth`/`worldHeight` inchangés, `_applyResponsiveCamera(size)` reçoit simplement la size contrainte et zoom en conséquence.
+- **Bench industrie (Stake / BGaming / crash games)** — pattern systématique : plateau portrait à largeur fixe, décor/UI autour sur desktop, jamais de canvas qui s'étire.
+
 ---
 
 ## Questions ouvertes
@@ -84,8 +93,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | Game Design | 🟢 Build 45 validé | 9 cases, multi `100·25·10·2·0.1·…` |
 | Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire, cases découplées |
-| Design & UI | 🟡 En cours | Immersivité mobile OK (Build 45). Trajectoires à régénérer. VFX Phase 2 à faire |
-| Dev | 🟢 Build 45 | Plein écran + zoom dynamique + 9 cases |
+| Design & UI | 🟡 En cours | Responsive mobile + desktop OK (Build 46). Trajectoires à régénérer. VFX Phase 2 à faire |
+| Dev | 🟢 Build 46 | Responsive breakpoint 1024, board max 500px, layout desktop 3 colonnes |
 | CI/CD | 🟢 Done | Auto-deploy gh-pages |
 | Test mobile (web) | 🟢 OK | Safari/Chrome iPhone via GitHub Pages |
 | Flutter local | 🟢 OK | v3.41.6 Windows (Git CMD) |
@@ -93,4 +102,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-17 — Build 45 : plein écran + zoom dynamique + grille 9 cases découplée des picots.*
+*Dernière mise à jour : 2026-04-17 — Build 46 : responsive mobile + desktop (breakpoint 1024, board max 500px, layout 3 colonnes sur desktop).*

@@ -8,7 +8,19 @@ import 'ui/config_panel.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-17 · build 45';
+const String kBuildTime = '2026-04-17 · build 46';
+
+/// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
+const double kDesktopBreakpoint = 1024.0;
+
+/// Largeur maximale du plateau de jeu (mobile et desktop).
+const double kBoardMaxWidth = 500.0;
+
+/// Colonnes latérales desktop (placeholder en attendant le contenu réel).
+const double kSidePanelWidth = 240.0;
+
+/// Gap entre les 3 colonnes en mode desktop.
+const double kDesktopGap = 20.0;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,9 +95,59 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SizedBox.expand(
-        child: Stack(
-          children: [
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isDesktop = constraints.maxWidth >= kDesktopBreakpoint;
+
+          final gameContainer = _buildGameContainer();
+
+          if (isDesktop) {
+            // Layout desktop : 3 colonnes 240 / 500 / 240 avec gap 20, total 1020, centré.
+            return Center(
+              child: SizedBox(
+                width: kSidePanelWidth * 2 + kBoardMaxWidth + kDesktopGap * 2,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(
+                      width: kSidePanelWidth,
+                      child: _SidePanelPlaceholder(label: 'panel left'),
+                    ),
+                    const SizedBox(width: kDesktopGap),
+                    SizedBox(width: kBoardMaxWidth, child: gameContainer),
+                    const SizedBox(width: kDesktopGap),
+                    const SizedBox(
+                      width: kSidePanelWidth,
+                      child: _SidePanelPlaceholder(label: 'panel right'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Mode mobile : 92% du viewport, plafonné à 500px, centré horizontalement.
+          final boardWidth =
+              (constraints.maxWidth * 0.92).clamp(0.0, kBoardMaxWidth);
+          return Center(
+            child: SizedBox(
+              width: boardWidth,
+              height: constraints.maxHeight,
+              child: gameContainer,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// Stack contenant le jeu + tous les overlays HUD (balance, build badge,
+  /// instructions, popups, config panel). Utilisé à l'identique en mobile
+  /// et dans la colonne centrale desktop — les Positioned sont donc relatifs
+  /// au conteneur du plateau, pas au viewport.
+  Widget _buildGameContainer() {
+    return Stack(
+      children: [
               // Jeu Flame — fond sombre opaque rendu par Flame
               GameWidget(
                 game: _game,
@@ -217,10 +279,111 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
             // Panneau de config DEBUG (icône ⚙ en haut à droite)
             ConfigPanel(game: _game),
           ],
+        );
+  }
+}
+
+/// Placeholder vide pour les colonnes latérales en mode desktop (≥1024px).
+/// Bordure en pointillé + label central — le contenu réel sera défini
+/// dans une étape ultérieure (stats, historique, branding marque…).
+class _SidePanelPlaceholder extends StatelessWidget {
+  final String label;
+  const _SidePanelPlaceholder({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: DottedBorderBox(
+        child: Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Color(0x88e8d0ff),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.5,
+            ),
+          ),
         ),
       ),
     );
   }
+}
+
+/// Container avec bordure dashed simulée (Flutter n'a pas de BorderStyle.dashed
+/// natif sur Border — on utilise un CustomPainter léger).
+class DottedBorderBox extends StatelessWidget {
+  final Widget child;
+  const DottedBorderBox({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedBorderPainter(
+        color: const Color(0x883a2060),
+        strokeWidth: 1.5,
+        dashLength: 6,
+        gapLength: 4,
+        radius: 12,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double dashLength;
+  final double gapLength;
+  final double radius;
+
+  _DashedBorderPainter({
+    required this.color,
+    required this.strokeWidth,
+    required this.dashLength,
+    required this.gapLength,
+    required this.radius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final rect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+
+    final path = Path()..addRRect(rect);
+    final metrics = path.computeMetrics();
+    for (final metric in metrics) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final next = (distance + dashLength).clamp(0.0, metric.length);
+        canvas.drawPath(
+          metric.extractPath(distance, next),
+          paint,
+        );
+        distance = next + gapLength;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter old) =>
+      old.color != color ||
+      old.strokeWidth != strokeWidth ||
+      old.dashLength != dashLength ||
+      old.gapLength != gapLength ||
+      old.radius != radius;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

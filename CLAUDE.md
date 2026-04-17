@@ -100,7 +100,7 @@ EOF
 
 ## Config plateau actuelle
 
-> Build **45** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. Plein écran + zoom dynamique fit-largeur.
+> Build **46** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. **Responsive mobile + desktop** : breakpoint 1024px, board max 500px centré, layout desktop 3 colonnes `[240 | 500 | 240]` avec panneaux latéraux placeholder.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
