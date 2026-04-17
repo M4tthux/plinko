@@ -64,10 +64,8 @@ class PlinkoGame extends FlameGame with TapCallbacks {
         'GX (${PlinkoConfig.pegGX}) doit être > 2×PEG_RADIUS + 2×BALL_RADIUS '
         '(${2 * PlinkoConfig.pegRadius + 2 * PlinkoConfig.ballRadius})');
 
-    camera.viewfinder.zoom = PlinkoConfig.zoom;
     camera.viewfinder.anchor = Anchor.center;
-    camera.viewfinder.position =
-        Vector2(PlinkoConfig.worldWidth / 2, PlinkoConfig.worldHeight / 2);
+    _applyResponsiveCamera(size);
 
     _buildPegPositions();
 
@@ -78,6 +76,27 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     await world.addAll(BoardBuilder.buildSlotDividers());
     await world.addAll(BoardBuilder.buildSlotLabels());
     await world.add(BoardBuilder.buildTitle());
+  }
+
+  /// Recalcule zoom + centre caméra pour fit la largeur de l'écran.
+  /// Le contenu utile va de y≈1.8 (LaunchHole) à y≈slotBaseY (~15.5).
+  void _applyResponsiveCamera(Vector2 size) {
+    if (size.x <= 0 || size.y <= 0) return;
+    // Marge horizontale 4% pour respirer
+    final fitZoom = (size.x * 0.96) / PlinkoConfig.worldWidth;
+    camera.viewfinder.zoom = fitZoom;
+    final contentTop = PlinkoConfig.ballStartY - 0.5;
+    final contentBottom = PlinkoConfig.slotBaseY + 0.3;
+    camera.viewfinder.position = Vector2(
+      PlinkoConfig.worldWidth / 2,
+      (contentTop + contentBottom) / 2,
+    );
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    if (camera.viewfinder.zoom > 0) _applyResponsiveCamera(size);
   }
 
   /// Grille triangulaire : rang R contient R+1 picots (à partir de startRow).

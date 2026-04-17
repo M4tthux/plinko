@@ -8,7 +8,7 @@ import 'ui/config_panel.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-12 · build 41';
+const String kBuildTime = '2026-04-17 · build 45';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,11 +83,9 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Center(
-        child: AspectRatio(
-          aspectRatio: 9 / 16,
-          child: Stack(
-            children: [
+      body: SizedBox.expand(
+        child: Stack(
+          children: [
               // Jeu Flame — fond sombre opaque rendu par Flame
               GameWidget(
                 game: _game,
@@ -216,10 +214,9 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 ),
               ),
 
-              // Panneau de config DEBUG (icône ⚙ en haut à droite)
-              ConfigPanel(game: _game),
-            ],
-          ),
+            // Panneau de config DEBUG (icône ⚙ en haut à droite)
+            ConfigPanel(game: _game),
+          ],
         ),
       ),
     );

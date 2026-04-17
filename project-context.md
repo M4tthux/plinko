@@ -48,6 +48,13 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **Lancement centre + jitter, pas de parois** — distribution binomiale pure comme les vrais Plinko
 - **Pas de sons / haptique au MVP** — repoussé Post-MVP pour ne pas figer le contrat son/marque
 - **Ambiance futuriste / arcade** — néons, fond sombre, bille lumineuse
+- **9 cases découplées des picots (Build 45)** — picots restent en grille triangulaire 12 rangs, mais les 9 cases du bas répartissent uniformément la largeur (slotWidth ≠ pegGX). Multiplicateurs : `100·25·10·2·0.1·2·10·25·100`. Décision = lisibilité mobile prime sur l'alignement strict cases/picots.
+
+### Design / Immersivité mobile (Build 42→45)
+- **Plein écran** — `AspectRatio(9/16)` retiré : le canvas occupe toute la fenêtre (récup ~150px sur iPhone 14)
+- **Zoom dynamique fit-largeur** — `camera.zoom = screenWidth × 0.96 / worldWidth` recalculé sur chaque resize (vs zoom fixe 24 avant)
+- **Réduction grille 17→9 cases, 16→10 rangées visibles** — cases 2× plus larges à l'écran. Trajectoires obsolètes mais `forcePhysicsMode = true` donc no-op (à régénérer si on relance le replay)
+- **Picots/bille +20%** — `pegRadius 0.12→0.14`, `ballRadius 0.16→0.19` (ratio bille/picot maintenu ~1.36)
 
 ---
 
@@ -58,9 +65,9 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - Équilibrage multiplicateurs x100 : probabilité réelle vs ressenti joueur à monitorer
 
 ### Design / Dev
-- **Visuel end game** — overlay jackpot x100 spectaculaire à décider (feux d'artifice, halo) ou sobriété popup actuel
 - **VFX Phase 2** — flash case, screen shake, scale pulse
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) — à retirer avant prod
+- **Régénérer trajectoires** pour la nouvelle grille 12 rangs / 9 cases (aujourd'hui obsolètes, masquées par `forcePhysicsMode = true`)
 
 ### Tech Post-MVP
 - Transmission récompense → marque : webhook ou API pull ?
@@ -75,10 +82,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 | Domaine | Statut | Notes |
 |---|---|---|
-| Game Design | 🟢 Build 41 validé | Mode multiplicateur casino + multi-ball |
-| Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire |
-| Design & UI | 🟡 En cours | VFX Phase 1 OK. Phase 2 à faire |
-| Dev | 🟢 Build 41 | Animation "+X€" validée |
+| Game Design | 🟢 Build 45 validé | 9 cases, multi `100·25·10·2·0.1·…` |
+| Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire, cases découplées |
+| Design & UI | 🟡 En cours | Immersivité mobile OK (Build 45). Trajectoires à régénérer. VFX Phase 2 à faire |
+| Dev | 🟢 Build 45 | Plein écran + zoom dynamique + 9 cases |
 | CI/CD | 🟢 Done | Auto-deploy gh-pages |
 | Test mobile (web) | 🟢 OK | Safari/Chrome iPhone via GitHub Pages |
 | Flutter local | 🟢 OK | v3.41.6 Windows (Git CMD) |
@@ -86,4 +93,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-17 — audit archi contexte + Phase 1 dedup (vision recentrée ici, §Projet retiré de CLAUDE.md).*
+*Dernière mise à jour : 2026-04-17 — Build 45 : plein écran + zoom dynamique + grille 9 cases découplée des picots.*

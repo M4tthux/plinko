@@ -100,30 +100,30 @@ EOF
 
 ## Config plateau actuelle
 
-> Build **41** — `m4tthux.github.io/plinko`. Grille 16 rangées visibles / 17 cases (style Stake).
+> Build **45** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. Plein écran + zoom dynamique fit-largeur.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
-| `worldWidth` | **13.84** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
-| `worldHeight` | **18.0** | Recentré pour plateau compact |
-| `zoom` | 24.0 | Zoom caméra |
+| `worldWidth` | **8.88** (calculé) | = (rows-1) × pegGX + 2 × pegRadius |
+| `worldHeight` | **18.0** | Conservé — caméra centre sur le contenu réel |
+| `zoom` | **dynamique** | `screenWidth × 0.96 / worldWidth` (plus de constante) |
 | `gravity` | 12.0 | Sub-stepping 4× |
-| `rows` | **18** | Last row = 18 picots → 17 gaps = 17 cases |
-| `startRow` | **2** | Commence à 3 picots (**16 rangées visibles**) |
-| `pegGX` | **0.80** | Espacement horizontal (17 cases) |
+| `rows` | **12** | Last row = 12 picots |
+| `startRow` | **2** | Commence à 3 picots (**10 rangées visibles**) |
+| `pegGX` | **0.80** | Espacement horizontal entre picots |
 | `pegGY` | **0.70** | Quasi-équilatéral (0.80×0.866=0.693) |
 | `pegStartY` | **3.0** | Y du rang startRow |
-| `pegRadius` | **0.12** | Petit — proportions Stake |
+| `pegRadius` | **0.14** | +20% vs Build 41 (lisibilité mobile) |
 | `pegRestitution` | 0.35 | Rebond amorti |
-| `ballRadius` | **0.16** | Ratio **~1.33×** pegRadius (légèrement plus grosse) |
+| `ballRadius` | **0.19** | Ratio **~1.36×** pegRadius |
 | `ballStartY` | **1.8** | Émerge du LaunchHole |
 | `ballRestitution` | 0.35 | La gravité domine |
 | **Parois latérales** | Aucune | Sortie picots du bas = Perdu |
-| `slotCount` | **17** | 17 gaps entre 18 picots |
-| `jackpotSlotIndex` | **8** | Centre (0-indexed sur 17) |
+| `slotCount` | **9** | Découplé des picots |
+| `jackpotSlotIndex` | **4** | Centre (0-indexed sur 9) |
 | `slotStartX` | = pegX(rows-1, 0) | 1er picot du bas |
 | `slotEndX` | = pegX(rows-1, rows-1) | Dernier picot du bas |
-| `slotWidth` | = pegGX (0.80) | Entre 2 picots |
+| `slotWidth` | = (slotEndX − slotStartX) / 9 | **Découplé** : ne dépend plus de pegGX |
 | `slotWallHeight` | **1.2** | Scaled pour grille compacte |
 | **LaunchHole** | maintenu | Trou sombre en haut, émergence bille |
 
@@ -155,11 +155,11 @@ EOF
 
 ## Système de multiplicateurs
 
-17 cases, multiplicateurs positionnels fixes symétriques (pas de PrizeLot depuis Build 40).
+9 cases, multiplicateurs positionnels fixes symétriques (Build 45 — découplé des picots).
 
 ```
-Index :  0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-Mult  :  x100 x25  x10  x5   x2   x0.5 x0.2 x0.1 x0.1 x0.1 x0.2 x0.5 x2   x5   x10  x25  x100
+Index :  0    1    2    3    4    5    6    7    8
+Mult  :  x100 x25  x10  x2   x0.1 x2   x10  x25  x100
 ```
 
 **Économie :** balance 50€, tap = −1€ (1 bille), gain = 1€ × mult[case], sortie du plateau = perdu.
@@ -175,7 +175,6 @@ Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` — crédit : `
 > Questions ouvertes détaillées dans [`project-context.md`](project-context.md).
 
 ### Haute priorité
-- **Visuel end game** : overlay jackpot x100 spectaculaire (feux d'artifice, halo, jackpot or) — à cadrer avec Matthieu
 - **VFX Phase 2** : flash case, screen shake, scale pulse à l'atterrissage
 
 ### Basse priorité

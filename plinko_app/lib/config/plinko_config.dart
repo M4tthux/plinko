@@ -12,14 +12,14 @@ import '../models/prize_lot.dart';
 ///   - Pas de parois latérales — sortie = perdu
 class PlinkoConfig {
   // ─── Grille triangulaire ───────────────────────────────────────────────────
-  static const int    rows       = 18;    // rangs logiques 0–17 (last row = 18 picots)
-  static const int    startRow   = 2;     // commence à 3 picots → 16 rangées affichées
-  static const double pegGX     = 0.80;   // espacement horizontal (17 cases)
+  static const int    rows       = 12;    // rangs logiques 0–11 (last row = 12 picots)
+  static const int    startRow   = 2;     // commence à 3 picots → 10 rangées affichées
+  static const double pegGX     = 0.80;   // espacement horizontal (11 cases)
   static const double pegGY     = 0.70;   // espacement vertical (quasi-équilatéral 0.866×)
   static const double pegStartY = 3.0;    // Y du rang startRow (laisse place au trou)
 
   // ─── Picots ────────────────────────────────────────────────────────────────
-  static double pegRadius      = 0.12;  // petit — proportions Stake
+  static double pegRadius      = 0.14;  // +20% pour lisibilité mobile (build 44)
   static double pegRestitution = 0.35;  // dévie légèrement, pas de gros rebond
 
   // ─── Monde physique ────────────────────────────────────────────────────────
@@ -53,20 +53,21 @@ class PlinkoConfig {
 
   // ─── Bille ─────────────────────────────────────────────────────────────────
   static const double ballStartY = 1.8;  // émerge du trou (sous le titre PLINKO)
-  static double ballRadius      = 0.16;  // ratio ~1.33× avec pegRadius (légèrement plus grosse)
+  static double ballRadius      = 0.19;  // ratio ~1.36× avec pegRadius (build 44)
   static double ballRestitution = 0.35;  // rebond amorti — la gravité domine
 
   // ─── Gravité ───────────────────────────────────────────────────────────────
   static double gravity = 12.0;
 
   // ─── Cases de récompense (alignées sur les picots de la dernière rangée) ──
-  static const int    slotCount         = 17;  // 17 gaps entre 18 picots
-  static const int    jackpotSlotIndex  = 8;   // centre (0-indexed sur 17)
+  static const int    slotCount         = 9;   // découplé des picots (build 45)
+  static const int    jackpotSlotIndex  = 4;   // centre (0-indexed sur 9)
   static const double slotWallHeight    = 1.2; // scaled pour grille compacte
   static const double slotWallThickness = 0.06;
 
-  /// Largeur d'une case = espacement entre deux picots de la dernière rangée.
-  static double get slotWidth => pegGX;
+  /// Largeur d'une case — découplée des picots : la zone des cases (du 1er
+  /// au dernier picot du bas) est divisée équitablement en `slotCount` cases.
+  static double get slotWidth => (slotEndX - slotStartX) / slotCount;
 
   /// X du bord gauche de la case 0 = position du 1er picot de la dernière rangée.
   static double get slotStartX => pegX(rows - 1, 0);
@@ -78,12 +79,12 @@ class PlinkoConfig {
   static double get slotBaseY =>
       pegY(rows - 1) + pegGY + slotWallHeight;
 
-  // ─── Multiplicateurs des 17 cases (symétrique, x100 aux extrémités) ───────
-  // Index 7-8-9 (centre) = x0.1 (le pire), extrémités = x100 (jackpot)
+  // ─── Multiplicateurs des 9 cases (symétrique, x100 aux extrémités) ────────
+  // Index 4 (centre) = x0.1 (le pire), extrémités = x100 (jackpot)
   static const List<double> slotMultipliers = [
-    100.0, 25.0, 10.0, 5.0, 2.0, 0.5, 0.2, 0.1,
-    0.1,  // centre (index 8)
-    0.1, 0.2, 0.5, 2.0, 5.0, 10.0, 25.0, 100.0,
+    100.0, 25.0, 10.0, 2.0,
+    0.1,  // centre (index 4)
+    2.0, 10.0, 25.0, 100.0,
   ];
 
   /// Gradient aligné sur le multiplicateur : extrêmes chauds → centre terne.
@@ -91,17 +92,9 @@ class PlinkoConfig {
     0xFFff1a1a, // x100 rouge vif
     0xFFff4422, // x25  rouge-orange
     0xFFff7a00, // x10  orange
-    0xFFffa500, // x5   orange clair
     0xFFffcc00, // x2   jaune
-    0xFFb4c240, // x0.5 jaune-vert
-    0xFF6ecc70, // x0.2 vert clair
-    0xFF3aa5bf, // x0.1 bleu-vert (tiède)
-    0xFF2d6fa8, // x0.1 bleu (centre — le moins intéressant)
-    0xFF3aa5bf, // x0.1 bleu-vert
-    0xFF6ecc70, // x0.2 vert clair
-    0xFFb4c240, // x0.5 jaune-vert
+    0xFF2d6fa8, // x0.1 bleu (centre)
     0xFFffcc00, // x2   jaune
-    0xFFffa500, // x5   orange clair
     0xFFff7a00, // x10  orange
     0xFFff4422, // x25  rouge-orange
     0xFFff1a1a, // x100 rouge vif
