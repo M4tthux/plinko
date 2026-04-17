@@ -1,7 +1,7 @@
 # CLAUDE.md — Plinko (Balleck Team)
 
 > Fichier de référence pour Claude Code. Chargé automatiquement à chaque session.
-> Source de vérité complète : `project-context.md` | Historique décisions : `decisions-log.md`
+> Source de vérité complète : `project-context.md`
 
 ---
 
@@ -94,7 +94,6 @@ EOF
 | `generate_trajectories.py` | Script Python génération (70 trajectoires) |
 | `plinko_app/assets/trajectories.json` | 70 trajectoires pré-calculées (~326 Ko) |
 | `project-context.md` | Source de vérité projet |
-| `decisions-log.md` | Historique complet de toutes les décisions |
 
 ---
 

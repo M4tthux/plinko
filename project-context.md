@@ -1,6 +1,6 @@
 # PROJECT CONTEXT — Plinko (Balleck Team)
 
-> Source de vérité **produit** (vision, décisions, état). Quick ref technique : [`CLAUDE.md`](CLAUDE.md). Historique immuable : [`decisions-log.md`](decisions-log.md).
+> Source de vérité **produit** (vision, décisions, état). Quick ref technique : [`CLAUDE.md`](CLAUDE.md).
 
 ---
 
@@ -31,7 +31,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 > Les *quoi* sont dans CLAUDE.md. Cette section garde les raisons que le code ne montre pas.
 
 ### Process / Docs
-- **Hiérarchie docs** (Phase 1 refacto 2026-04-17) — project-context.md = source de vérité (vision + décisions + statut), CLAUDE.md = quick ref technique pure, decisions-log.md = historique immuable. Vision uniquement dans project-context.md, §Projet retiré de CLAUDE.md pour supprimer le doublon.
+- **Hiérarchie docs** — project-context.md = source de vérité (vision + décisions + statut), CLAUDE.md = quick ref technique pour Claude Code. Deux fichiers, c'est tout. Vision uniquement dans project-context.md pour éviter le doublon.
+- **Hook SessionStart** (`.claude/settings.json`) — `git pull` + `cat project-context.md` + dernier log `sessions/` à chaque démarrage. Garantit qu'aucune session ne démarre froide, même sans phrase trigger explicite.
 - **Phase 2 différée** — refonte hook + skill plinko-context-loader (aujourd'hui ils doublonnent : hook lit project-context + dernier log, skill relit tout + Notion). À faire après 2 sessions de test Phase 1.
 
 ### Tech
@@ -40,9 +41,11 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **Config hard-codée `plinko_config.dart`** — pas de backend au MVP, personnalisation marque = Post-MVP
 - **CI push master → gh-pages auto** — plus besoin du PC pour déployer
 - **Grille triangulaire** — `worldWidth` dérivé de `(rows-1) × pegGX + 2 × pegRadius` pour alignement pixel-perfect cases/picots
+- **Trajectoires pré-calculées + replay frame par frame** — `generate_trajectories.py` produit un JSON (stride=1, interpolation linéaire côté Dart). Au runtime : zone du doigt → sélection d'une trajectoire → replay. Fallback physique temps réel si trajectoire manquante. Actuellement masqué par `forcePhysicsMode = true` en attendant régénération post-Build 45.
 
 ### Game Design
 - **Illusion de hasard totale** — résultat pré-déterminé, trajectoire rejouée frame par frame
+- **Lancer à l'aveugle** — pas d'aperçu de trajectoire, pas de ligne fantôme, pas de prédiction visuelle. Le joueur tape et découvre la chute. Oriente toute décision UI future (pas de helpers, pas d'indicateurs de probabilité pré-lancement).
 - **Mode multiplicateur casino (Build 40)** — abandon du système PrizeLot probabiliste, remplacé par multiplicateurs positionnels fixes (lisibilité + standard industrie)
 - **1 tap = 1 bille = −1€, multi-ball** — rythme de jeu soutenu, économie claire
 - **Lancement centre + jitter, pas de parois** — distribution binomiale pure comme les vrais Plinko
