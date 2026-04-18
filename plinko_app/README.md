@@ -23,7 +23,7 @@ Sur Windows : **Git CMD uniquement** — le PATH `C:\flutter\bin` n'est pas reco
 
 - `lib/config/plinko_config.dart` — config centrale du plateau
 - `lib/game/` — `plinko_game.dart`, `ball.dart`, `board.dart`
-- `lib/ui/` — `reward_overlay.dart`, `config_panel.dart`
+- `lib/ui/` — `config_panel.dart`
 - `lib/main.dart` — UI principale, balance, popups gain
 - `assets/trajectories.json` — 70 trajectoires pré-calculées (70 trajectoires × 9 cases historiques)
 
