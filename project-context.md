@@ -47,14 +47,32 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **1 tap = 1 bille = −1€, multi-ball** — rythme de jeu soutenu, économie claire
 - **Lancement centre + jitter, pas de parois** — distribution binomiale pure comme les vrais Plinko
 - **Pas de sons / haptique au MVP** — repoussé Post-MVP pour ne pas figer le contrat son/marque
-- **Ambiance futuriste / arcade** — néons, fond sombre, bille lumineuse
-- **9 cases découplées des picots (Build 45)** — picots restent en grille triangulaire 12 rangs, mais les 9 cases du bas répartissent uniformément la largeur (slotWidth ≠ pegGX). Multiplicateurs : `100·25·10·2·0.1·2·10·25·100`. Décision = lisibilité mobile prime sur l'alignement strict cases/picots.
+- **Ambiance arcade rétro néon** — direction "Deep Arcade" validée Build 47→54 (voir section dédiée plus bas)
+- **9 cases découplées des picots (Build 45)** — picots restent en grille triangulaire 12 rangs, mais les 9 cases du bas répartissent uniformément la largeur (slotWidth ≠ pegGX). Décision = lisibilité mobile prime sur l'alignement strict cases/picots. Multiplicateurs initiaux `100·25·10·2·0.1·…` révisés en Build 49 (voir plus bas).
 
 ### Design / Immersivité mobile (Build 42→45)
 - **Plein écran** — `AspectRatio(9/16)` retiré : le canvas occupe toute la fenêtre (récup ~150px sur iPhone 14)
 - **Zoom dynamique fit-largeur** — `camera.zoom = screenWidth × 0.96 / worldWidth` recalculé sur chaque resize (vs zoom fixe 24 avant)
 - **Réduction grille 17→9 cases, 16→10 rangées visibles** — cases 2× plus larges à l'écran. Trajectoires obsolètes mais `forcePhysicsMode = true` donc no-op (à régénérer si on relance le replay)
 - **Picots/bille +20%** — `pegRadius 0.12→0.14`, `ballRadius 0.16→0.19` (ratio bille/picot maintenu ~1.36)
+
+### Direction artistique Deep Arcade (Build 47→54)
+- **Direction "Deep Arcade / Neon Noir"** tranchée après benchmark multi-agents (benchmark mémoire / game-designer / designer). Principe central game-designer : *"80 % de l'écran sombre et mat pour que les 20 % lumineux aient du poids. Si on retire la bille et les picots, le fond doit être presque ennuyeux."* Le build précédent (violet plat + gros contours) faisait *néon 2010*, pas *arcade rétro* — l'excès de néon aplatissait la hiérarchie x100 / x0.1.
+- **Anti-pattern principal identifié** : gros contours épais uniformes. Vrai néon = trait fin + halo large, pas trait épais coloré. Pièces flottantes jackpot + reflet verre + trapèze cases supprimés (visual noise qui concurrence la bille).
+- **Fond noir #08080F + caustique radiale diffuse** — pas de gradient violet, pas d'étoiles, pas de grille perspective. Neutre pour ne pas contaminer la hiérarchie des cases.
+- **Picots blancs purs** (fin du doré 3D) — neutralité maximale, halo discret au repos, amplifié au hit.
+- **Bille magenta `#FF2EB4`** (fin du doré) — corps + trail + particules d'impact cohérents. Choix bille rose car c'est l'élément qui doit "briller" sans rivaliser avec les cases jackpot.
+- **Cases rectangles verticaux contour fin néon** — palette magenta→violet→indigo→bleu gris→gris. Hiérarchie par la chaleur (pas la taille). x0.1 gris neutre, jamais rouge ni "punitif".
+- **Titre PLINKO en overlay Flutter** (`Positioned top: 150`) — retiré du rendu Flame pour placement pixel-exact indépendant du zoom caméra. Blanc pur + soulignement cyan `#00D9FF` fin.
+
+### Nouveau système multiplicateurs (Build 49)
+- **Échelle réduite** — ancienne `100·25·10·2·0.1·2·10·25·100` → nouvelle `10·2·0.5·0.1·0.1·0.1·0.5·2·10`. Décision Matthieu : x100 trop "promesse casino" pour un mini-jeu promo, x0.1 en 3 cases centrales plus réaliste. Gains plus lissés, moins de frustration (x0.5 récupère la moitié de la mise vs perdre 90 % sur x0.1).
+- **`slotIsMajor` seuil baissé à ≥ 10** — sinon plus aucune case n'aurait le glow "jackpot" après réduction d'échelle.
+
+### Contrôles mise + nombre de billes (Build 54)
+- **Tap-to-launch retiré** — remplacé par deux rangées de boutons en bas. Raison : ergonomie clavier/souris desktop + intention explicite vs tap répété.
+- **Rangée mise (1/2/5/10€)** — radio-style cyan, défaut 1€. `betAmountNotifier` dans `PlinkoGame`. Gain = `bet × mult` (plus de constante `kBallCost`).
+- **Rangée lancer (1/2/5/10 billes)** — CTA magenta, lancers multiples espacés de 120 ms. Boutons grisés tant que `ballsInFlightNotifier > 0` (double-protection dans `launchBalls` aussi). Décision : forcer l'attente de fin de rafale évite qu'on empile 40 billes d'un coup et qu'on ne voie plus rien.
 
 ### Responsive mobile + desktop (Build 46)
 - **Breakpoint unique 1024px** — viewport < 1024 = mode mobile, ≥ 1024 = mode desktop. Une seule règle, pas de zone grise tablette.
@@ -91,10 +109,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 | Domaine | Statut | Notes |
 |---|---|---|
-| Game Design | 🟢 Build 45 validé | 9 cases, multi `100·25·10·2·0.1·…` |
+| Game Design | 🟢 Build 49 validé | 9 cases, multi `10·2·0.5·0.1×3·0.5·2·10` (échelle réduite) |
 | Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire, cases découplées |
-| Design & UI | 🟡 En cours | Responsive mobile + desktop OK (Build 46). Trajectoires à régénérer. VFX Phase 2 à faire |
-| Dev | 🟢 Build 46 | Responsive breakpoint 1024, board max 500px, layout desktop 3 colonnes |
+| Design & UI | 🟢 Build 54 | Direction Deep Arcade livrée (fond noir, picots blancs, cases fin néon, bille magenta). Contrôles mise/billes en bas. Trajectoires à régénérer. VFX Phase 2 à faire |
+| Dev | 🟢 Build 54 | Contrôles mise + nombre de billes, tap-to-launch retiré, bet dynamique |
 | CI/CD | 🟢 Done | Auto-deploy gh-pages |
 | Test mobile (web) | 🟢 OK | Safari/Chrome iPhone via GitHub Pages |
 | Flutter local | 🟢 OK | v3.41.6 Windows (Git CMD) |
@@ -102,4 +120,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-17 — Build 46 : responsive mobile + desktop (breakpoint 1024, board max 500px, layout 3 colonnes sur desktop).*
+*Dernière mise à jour : 2026-04-18 — Build 54 : direction Deep Arcade livrée (fond noir, picots blancs, cases fin néon, bille magenta, titre overlay Flutter) + refonte multiplicateurs échelle réduite + contrôles UI mise/billes en bas remplaçant le tap-to-launch.*

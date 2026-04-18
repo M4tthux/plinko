@@ -100,7 +100,7 @@ EOF
 
 ## Config plateau actuelle
 
-> Build **46** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. **Responsive mobile + desktop** : breakpoint 1024px, board max 500px centré, layout desktop 3 colonnes `[240 | 500 | 240]` avec panneaux latéraux placeholder.
+> Build **54** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. **Direction Deep Arcade** (fond noir, picots blancs, cases fin néon, bille magenta). **Contrôles mise + nombre de billes** en bas (tap-to-launch retiré). Responsive mobile + desktop inchangé depuis Build 46.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|
@@ -155,18 +155,18 @@ EOF
 
 ## Système de multiplicateurs
 
-9 cases, multiplicateurs positionnels fixes symétriques (Build 45 — découplé des picots).
+9 cases, multiplicateurs positionnels fixes symétriques. **Échelle réduite Build 49** (voir `project-context.md` pour le pourquoi).
 
 ```
 Index :  0    1    2    3    4    5    6    7    8
-Mult  :  x100 x25  x10  x2   x0.1 x2   x10  x25  x100
+Mult  :  x10  x2   x0.5 x0.1 x0.1 x0.1 x0.5 x2   x10
 ```
 
-**Économie :** balance 50€, tap = −1€ (1 bille), gain = 1€ × mult[case], sortie du plateau = perdu.
-**Multi-ball :** 1 tap = 1 bille, despawn 0.8s après landing.
+**Économie :** balance 50€, mise sélectionnable 1/2/5/10€ via bouton (défaut 1€), gain = `bet × mult[case]`, sortie du plateau = perdu.
+**Lancer (Build 54) :** boutons "1 / 2 / 5 / 10 billes" en bas d'écran. Tap-to-launch retiré. Rafale espacée de 120 ms, boutons grisés tant qu'une bille n'a pas fini son parcours. `betAmountNotifier` + `ballsInFlightNotifier` dans `PlinkoGame`.
 **Animation "+X€"** (Build 41) : popup center screen (scale bump + fade 900ms), or si ≥1€, bleuté sinon.
 
-Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` — crédit : `PlinkoGame._creditLanding()` — popup : `_GainPopup` dans `main.dart` (stream `gainEvents`).
+Code : `PlinkoConfig.slotMultipliers` + `slotMultiplierLabel(i)` — crédit : `PlinkoGame._creditLanding()` — popup : `_GainPopup` dans `main.dart` — contrôles : `_BottomControls`, `_BetButton`, `_LaunchButton` dans `main.dart`.
 
 ---
 
