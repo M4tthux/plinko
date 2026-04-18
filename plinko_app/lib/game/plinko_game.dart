@@ -17,8 +17,11 @@ import 'ball.dart';
 ///   - Atterrissage → balance créditée de (multiplicateur × 1€)
 ///   - Plus d'overlay récompense : la balance affichée en coin d'écran suffit
 class PlinkoGame extends FlameGame with TapCallbacks {
-  /// Mise unitaire pour une bille (en €).
-  static const double kBallCost = 1.0;
+  /// Mise par défaut pour une bille (en €). Overridable via betAmountNotifier.
+  static const double kDefaultBet = 1.0;
+
+  /// Délai entre deux lancers en mode multi-bille (ms).
+  static const int _stagggerMs = 120;
 
   /// Durée pendant laquelle la bille reste visible après atterrissage
   /// avant d'être retirée du monde (permet de voir la case d'arrivée).
@@ -31,6 +34,13 @@ class PlinkoGame extends FlameGame with TapCallbacks {
 
   /// Balance en € — démarre à 50€. Source de vérité du score.
   final ValueNotifier<double> balanceNotifier = ValueNotifier<double>(50.0);
+
+  /// Mise courante par bille — pilotée par la rangée de boutons (1/2/5/10€).
+  final ValueNotifier<double> betAmountNotifier =
+      ValueNotifier<double>(kDefaultBet);
+
+  /// Nombre de billes en vol (vol + linger). 0 = on peut relancer.
+  final ValueNotifier<int> ballsInFlightNotifier = ValueNotifier<int>(0);
 
   /// Stream des gains crédités — 1 event par bille atterrissant dans une case.
   /// Écouté par l'UI pour afficher l'animation "+X€" flottante.
@@ -75,7 +85,8 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     await world.addAll(BoardBuilder.buildPegs());
     await world.addAll(BoardBuilder.buildSlotDividers());
     await world.addAll(BoardBuilder.buildSlotLabels());
-    await world.add(BoardBuilder.buildTitle());
+    // Titre PLINKO déplacé en overlay Flutter (main.dart) pour positionnement
+    // pixel-exact indépendant du zoom caméra.
   }
 
   /// Recalcule zoom + centre caméra pour fit la largeur de l'écran.
@@ -112,19 +123,30 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     }
   }
 
-  // ── Tap pour lancer (multi-ball) ─────────────────────────────────────────
+  // ── Lancer piloté par l'UI (plus de tap-to-launch) ───────────────────────
 
   @override
   void onTapUp(TapUpEvent event) {
-    // Chaque tap = 1 bille lancée, pas de blocage
-    _launchBall();
+    // Tap sur le plateau = no-op : le lancer passe par les boutons en bas.
+  }
+
+  /// Lance [count] billes en rafale (décalées de [_stagggerMs]).
+  /// Appelé par l'UI (boutons "N billes").
+  void launchBalls(int count) {
+    if (count <= 0) return;
+    if (ballsInFlightNotifier.value > 0) return; // double-protection
+    for (int i = 0; i < count; i++) {
+      Future.delayed(
+        Duration(milliseconds: i * _stagggerMs),
+        _launchBall,
+      );
+    }
   }
 
   void _launchBall() {
-    // Déduction immédiate de la mise
-    balanceNotifier.value = balanceNotifier.value - kBallCost;
+    final bet = betAmountNotifier.value;
+    balanceNotifier.value = balanceNotifier.value - bet;
 
-    // Lancement depuis le centre avec micro-jitter
     final jitter = (_rng.nextDouble() - 0.5) * 0.4;
     final startX = PlinkoConfig.boardCenterX + jitter;
     final startPos = Vector2(startX, PlinkoConfig.ballStartY);
@@ -132,6 +154,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     final ball = Ball(startPos);
     world.add(ball);
     _activeBalls.add(ball);
+    ballsInFlightNotifier.value = _activeBalls.length;
   }
 
   // ── Boucle principale ────────────────────────────────────────────────────
@@ -178,6 +201,9 @@ class PlinkoGame extends FlameGame with TapCallbacks {
       _creditedBalls.remove(ball);
       _landedLinger.remove(ball);
     }
+    if (toRemove.isNotEmpty) {
+      ballsInFlightNotifier.value = _activeBalls.length;
+    }
   }
 
   /// Crédite la balance du multiplicateur × mise, et joue les particules.
@@ -189,7 +215,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     }
 
     final mult = PlinkoConfig.slotMultiplierAt(slotIdx);
-    final gain = kBallCost * mult;
+    final gain = betAmountNotifier.value * mult;
     balanceNotifier.value = balanceNotifier.value + gain;
 
     // Émet le gain pour l'animation "+X€" flottante
@@ -273,6 +299,7 @@ class PlinkoGame extends FlameGame with TapCallbacks {
     _activeBalls.clear();
     _creditedBalls.clear();
     _landedLinger.clear();
+    ballsInFlightNotifier.value = 0;
 
     world.removeAll(world.children.whereType<Peg>().toList());
     world.removeAll(world.children.whereType<SlotDivider>().toList());

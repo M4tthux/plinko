@@ -4,8 +4,9 @@ import 'package:flutter/material.dart' show Colors, TextStyle, FontWeight, TextS
 import '../config/plinko_config.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Background — fond radial gradient (centre éclairci → bords sombres)
-// Priorité -100 : rendu avant tous les autres composants.
+// Background — Deep Arcade (Build 48)
+// Noir quasi-uniforme + très légère caustique radiale pour éviter le plat mort.
+// Aucune étoile, aucun gradient violet. Priorité -100.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class Background extends PositionComponent {
@@ -16,49 +17,32 @@ class Background extends PositionComponent {
     final w = PlinkoConfig.worldWidth;
     final h = PlinkoConfig.worldHeight;
 
-    // Fond noir profond — couvre tout le viewport
+    // Noir profond uniforme sur toute la zone (avec marge pour couvrir le viewport)
     const mx = 14.0;
     const my = 10.0;
     final full = Rect.fromLTWH(-mx, -my, w + mx * 2, h + my * 2);
-    canvas.drawRect(full, Paint()..color = const Color(0xFF060610));
+    canvas.drawRect(full, Paint()..color = const Color(0xFF08080F));
 
-    // Radial gradient central — profondeur
-    final center = Offset(w / 2, h * 0.45);
-    final gradientRect = Rect.fromCircle(center: center, radius: h * 0.7);
-    canvas.drawOval(gradientRect, Paint()
+    // Caustique radiale très diffuse au centre-haut (évite le plat)
+    final caustic = Rect.fromCircle(
+      center: Offset(w / 2, h * 0.35),
+      radius: h * 0.9,
+    );
+    canvas.drawRect(full, Paint()
       ..shader = RadialGradient(
         center: Alignment.center,
-        radius: 1.0,
-        colors: const [
-          Color(0xFF1a1a3a), // centre plus clair
-          Color(0xFF0f0f2a), // mi-distance
-          Color(0xFF060610), // bords sombres
+        radius: 0.95,
+        colors: [
+          const Color(0xFF18142A).withOpacity(0.55), // centre très légèrement plus clair
+          const Color(0xFF08080F).withOpacity(0.0),   // fondu vers transparent
         ],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(gradientRect));
-
-    // Lueur violette haute (zone de lancer) — plus intense
-    canvas.drawCircle(
-      Offset(w / 2, PlinkoConfig.pegStartY - 2.5),
-      w * 0.6,
-      Paint()
-        ..color      = const Color(0xFF2a1050).withOpacity(0.35)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0),
-    );
-
-    // Lueur cyan basse (zone des cases) — plus intense
-    canvas.drawCircle(
-      Offset(w / 2, PlinkoConfig.slotBaseY),
-      w * 0.45,
-      Paint()
-        ..color      = const Color(0xFF003050).withOpacity(0.22)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0),
-    );
+        stops: const [0.0, 1.0],
+      ).createShader(caustic));
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SideEdge — bordures latérales subtiles (remplace le cadre rectangulaire)
+// SideEdge — désactivé (Deep Arcade : pas de bord visuel)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SideEdge extends PositionComponent {
@@ -66,36 +50,12 @@ class SideEdge extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    final w = PlinkoConfig.worldWidth;
-    final topY = PlinkoConfig.pegStartY - 1.5;
-    final bottomY = PlinkoConfig.slotBaseY + 0.3;
-
-    final edgePaint = Paint()
-      ..color       = const Color(0xFF7c5cbf).withOpacity(0.30)
-      ..strokeWidth = 0.06
-      ..style       = PaintingStyle.stroke;
-
-    final glowPaint = Paint()
-      ..color       = const Color(0xFF7c5cbf).withOpacity(0.12)
-      ..strokeWidth = 0.30
-      ..style       = PaintingStyle.stroke
-      ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.25);
-
-    // Bord gauche
-    canvas.drawLine(Offset(0.08, topY), Offset(0.08, bottomY), glowPaint);
-    canvas.drawLine(Offset(0.08, topY), Offset(0.08, bottomY), edgePaint);
-
-    // Bord droit
-    canvas.drawLine(Offset(w - 0.08, topY), Offset(w - 0.08, bottomY), glowPaint);
-    canvas.drawLine(Offset(w - 0.08, topY), Offset(w - 0.08, bottomY), edgePaint);
+    // Pas de bords en direction Deep Arcade.
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// LaunchHole — trou sombre en haut du plateau d'où émerge la bille
-//
-// Rendu visuel uniquement (aucune physique). Donne l'illusion que la bille
-// vient d'un conduit caché derrière le plateau. Centré sur ballStartY.
+// LaunchHole — bille idle discrète sous le titre (magenta, pas dorée)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class LaunchHole extends PositionComponent {
@@ -106,86 +66,48 @@ class LaunchHole extends PositionComponent {
             PlinkoConfig.ballStartY,
           ),
           anchor: Anchor.center,
-          priority: -50, // derrière les picots, devant le fond
+          priority: -50,
         );
 
   @override
   void render(Canvas canvas) {
-    // Rayon calqué sur la bille (légèrement plus grand pour la marge visuelle)
-    final rBall = PlinkoConfig.ballRadius;
-    final rOuter = rBall * 1.75; // ouverture visible
-    final rInner = rBall * 1.25; // bord intérieur sombre
-    final rCore  = rBall * 1.05; // cœur noir
+    final r = PlinkoConfig.ballRadius;
+    const magenta = Color(0xFFFF2EB4);
 
-    // ── Anneau extérieur : liseré violet glow (bordure du conduit) ──────────
-    canvas.drawCircle(
-      Offset.zero,
-      rOuter + 0.05,
-      Paint()
-        ..color       = const Color(0xFF9d7cdf).withOpacity(0.28)
-        ..style       = PaintingStyle.stroke
-        ..strokeWidth = 0.10
-        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.22),
-    );
+    // Halo magenta diffus
+    canvas.drawCircle(Offset.zero, r * 2.0, Paint()
+      ..color      = magenta.withOpacity(0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8));
 
-    // ── Plaque métallique extérieure (dégradé radial gris-violet) ──────────
-    final plateRect = Rect.fromCircle(center: Offset.zero, radius: rOuter);
-    canvas.drawCircle(Offset.zero, rOuter, Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.25, -0.35),
+    // Halo interne
+    canvas.drawCircle(Offset.zero, r * 1.35, Paint()
+      ..color      = magenta.withOpacity(0.40)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.35));
+
+    // Corps magenta
+    final bodyRect = Rect.fromCircle(center: Offset.zero, radius: r);
+    canvas.drawCircle(Offset.zero, r, Paint()
+      ..shader = const RadialGradient(
+        center: Alignment(-0.3, -0.4),
         radius: 1.0,
-        colors: const [
-          Color(0xFF3a2a5c),
-          Color(0xFF1e1433),
-          Color(0xFF0a0616),
+        colors: [
+          Color(0xFFFFD6EE),
+          Color(0xFFFF2EB4),
+          Color(0xFF7A0E55),
         ],
-        stops: const [0.0, 0.55, 1.0],
-      ).createShader(plateRect));
+        stops: [0.0, 0.5, 1.0],
+      ).createShader(bodyRect));
 
-    // ── Liseré intérieur net (bord de l'ouverture) ─────────────────────────
+    // Reflet spéculaire
     canvas.drawCircle(
-      Offset.zero,
-      rInner,
-      Paint()
-        ..color       = const Color(0xFF7c5cbf).withOpacity(0.55)
-        ..style       = PaintingStyle.stroke
-        ..strokeWidth = 0.045,
-    );
-
-    // ── Ombre interne (profondeur du trou) ─────────────────────────────────
-    final holeRect = Rect.fromCircle(center: Offset.zero, radius: rInner);
-    canvas.drawCircle(Offset.zero, rInner, Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(0.0, -0.35),
-        radius: 1.0,
-        colors: const [
-          Color(0xFF1a0f2e),
-          Color(0xFF050208),
-          Color(0xFF000000),
-        ],
-        stops: const [0.0, 0.65, 1.0],
-      ).createShader(holeRect));
-
-    // ── Cœur noir profond ──────────────────────────────────────────────────
-    canvas.drawCircle(
-      Offset.zero,
-      rCore,
-      Paint()..color = const Color(0xFF000000),
-    );
-
-    // ── Reflet spéculaire subtil sur la plaque (haut-gauche) ───────────────
-    canvas.drawCircle(
-      Offset(-rOuter * 0.35, -rOuter * 0.55),
-      rOuter * 0.22,
-      Paint()
-        ..color       = Colors.white.withOpacity(0.18)
-        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.08),
-    );
+      Offset(-r * 0.3, -r * 0.35),
+      r * 0.24,
+      Paint()..color = Colors.white.withOpacity(0.75));
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Wall plat (bas) — visuel uniquement
+// Wall plat — visuel uniquement (désactivé en Deep Arcade)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class Wall extends PositionComponent {
@@ -200,31 +122,28 @@ class Wall extends PositionComponent {
       Offset(_start.x, _start.y),
       Offset(_end.x, _end.y),
       Paint()
-        ..color       = const Color(0xFF3a2060)
-        ..strokeWidth = 0.15
+        ..color       = const Color(0xFF1A1A28)
+        ..strokeWidth = 0.08
         ..style       = PaintingStyle.stroke,
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Picot (peg) — blanc/gris uniforme, gros halo, dégradé radial, spéculaire
+// Picot (peg) — Deep Arcade : point blanc pur net, halo discret
 // ─────────────────────────────────────────────────────────────────────────────
 
 class Peg extends PositionComponent {
-  final Color _color;
-
-  // ── Glow flash au passage de la bille ──────────────────────────────────
+  // Glow flash au passage de la bille
   double _hitTimer = 0.0;
-  static const double _hitDuration = 0.20; // 200ms
+  static const double _hitDuration = 0.20;
 
   void triggerHit() {
     _hitTimer = _hitDuration;
   }
 
-  Peg(Vector2 pegPosition, {Color? color})
-      : _color = color ?? const Color(0xFFd0d0e0),
-        super(position: pegPosition, anchor: Anchor.center);
+  Peg(Vector2 pegPosition)
+      : super(position: pegPosition, anchor: Anchor.center);
 
   @override
   void update(double dt) {
@@ -236,42 +155,28 @@ class Peg extends PositionComponent {
     final r = PlinkoConfig.pegRadius;
     final hitProgress = (_hitTimer > 0) ? (_hitTimer / _hitDuration) : 0.0;
 
-    // Halo atmosphérique — 2.2× rayon, plus intense si hit
-    final haloOpacity = 0.30 + hitProgress * 0.50;
-    final haloRadius  = r * (2.2 + hitProgress * 1.0);
+    // Halo blanc discret au repos, amplifié au hit
+    final haloOpacity = 0.12 + hitProgress * 0.55;
+    final haloRadius  = r * (1.7 + hitProgress * 1.1);
     canvas.drawCircle(
       Offset.zero,
       haloRadius,
       Paint()
-        ..color      = Color.lerp(_color, Colors.white, hitProgress * 0.7)!.withOpacity(haloOpacity)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * (1.0 + hitProgress * 0.6)),
+        ..color      = Colors.white.withOpacity(haloOpacity)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * (0.8 + hitProgress * 0.6)),
     );
 
-    // Corps — dégradé radial blanc→gris, plus blanc si hit
-    final bodyRect = Rect.fromCircle(center: Offset.zero, radius: r);
-    canvas.drawCircle(Offset.zero, r, Paint()
-      ..shader = RadialGradient(
-        center: const Alignment(-0.3, -0.35),
-        radius: 0.85,
-        colors: [
-          Color.lerp(const Color(0xFFf0f0ff), Colors.white, hitProgress)!,
-          Color.lerp(const Color(0xFFd0d0e0), Colors.white, hitProgress * 0.8)!,
-          Color.lerp(const Color(0xFF9898b0), const Color(0xFFd0d0e0), hitProgress)!,
-        ],
-        stops: const [0.0, 0.5, 1.0],
-      ).createShader(bodyRect));
-
-    // Reflet spéculaire — plus gros et lumineux
+    // Corps — point blanc pur solide, légèrement plus petit (lisibilité écran épuré)
     canvas.drawCircle(
-      Offset(-r * 0.25, -r * 0.28),
-      r * 0.35,
-      Paint()..color = Colors.white.withOpacity(0.80 + hitProgress * 0.20),
+      Offset.zero,
+      r * 0.72,
+      Paint()..color = Colors.white,
     );
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Séparateur de case — mur vertical avec glow subtil
+// SlotDivider — Deep Arcade : désactivé (les cases parlent via leur contour)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SlotDivider extends PositionComponent {
@@ -281,29 +186,15 @@ class SlotDivider extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    final topY    = PlinkoConfig.slotBaseY - PlinkoConfig.slotWallHeight;
-    final bottomY = PlinkoConfig.slotBaseY;
-
-    // Glow subtil
-    canvas.drawLine(Offset(_x, topY), Offset(_x, bottomY), Paint()
-      ..color       = const Color(0xFF7c5cbf).withOpacity(0.18)
-      ..strokeWidth = 0.20
-      ..style       = PaintingStyle.stroke
-      ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.12));
-
-    // Ligne principale
-    canvas.drawLine(Offset(_x, topY), Offset(_x, bottomY), Paint()
-      ..color       = const Color(0xFF9080c0).withOpacity(0.55)
-      ..strokeWidth = PlinkoConfig.slotWallThickness * 1.5
-      ..style       = PaintingStyle.stroke);
+    // Pas de séparateur visible — remplacé par le contour net des cases.
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SlotLabel — coupe en verre stylisée (trapézoïdale, effet cristal)
-//
-// Refonte visuelle : fond plus opaque, bordures plus épaisses, glow sur
-// TOUTES les cases, texte plus gros.
+// SlotLabel — Deep Arcade (Build 48)
+// Rectangle vertical à coins arrondis, fill sombre avec léger gradient,
+// contour fin néon dans la couleur du multiplicateur. Pas de pièces flottantes,
+// pas de reflet verre, hiérarchie via intensité du glow uniquement.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class SlotLabel extends PositionComponent {
@@ -323,179 +214,90 @@ class SlotLabel extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    // Lire directement le multiplicateur de la case
     final label     = PlinkoConfig.slotMultiplierLabel(_index);
     final isJackpot = PlinkoConfig.slotIsMajor(_index);
     final color     = PlinkoConfig.slotColorAt(_index);
 
-    // ── Dimensions de la coupe ────────────────────────────────────────────────
-    final cw  = _w - 0.08;   // largeur utile (réduit la marge)
-    final ch  = _h - 0.04;
-    final hw  = cw / 2;
-    final hh  = ch / 2;
+    // Rectangle vertical (légère marge entre cases)
+    final cw = _w - 0.06;
+    final ch = _h - 0.04;
+    final hw = cw / 2;
+    final hh = ch / 2;
+    final radius = Radius.circular(cw * 0.10);
 
-    final widthBonus = isJackpot ? hw * 0.08 : 0.0;
-    final topY  = -hh;
-    final botY  = hh;
-    final rimAdd   = (hw + widthBonus) * 0.07;
-    final shrink   = (hw + widthBonus) * 0.04;
-    final hwEff    = hw + widthBonus;
+    final rrect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(-hw, -hh, hw, hh),
+      radius,
+    );
 
-    // Chemin trapézoïdal coupe
-    final cupPath = Path()
-      ..moveTo(-(hwEff + rimAdd), topY)
-      ..lineTo( (hwEff + rimAdd), topY)
-      ..lineTo( (hwEff - shrink), botY)
-      ..lineTo(-(hwEff - shrink), botY)
-      ..close();
+    // ── Glow externe — intensité proportionnelle à la désirabilité ─────────
+    final glowOpacity = isJackpot ? 0.55 : (_index == 4 ? 0.10 : 0.22);
+    final glowBlur    = isJackpot ? 0.45 : 0.25;
+    canvas.drawRRect(rrect, Paint()
+      ..color      = color.withOpacity(glowOpacity)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, glowBlur));
 
-    final cupRect = Rect.fromLTRB(-(hwEff + rimAdd), topY, (hwEff + rimAdd), botY);
-
-    // ── Glow sur TOUTES les cases ─────────────────────────────────────────────
-    canvas.drawPath(cupPath, Paint()
-      ..color      = color.withOpacity(isJackpot ? 0.60 : 0.30)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, isJackpot ? 0.55 : 0.30));
-
-    // ── Corps — dégradé vertical, plus opaque ─────────────────────────────────
-    canvas.drawPath(cupPath, Paint()
+    // ── Fill sombre avec léger dégradé vertical (haut plus clair teinté) ───
+    final fillRect = Rect.fromLTRB(-hw, -hh, hw, hh);
+    canvas.drawRRect(rrect, Paint()
       ..shader = LinearGradient(
         begin:  Alignment.topCenter,
         end:    Alignment.bottomCenter,
         colors: [
-          color.withOpacity(isJackpot ? 0.45 : 0.28),
-          const Color(0xFF06060f).withOpacity(0.85),
+          Color.lerp(const Color(0xFF14101E), color, isJackpot ? 0.22 : 0.12)!.withOpacity(0.95),
+          const Color(0xFF08060F).withOpacity(0.95),
         ],
-      ).createShader(cupRect));
+      ).createShader(fillRect));
 
-    // ── Shine verre — reflet diagonal gauche ──────────────────────────────────
-    canvas.save();
-    canvas.clipPath(cupPath);
-    canvas.drawLine(
-      Offset(-(hwEff + rimAdd) + 0.10, topY + 0.07),
-      Offset(-(hwEff + rimAdd) + 0.17, botY - 0.09),
-      Paint()
-        ..color       = Colors.white.withOpacity(0.28)
-        ..strokeWidth = 0.22
-        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.07));
-    canvas.restore();
-
-    // ── Bordure néon — toutes les cases, plus épaisse ─────────────────────────
-    if (isJackpot) {
-      // Glow externe doré intense
-      canvas.drawPath(cupPath, Paint()
-        ..color       = color.withOpacity(0.65)
-        ..style       = PaintingStyle.stroke
-        ..strokeWidth = 0.28
-        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.22));
-    } else {
-      // Glow subtil sur les cases normales
-      canvas.drawPath(cupPath, Paint()
-        ..color       = color.withOpacity(0.30)
-        ..style       = PaintingStyle.stroke
-        ..strokeWidth = 0.16
-        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.12));
-    }
-    canvas.drawPath(cupPath, Paint()
-      ..color       = color.withOpacity(isJackpot ? 0.95 : 0.75)
+    // ── Contour fin néon ────────────────────────────────────────────────────
+    canvas.drawRRect(rrect, Paint()
+      ..color       = color.withOpacity(isJackpot ? 0.95 : 0.80)
       ..style       = PaintingStyle.stroke
-      ..strokeWidth = isJackpot ? 0.12 : 0.07);
+      ..strokeWidth = isJackpot ? 0.035 : 0.025);
 
-    // ── Rim highlight — liseré brillant en haut ───────────────────────────────
-    canvas.drawLine(
-      Offset(-(hwEff + rimAdd) + 0.09, topY + 0.028),
-      Offset( (hwEff + rimAdd) - 0.09, topY + 0.028),
-      Paint()
-        ..color       = Colors.white.withOpacity(0.55)
-        ..strokeWidth = 0.035);
-
-    // ── Dim si une autre case est en surbrillance ─────────────────────────────
+    // ── Dim si une autre case est en surbrillance (debug config) ──────────
     final highlighted = PlinkoConfig.highlightedSlotIndex;
     if (highlighted != null && _index != highlighted) {
-      canvas.drawPath(cupPath, Paint()..color = const Color(0xCC000000));
+      canvas.drawRRect(rrect, Paint()..color = const Color(0xCC000000));
     }
 
-    // ── Pièces flottantes (jackpot uniquement) ────────────────────────────────
-    if (isJackpot) {
-      _drawCoins(canvas, topY);
-    }
-
-    // ── Texte centré — proportionnel à la largeur de case ────────────────────
-    const textY = 0.0;
+    // ── Texte — blanc pur, sans-serif bold, pas de glow coloré ─────────────
     final sw = PlinkoConfig.slotWidth;
     final baseSize = label.length > 4 ? sw * 0.30
                    : label.length > 3 ? sw * 0.34
-                   : sw * 0.38;
-    final fontSize = isJackpot ? baseSize * 1.15 : baseSize;
+                   : sw * 0.40;
+    final fontSize = isJackpot ? baseSize * 1.08 : baseSize;
 
     final tp = TextPainter(
       text: TextSpan(
         text: label,
         style: TextStyle(
-          color:      isJackpot ? const Color(0xFFffe680) : Colors.white,
+          color:      Colors.white,
           fontSize:   fontSize,
-          fontWeight: FontWeight.w900,
+          fontWeight: FontWeight.w800,
           height:     1.0,
+          letterSpacing: -0.02,
           shadows: [
-            Shadow(color: const Color(0xFF000000).withOpacity(0.80),
-                   blurRadius: 0.05, offset: const Offset(0.02, 0.025)),
-            Shadow(color: color.withOpacity(0.95), blurRadius: 0.18),
-            Shadow(color: color.withOpacity(0.60), blurRadius: 0.40),
+            Shadow(
+              color: const Color(0xFF000000).withOpacity(0.60),
+              blurRadius: 0.04,
+              offset: const Offset(0.015, 0.02),
+            ),
           ],
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
 
-    tp.paint(canvas, Offset(-tp.width / 2, textY - tp.height / 2));
-  }
-
-  // ── Pièces dorées flottant au-dessus de la coupe jackpot ──────────────────
-  void _drawCoins(Canvas canvas, double topY) {
-    // Positions scalées relativement à slotWidth (référence 1.35)
-    final sc = PlinkoConfig.slotWidth / 1.35;
-    final coins = [
-      [-0.44 * sc, topY - 0.16 * sc, 0.113 * sc],
-      [ 0.06 * sc, topY - 0.37 * sc, 0.124 * sc],
-      [ 0.48 * sc, topY - 0.12 * sc, 0.106 * sc],
-      [-0.16 * sc, topY - 0.51 * sc, 0.094 * sc],
-      [ 0.28 * sc, topY - 0.43 * sc, 0.111 * sc],
-    ];
-
-    for (final c in coins) {
-      final cx = c[0], cy = c[1], cr = c[2];
-      final coinRect = Rect.fromCircle(center: Offset(cx, cy), radius: cr);
-
-      // Glow doré
-      canvas.drawCircle(Offset(cx, cy), cr * 2.0, Paint()
-        ..color      = const Color(0xFFf0c040).withOpacity(0.33)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.09));
-
-      // Corps sphère pièce
-      canvas.drawCircle(Offset(cx, cy), cr, Paint()
-        ..shader = const RadialGradient(
-          center: Alignment(-0.30, -0.38),
-          radius: 0.92,
-          colors: [Color(0xFFffe78a), Color(0xFFf0c040), Color(0xFFb87800)],
-          stops:  [0.0, 0.44, 1.0],
-        ).createShader(coinRect));
-
-      // Liseré
-      canvas.drawCircle(Offset(cx, cy), cr, Paint()
-        ..color       = const Color(0xFFd4900a).withOpacity(0.82)
-        ..style       = PaintingStyle.stroke
-        ..strokeWidth = 0.014);
-
-      // Reflet spéculaire
-      canvas.drawCircle(
-        Offset(cx - cr * 0.24, cy - cr * 0.30),
-        cr * 0.28,
-        Paint()..color = Colors.white.withOpacity(0.74));
-    }
+    // Centrage vertical : compensation visuelle pour chiffres sans-serif
+    // (le line-box inclut du descent inutile → on shift légèrement vers le bas).
+    final yOffset = -tp.height / 2 + fontSize * 0.18;
+    tp.paint(canvas, Offset(-tp.width / 2, yOffset));
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PlinkoTitle — label "PLINKO" en haut du plateau
+// PlinkoTitle — Deep Arcade : blanc pur + soulignement cyan fin
 // ─────────────────────────────────────────────────────────────────────────────
 
 class PlinkoTitle extends PositionComponent {
@@ -507,27 +309,46 @@ class PlinkoTitle extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
+    const cyan = Color(0xFF00D9FF);
+
     final tp = TextPainter(
-      text: TextSpan(
+      text: const TextSpan(
         text: 'PLINKO',
         style: TextStyle(
-          color:      const Color(0xFFe8d0ff),
-          fontSize:   1.1,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 0.25,
-          height:     1.0,
-          shadows: [
-            Shadow(color: const Color(0xFF7c5cbf).withOpacity(0.90), blurRadius: 0.40),
-            Shadow(color: const Color(0xFF7c5cbf).withOpacity(0.50), blurRadius: 0.80),
-            Shadow(color: const Color(0xFF000000).withOpacity(0.60), blurRadius: 0.06,
-                   offset: const Offset(0.03, 0.03)),
-          ],
+          color:         Colors.white,
+          fontSize:      1.1,
+          fontWeight:    FontWeight.w900,
+          letterSpacing: 0.18,
+          height:        1.0,
         ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
 
     tp.paint(canvas, Offset(-tp.width / 2, -tp.height / 2));
+
+    // Soulignement cyan fin sous le mot
+    final lineY = tp.height / 2 + 0.12;
+    final lineHalfW = tp.width * 0.42;
+
+    // Glow diffus
+    canvas.drawLine(
+      Offset(-lineHalfW, lineY),
+      Offset( lineHalfW, lineY),
+      Paint()
+        ..color       = cyan.withOpacity(0.55)
+        ..strokeWidth = 0.10
+        ..maskFilter  = const MaskFilter.blur(BlurStyle.normal, 0.08),
+    );
+
+    // Trait net
+    canvas.drawLine(
+      Offset(-lineHalfW, lineY),
+      Offset( lineHalfW, lineY),
+      Paint()
+        ..color       = cyan
+        ..strokeWidth = 0.035,
+    );
   }
 }
 
@@ -542,11 +363,9 @@ class BoardBuilder {
   static LaunchHole buildLaunchHole() => LaunchHole();
 
   static List<PositionComponent> buildWalls() {
-    return []; // pas de contour — bords ouverts
+    return [];
   }
 
-  /// Grille triangulaire : rang R contient R+1 picots (à partir de startRow).
-  /// Picots blancs/gris uniformes.
   static List<Peg> buildPegs() {
     final pegs = <Peg>[];
     for (int row = PlinkoConfig.startRow; row < PlinkoConfig.rows; row++) {
@@ -560,7 +379,6 @@ class BoardBuilder {
     return pegs;
   }
 
-  /// Séparateurs entre les cases.
   static List<SlotDivider> buildSlotDividers() {
     return List.generate(
       PlinkoConfig.slotCount + 1,

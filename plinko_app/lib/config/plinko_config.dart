@@ -79,25 +79,26 @@ class PlinkoConfig {
   static double get slotBaseY =>
       pegY(rows - 1) + pegGY + slotWallHeight;
 
-  // ─── Multiplicateurs des 9 cases (symétrique, x100 aux extrémités) ────────
-  // Index 4 (centre) = x0.1 (le pire), extrémités = x100 (jackpot)
+  // ─── Multiplicateurs des 9 cases (symétrique) ─────────────────────────────
+  // Extrémités = x10, puis x2, x0.5, et 3 cases centrales = x0.1.
   static const List<double> slotMultipliers = [
-    100.0, 25.0, 10.0, 2.0,
+    10.0, 2.0, 0.5, 0.1,
     0.1,  // centre (index 4)
-    2.0, 10.0, 25.0, 100.0,
+    0.1, 0.5, 2.0, 10.0,
   ];
 
-  /// Gradient aligné sur le multiplicateur : extrêmes chauds → centre terne.
+  /// Palette Deep Arcade (Build 48) : magenta aux extrémités → dégradé froid au centre.
+  /// Principe : chaleur code la désirabilité, neutre au centre (x0.1 ≠ punition).
   static const List<int> _slotColorValues = [
-    0xFFff1a1a, // x100 rouge vif
-    0xFFff4422, // x25  rouge-orange
-    0xFFff7a00, // x10  orange
-    0xFFffcc00, // x2   jaune
-    0xFF2d6fa8, // x0.1 bleu (centre)
-    0xFFffcc00, // x2   jaune
-    0xFFff7a00, // x10  orange
-    0xFFff4422, // x25  rouge-orange
-    0xFFff1a1a, // x100 rouge vif
+    0xFFFF2EB4, // x100 magenta vif
+    0xFFB847FF, // x25  violet
+    0xFF6B4FFF, // x10  indigo
+    0xFF4A5A8A, // x2   bleu gris
+    0xFF3A3A4A, // x0.1 gris neutre (centre)
+    0xFF4A5A8A, // x2   bleu gris
+    0xFF6B4FFF, // x10  indigo
+    0xFFB847FF, // x25  violet
+    0xFFFF2EB4, // x100 magenta vif
   ];
 
   /// Formate un multiplicateur en label affiché ("x100", "x0.1"…).
@@ -110,8 +111,9 @@ class PlinkoConfig {
 
   static double slotMultiplierAt(int i) => slotMultipliers[i];
   static String slotLabelAt(int i) => slotMultiplierLabel(i);
-  /// Une case est "majeure" (visuel jackpot : pièces, glow fort) si x25 ou plus.
-  static bool   slotIsMajor(int i) => slotMultipliers[i] >= 25.0;
+  /// Une case est "majeure" (glow fort) si x10 ou plus — les extrémités dans
+  /// la config actuelle (post échelle réduite x0.1→x10).
+  static bool   slotIsMajor(int i) => slotMultipliers[i] >= 10.0;
   /// Backward-compat — traité comme slotIsMajor pour le rendu existant.
   static bool   slotIsJackpot(int i) => slotIsMajor(i);
   static Color  slotColorAt(int i) => Color(_slotColorValues[i]);

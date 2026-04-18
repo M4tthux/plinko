@@ -220,13 +220,20 @@ class _ConfigPanelState extends State<ConfigPanel> {
             child: Container(
               width: 40, height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF1a1a30),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF3a2060)),
+                color: const Color(0xFF0A0A14).withOpacity(0.75),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                    color: const Color(0xFF00D9FF).withOpacity(0.85), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00D9FF).withOpacity(0.35),
+                    blurRadius: 10,
+                  ),
+                ],
               ),
               child: Icon(
-                _open ? Icons.close : Icons.tune,
-                color: const Color(0xFF00c8ff),
+                _open ? Icons.close : Icons.menu,
+                color: Colors.white,
                 size: 20,
               ),
             ),

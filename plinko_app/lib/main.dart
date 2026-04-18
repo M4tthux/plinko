@@ -8,7 +8,7 @@ import 'ui/config_panel.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-17 · build 46';
+const String kBuildTime = '2026-04-18 · build 54';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -148,105 +148,90 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   Widget _buildGameContainer() {
     return Stack(
       children: [
-              // Jeu Flame — fond sombre opaque rendu par Flame
+              // Jeu Flame — fond noir Deep Arcade
               GameWidget(
                 game: _game,
-                backgroundBuilder: (_) => Container(color: const Color(0xFF08040f)),
+                backgroundBuilder: (_) => Container(color: const Color(0xFF08080F)),
               ),
 
-              // Instructions
+              // Titre PLINKO — overlay Flutter, positionné pixel-exact
               const Positioned(
-                bottom: 24,
+                top: 150,
                 left: 0,
                 right: 0,
-                child: Text(
-                  'Tap pour lancer (1€ / bille)',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0x8800c8ff),
-                    fontSize: 13,
-                    letterSpacing: 1.5,
-                  ),
-                ),
+                child: _PlinkoTitleOverlay(),
               ),
 
-              // Badge version — DEBUG
+              // Rangées de boutons : mise + nombre de billes
+              Positioned(
+                bottom: 26,
+                left: 12,
+                right: 12,
+                child: _BottomControls(game: _game),
+              ),
+
+              // Badge version — DEBUG (discret, tout en bas)
               const Positioned(
-                top: 8,
+                bottom: 4,
                 left: 0,
                 right: 0,
                 child: Text(
                   kBuildTime,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Color(0xCC00c8ff),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
+                    color: Color(0x55FFFFFF),
+                    fontSize: 9,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.6,
                   ),
                 ),
               ),
 
-              // Balance — coin haut-gauche, au-dessus du plateau
+              // Balance — coin haut-gauche, card rose néon
               Positioned(
-                top: 40,
+                top: 16,
                 left: 16,
                 child: ValueListenableBuilder<double>(
                   valueListenable: _game.balanceNotifier,
                   builder: (context, balance, _) {
                     final positive = balance >= 0;
+                    final accent = positive
+                        ? const Color(0xFF00D9FF)         // cyan Deep Arcade
+                        : const Color(0xFFFF4466);        // rouge si négatif
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            const Color(0xFF1a1033).withOpacity(0.92),
-                            const Color(0xFF0a0618).withOpacity(0.92),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: const Color(0xFF0A0A14).withOpacity(0.75),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: positive
-                              ? const Color(0xFFf0c040).withOpacity(0.55)
-                              : const Color(0xFFff4444).withOpacity(0.55),
-                          width: 1.2,
-                        ),
+                        border: Border.all(color: accent.withOpacity(0.85), width: 1),
                         boxShadow: [
                           BoxShadow(
-                            color: (positive
-                                    ? const Color(0xFFf0c040)
-                                    : const Color(0xFFff4444))
-                                .withOpacity(0.25),
+                            color: accent.withOpacity(0.35),
                             blurRadius: 10,
                             spreadRadius: 0,
                           ),
                         ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'BALANCE',
+                          Text(
+                            '€',
                             style: TextStyle(
-                              color: Color(0x99e8d0ff),
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 1.4,
+                              color: accent,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              height: 1.0,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(width: 8),
                           Text(
-                            '${balance.toStringAsFixed(2)} €',
-                            style: TextStyle(
-                              color: positive
-                                  ? const Color(0xFFffe680)
-                                  : const Color(0xFFff9a9a),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
+                            balance.toStringAsFixed(2),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.3,
                               height: 1.0,
                             ),
                           ),
@@ -384,6 +369,209 @@ class _DashedBorderPainter extends CustomPainter {
       old.dashLength != dashLength ||
       old.gapLength != gapLength ||
       old.radius != radius;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _PlinkoTitleOverlay — titre "PLINKO" blanc + soulignement cyan
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PlinkoTitleOverlay extends StatelessWidget {
+  const _PlinkoTitleOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    const cyan = Color(0xFF00D9FF);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'PLINKO',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 42,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 3.5,
+            height: 1.0,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: 110,
+          height: 2,
+          decoration: BoxDecoration(
+            color: cyan,
+            boxShadow: [
+              BoxShadow(color: cyan.withOpacity(0.7), blurRadius: 6),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _BottomControls — deux rangées : mise (1/2/5/10€) + nombre de billes (1/2/5/10)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _BottomControls extends StatelessWidget {
+  final PlinkoGame game;
+  const _BottomControls({required this.game});
+
+  static const _betOptions = <double>[1, 2, 5, 10];
+  static const _countOptions = <int>[1, 2, 5, 10];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Rangée 1 : sélection mise (radio-button style)
+        ValueListenableBuilder<double>(
+          valueListenable: game.betAmountNotifier,
+          builder: (_, bet, __) {
+            return Row(
+              children: [
+                for (int i = 0; i < _betOptions.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: _BetButton(
+                      label: '${_betOptions[i].toInt()}€',
+                      selected: bet == _betOptions[i],
+                      onTap: () => game.betAmountNotifier.value = _betOptions[i],
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+        // Rangée 2 : lancer N billes
+        ValueListenableBuilder<int>(
+          valueListenable: game.ballsInFlightNotifier,
+          builder: (_, inFlight, __) {
+            final disabled = inFlight > 0;
+            return Row(
+              children: [
+                for (int i = 0; i < _countOptions.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: _LaunchButton(
+                      label: _countOptions[i] == 1
+                          ? '1 bille'
+                          : '${_countOptions[i]} billes',
+                      disabled: disabled,
+                      onTap: disabled
+                          ? null
+                          : () => game.launchBalls(_countOptions[i]),
+                    ),
+                  ),
+                ],
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _BetButton extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _BetButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const cyan = Color(0xFF00D9FF);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 42,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected
+              ? cyan.withOpacity(0.18)
+              : const Color(0xFF0A0A14).withOpacity(0.75),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected ? cyan : Colors.white.withOpacity(0.18),
+            width: selected ? 1.4 : 1,
+          ),
+          boxShadow: selected
+              ? [BoxShadow(color: cyan.withOpacity(0.35), blurRadius: 10)]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : const Color(0xCCFFFFFF),
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LaunchButton extends StatelessWidget {
+  final String label;
+  final bool disabled;
+  final VoidCallback? onTap;
+  const _LaunchButton({
+    required this.label,
+    required this.disabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const magenta = Color(0xFFFF2EB4);
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Opacity(
+        opacity: disabled ? 0.35 : 1.0,
+        child: Container(
+          height: 50,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: disabled
+                ? const Color(0xFF0A0A14).withOpacity(0.5)
+                : magenta.withOpacity(0.14),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: disabled
+                  ? Colors.white.withOpacity(0.10)
+                  : magenta,
+              width: disabled ? 1 : 1.4,
+            ),
+            boxShadow: disabled
+                ? null
+                : [BoxShadow(color: magenta.withOpacity(0.40), blurRadius: 12)],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: disabled ? const Color(0x77FFFFFF) : Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

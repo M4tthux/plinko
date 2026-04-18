@@ -219,26 +219,27 @@ class Ball extends PositionComponent {
   void render(Canvas canvas) {
     final r = PlinkoConfig.ballRadius;
 
-    // ── Trail lumineux (10 positions précédentes, fade opacity) ────────────
-    // Le trail est dessiné AVANT la transformation squash (positions absolues)
+    const magenta = Color(0xFFFF2EB4);
+
+    // ── Trail magenta (10 positions précédentes, fade opacity) ─────────────
     for (int i = 0; i < _trailPositions.length; i++) {
-      final t = (i + 1) / _trailPositions.length; // 0→1 (ancien→récent)
+      final t = (i + 1) / _trailPositions.length;
       final trailPos = _trailPositions[i];
       final offset = Offset(
         trailPos.x - position.x,
         trailPos.y - position.y,
       );
-      final trailRadius = r * (0.3 + 0.5 * t); // 30%→80% du rayon
-      final opacity = 0.35 * t;                  // 0→0.35
+      final trailRadius = r * (0.3 + 0.5 * t);
+      final opacity = 0.40 * t;
 
-      // Glow flou
+      // Glow flou magenta
       canvas.drawCircle(offset, trailRadius * 1.6, Paint()
-        ..color      = const Color(0xFFf0c040).withOpacity(opacity * 0.4)
+        ..color      = magenta.withOpacity(opacity * 0.5)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.5));
 
       // Point solide
       canvas.drawCircle(offset, trailRadius, Paint()
-        ..color = const Color(0xFFf0c040).withOpacity(opacity));
+        ..color = magenta.withOpacity(opacity));
     }
 
     // ── Squash & stretch (déformation au rebond) ──────────────────────────
@@ -247,35 +248,35 @@ class Ball extends PositionComponent {
     canvas.scale(_squashScaleX, _squashScaleY);
     canvas.rotate(-_squashAngle);
 
-    // ── Halo externe or (glow dynamique — brille plus quand accélère) ────
-    final glowBoost = _speedFactor * 0.25; // 0→0.25 boost
+    // ── Halo externe magenta (glow dynamique — brille plus quand accélère)
+    final glowBoost = _speedFactor * 0.25;
     canvas.drawCircle(Offset.zero, r * (2.2 + _speedFactor * 0.8), Paint()
-      ..color      = const Color(0xFFf0c040).withOpacity(0.18 + glowBoost)
+      ..color      = magenta.withOpacity(0.20 + glowBoost)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.9 + _speedFactor * 0.5));
 
     // Halo interne
     canvas.drawCircle(Offset.zero, r * (1.45 + _speedFactor * 0.3), Paint()
-      ..color      = const Color(0xFFf0c040).withOpacity(0.40 + glowBoost * 0.6)
+      ..color      = magenta.withOpacity(0.45 + glowBoost * 0.6)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 0.45 + _speedFactor * 0.3));
 
-    // Corps principal — sphère dorée
+    // Corps principal — sphère magenta
     canvas.drawCircle(Offset.zero, r, Paint()
       ..shader = const RadialGradient(
         center: Alignment(-0.3, -0.4),
         radius: 1.0,
         colors: [
-          Color(0xFFfffbe6),
-          Color(0xFFf0c040),
-          Color(0xFF8a5c00),
+          Color(0xFFFFD6EE),
+          Color(0xFFFF2EB4),
+          Color(0xFF7A0E55),
         ],
-        stops: [0.0, 0.45, 1.0],
+        stops: [0.0, 0.5, 1.0],
       ).createShader(Rect.fromCircle(center: Offset.zero, radius: r)));
 
     // Reflet spéculaire
     canvas.drawCircle(
-      Offset(-r * 0.35, -r * 0.35),
-      r * 0.28,
-      Paint()..color = Colors.white.withOpacity(0.85));
+      Offset(-r * 0.3, -r * 0.35),
+      r * 0.26,
+      Paint()..color = Colors.white.withOpacity(0.80));
 
     canvas.restore(); // fin squash & stretch
   }
@@ -334,7 +335,7 @@ class ImpactParticles extends PositionComponent {
   @override
   void render(Canvas canvas) {
     for (final p in _particles) {
-      final color = isJackpot ? const Color(0xFFf0c040) : const Color(0xFFf0c040);
+      final color = const Color(0xFFFF2EB4);
       final opacity = p.life * 0.8;
 
       // Glow
