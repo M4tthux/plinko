@@ -109,7 +109,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 | Domaine | Statut | Notes |
 |---|---|---|
-| Game Design | 🟢 Build 49 validé | 9 cases, multi `10·2·0.5·0.1×3·0.5·2·10` (échelle réduite) |
+| Game Design | 🟢 Build 49 validé | 9 cases, multi `10·2·0.5·0.1·0.1·0.1·0.5·2·10` (échelle réduite) |
 | Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire, cases découplées |
 | Design & UI | 🟢 Build 54 | Direction Deep Arcade livrée (fond noir, picots blancs, cases fin néon, bille magenta). Contrôles mise/billes en bas. Trajectoires à régénérer. VFX Phase 2 à faire |
 | Dev | 🟢 Build 54 | Contrôles mise + nombre de billes, tap-to-launch retiré, bet dynamique |

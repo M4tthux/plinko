@@ -86,7 +86,7 @@ EOF
 | `plinko_app/lib/game/plinko_game.dart` | Jeu principal — collisions, loader, caméra |
 | `plinko_app/lib/game/ball.dart` | Bille — physique + replay frame par frame |
 | `plinko_app/lib/game/board.dart` | Plateau visuel + overlay zones DEBUG |
-| `plinko_app/lib/ui/reward_overlay.dart` | Overlay récompense (fade-in, jackpot or) |
+| ~~`plinko_app/lib/ui/reward_overlay.dart`~~ | **Obsolète** depuis Build 41 — remplacé par `_GainPopup` dans `main.dart`. À supprimer. |
 | `plinko_app/lib/ui/config_panel.dart` | Sliders live + debug + sauvegarde configs |
 | `plinko_app/lib/data/trajectory_loader.dart` | Lecture JSON + sélection trajectoire |
 | `plinko_app/lib/models/prize_lot.dart` | Table de lots (PrizeLot + LandedResult) |
