@@ -8,7 +8,7 @@ import 'ui/config_panel.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-18 · build 54';
+const String kBuildTime = '2026-04-18 · build 55';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -141,6 +141,19 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
     );
   }
 
+  /// Top du titre : plancher à 56px pour ne jamais empiéter sur la balance
+  /// (card top-left ~16→52px). Plafond 80px pour ne pas descendre dans le plateau.
+  double _titleTop(BuildContext context) {
+    final h = MediaQuery.of(context).size.height;
+    return (h * 0.05).clamp(72.0, 96.0);
+  }
+
+  /// Taille du titre : même logique, borne basse sur petits écrans.
+  double _titleFontSize(BuildContext context) {
+    final h = MediaQuery.of(context).size.height;
+    return (h * 0.05).clamp(28.0, 42.0);
+  }
+
   /// Stack contenant le jeu + tous les overlays HUD (balance, build badge,
   /// instructions, popups, config panel). Utilisé à l'identique en mobile
   /// et dans la colonne centrale desktop — les Positioned sont donc relatifs
@@ -154,12 +167,13 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 backgroundBuilder: (_) => Container(color: const Color(0xFF08080F)),
               ),
 
-              // Titre PLINKO — overlay Flutter, positionné pixel-exact
-              const Positioned(
-                top: 150,
+              // Titre PLINKO — overlay Flutter, top + taille responsives
+              // pour éviter le chevauchement avec le plateau sur petits écrans.
+              Positioned(
                 left: 0,
                 right: 0,
-                child: _PlinkoTitleOverlay(),
+                top: _titleTop(context),
+                child: _PlinkoTitleOverlay(fontSize: _titleFontSize(context)),
               ),
 
               // Rangées de boutons : mise + nombre de billes
@@ -376,19 +390,22 @@ class _DashedBorderPainter extends CustomPainter {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _PlinkoTitleOverlay extends StatelessWidget {
-  const _PlinkoTitleOverlay();
+  final double fontSize;
+  const _PlinkoTitleOverlay({this.fontSize = 42});
 
   @override
   Widget build(BuildContext context) {
     const cyan = Color(0xFF00D9FF);
+    // Soulignement scalé sur la taille du titre (ratio d'origine 110/42).
+    final underlineWidth = fontSize * (110 / 42);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
+        Text(
           'PLINKO',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 42,
+            fontSize: fontSize,
             fontWeight: FontWeight.w900,
             letterSpacing: 3.5,
             height: 1.0,
@@ -396,7 +413,7 @@ class _PlinkoTitleOverlay extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Container(
-          width: 110,
+          width: underlineWidth,
           height: 2,
           decoration: BoxDecoration(
             color: cyan,
