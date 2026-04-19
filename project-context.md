@@ -33,6 +33,7 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 ### Process / Docs
 - **Hiérarchie docs** (Phase 1 refacto 2026-04-17) — project-context.md = source de vérité (vision + décisions + statut), CLAUDE.md = quick ref technique pure, decisions-log.md = historique immuable. Vision uniquement dans project-context.md, §Projet retiré de CLAUDE.md pour supprimer le doublon.
 - **Phase 2 différée** — refonte hook + skill plinko-context-loader (aujourd'hui ils doublonnent : hook lit project-context + dernier log, skill relit tout + Notion). À faire après 2 sessions de test Phase 1.
+- **Spec UI Design consolidée** (2026-04-19) — ajout page Notion 🎨 Design UI (`https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c`) + miroir versionné `design-ui-spec.md` à la racine. Consolide DA Deep Arcade + handoff onboarding Claude Design en un seul doc. Règle : **intention + tokens évolutifs** sur Notion, **valeurs exactes** dans `plinko_config.dart`, **assets binaires** dans `design_handoff/`. Décalages spec vs code tracés en §7 du doc. Prochaine étape : consolider les multiples versions de design historiques (assets Gemini → refonte → Deep Arcade → handoff onboarding) et archiver les périmées.
 
 ### Tech
 - **Flame + physique manuelle** — Forge2D supprimé car incompatible Flutter Web

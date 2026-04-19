@@ -226,6 +226,7 @@ Statuts : Backlog / En cours / En test / Done / Bloqué
 - 🎮 Game Design — `https://www.notion.so/336d826db45981639b1bf031dd8af08d`
 - 🔧 Architecture Technique — `https://www.notion.so/336d826db45981dd9fe4d977798871ea`
 - 🎱 Benchmark Physique Bille — `https://www.notion.so/336d826db45981049295d99d645aa8b0`
+- 🎨 Design UI — `https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c` (miroir Git : `design-ui-spec.md`)
 
 ---
 
