@@ -2,7 +2,7 @@
 
 > **Spec UI vivante.** Source de vérité : [page Notion](https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c).
 > Ce fichier Markdown est le miroir versionné (copier-coller dans Notion en cas de MAJ).
-> Assets lourds (PNG de ref, prototypes HTML/JSX) : `design_handoff/design_handoff_plinko_onboarding_hifi/`.
+> Assets lourds (PNG de ref, prototypes HTML/JSX) : `design_handoff/design_handoff_plinko_onboarding_hifi/`. ⚠️ Les `.html` et `.jsx` sont des **prototypes de référence uniquement** — la production est en Flutter/Dart.
 
 ---
 
@@ -43,6 +43,8 @@ Validée Build 47→54 après benchmark multi-agents (benchmark / game-designer 
 
 ### Background recipe (écran de jeu)
 
+> 📐 **Notation d'intention (CSS-like)** — ce bloc décrit le *résultat visuel voulu*, pas du code. Flutter implémente via `CustomPainter` + `Stack` : `RadialGradient` pour les dégradés, `CustomPaint` pour la texture diagonale et le bruit fractal. Voir §7 pour les décalages d'implémentation connus.
+
 ```
 radial-gradient(ellipse 80% 40% at 50% 0%,   <accent>18 0%, transparent 60%),
 radial-gradient(ellipse 120% 60% at 50% 110%, #ff3ea514 0%, transparent 55%),
@@ -68,7 +70,7 @@ linear-gradient(180deg, #0a0a18 0%, #07070f 100%)
 ### Board & pegs (spec hi-fi)
 
 ```
-Grid:      11 rows, count = r + 3 pegs per row (3…13)   ⚠ voir §7 "Décalage grille"
+Grid:      10 rows visibles (12 logiques, startRow=2), count = r + 3 pegs per row (3…12)
 Spacing:   7 viewBox units (viewBox 100×110)
 Peg outer: r=1.1, white radial glow, opacity 0.35 (0.7 sur spotlight step 3)
 Peg core:  r=0.55, solid white
@@ -205,7 +207,7 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 
 ### Demo ball (step 3)
 - Se lance une fois à l'entrée step 3, délai 500ms
-- 11 rebonds, L/R aléatoire par rang, ~140ms par rebond
+- 10 rebonds, L/R aléatoire par rang, ~140ms par rebond
 - Trail magenta dashed qui s'accumule
 - En fin de course, atterrit dans une case (option : flash de la cellule)
 
@@ -219,8 +221,8 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 - R relance depuis step 1
 
 ### Persistence
-- Design/prototype : `localStorage` (`plinko-step`, `plinko-tweaks`)
-- Production : `SharedPreferences` → clé `plinko_has_seen_tour`
+- Design/prototype HTML : `localStorage` (`plinko-step`, `plinko-tweaks`) — **prototype uniquement, jamais en prod**
+- Production Flutter : `SharedPreferences` → clé `plinko_has_seen_tour`
 
 ---
 
@@ -242,7 +244,7 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 
 | Sujet | Spec (handoff) | Code actuel | Raison du décalage |
 |---|---|---|---|
-| **Grille plateau** | 11 rangs, 3…13 picots | **12 rangs, 9 cases** | Décision produit Build 45. Handoff à refaire avec la grille réelle (prompt à relancer côté Claude Design). |
+| **Grille plateau** | ~~11 rangs, 3…13 picots~~ → **corrigé : 10 rangées visibles (12 logiques), 3…12 picots, 9 cases** | Aligné avec le code | Gap résiduel : les assets `design_handoff/hifi/*.jsx` et les prototypes HTML décrivent encore l'ancienne grille 11 rangs / 3–13 picots. À mettre à jour quand on relancera le handoff Design. |
 | **Dim overlay** | SVG mask `<mask>` | **4 rectangles** autour du trou | `Path.combine(difference)` / `saveLayer + BlendMode.clear` rendent de façon incohérente sur le renderer HTML Flutter Web. |
 | **Ring spotlight** | 1.5px + halo 16/32/inset | **2px sèche, aucun halo** | Cumul des `BoxShadow` cyan (ring + callout + progress) teintait tout l'écran. Cyan réservé au contour. |
 | **Demo ball step 3** | Spec | **Pas encore implémentée** | À faire. |
