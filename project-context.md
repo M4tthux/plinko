@@ -69,6 +69,17 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **Échelle réduite** — ancienne `100·25·10·2·0.1·2·10·25·100` → nouvelle `10·2·0.5·0.1·0.1·0.1·0.5·2·10`. Décision Matthieu : x100 trop "promesse casino" pour un mini-jeu promo, x0.1 en 3 cases centrales plus réaliste. Gains plus lissés, moins de frustration (x0.5 récupère la moitié de la mise vs perdre 90 % sur x0.1).
 - **`slotIsMajor` seuil baissé à ≥ 10** — sinon plus aucune case n'aurait le glow "jackpot" après réduction d'échelle.
 
+### Landing + Onboarding tour (Build 56→59, 2026-04-19)
+- **Écran d'accueil créé** (`ui/landing_screen.dart`) — wordmark PLINKO glow cyan, headline "Tombe. Rebondit. Gagne.", sous-titre, CTA "Jouer" dégradé cyan 52h, ghost link "Comment ça marche ?". Route `/` avant le jeu.
+- **Tour d'onboarding 4 steps** (`ui/onboarding/coachmark.dart` + `tour_overlay.dart`) — spotlight bordure 2px cyan sèche (pas de halo), dim 62% noir via **4 rectangles positionnés autour du trou** (pas `Path.combine` ni `BlendMode.clear` qui rendent de façon incohérente sur le renderer HTML de Flutter Web). Callout glass bas-dockée avec step pill "n / 4", title, body, CTA "Suivant / Terminer", bouton "Passer" top-right (caché step final). Steps : wordmark → plateau → rangée mise → rangée billes.
+- **Zone cible "plateau" = overlay invisible resserré** (top 30% + bottom 25% du container) — le `GameWidget` entier était trop grand et ne laissait plus de place pour la callout. Cible seulement la pyramide + rangée multiplicateurs.
+- **TourOverlay au niveau Scaffold** — plein viewport en desktop comme en mobile, pas contraint à la colonne 500px. `GlobalKey` globales, `_rectFor` utilise `localToGlobal` → positions correctes même en desktop 3-colonnes.
+- **Callout clampée** (calloutEstH=150, safeEdge=20) — dock auto au-dessus ou en-dessous selon espace dispo, jamais hors-champ.
+- **Déclenchement uniquement depuis le landing** via "Comment ça marche ?" — pas d'auto-launch au 1er open. `hasSeenTour` persisté en `SharedPreferences` (flag pour usage futur, non-gating pour l'instant).
+- **Bouton retour top-left** (dans le jeu) → `Navigator.maybePop()` pour revenir au landing. Balance décalée à left:64 pour laisser la place.
+- **Typo** — Space Grotesk (UI) + JetBrains Mono (labels) via `google_fonts`, **appliqués uniquement sur le landing et le coachmark** pour cette session. Passe typo globale reportée session suivante.
+- **Choix `BoxShadow` minimaux** — halos cyan multiples (ring blur 32, callout blur 20, progress bar blur 8) combinés teintaient l'écran entier en cyan. Réduction à : 0 halo sur ring, 0 glow sur progress bar, bouton Suivant blur 6 seul. L'accent cyan est réservé au contour, pas au volume.
+
 ### Contrôles mise + nombre de billes (Build 54)
 - **Tap-to-launch retiré** — remplacé par deux rangées de boutons en bas. Raison : ergonomie clavier/souris desktop + intention explicite vs tap répété.
 - **Rangée mise (1/2/5/10€)** — radio-style cyan, défaut 1€. `betAmountNotifier` dans `PlinkoGame`. Gain = `bet × mult` (plus de constante `kBallCost`).
@@ -95,6 +106,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **VFX Phase 2** — flash case, screen shake, scale pulse
 - **LaunchZoneOverlay DEBUG** (Z0–Z4) — à retirer avant prod
 - **Régénérer trajectoires** pour la nouvelle grille 12 rangs / 9 cases (aujourd'hui obsolètes, masquées par `forcePhysicsMode = true`)
+- **Passe typo globale** (Space Grotesk UI + JetBrains Mono labels) — actuellement seulement appliquée sur landing + coachmark. À propager sur balance, build stamp, boutons bet/billes, popups gain, multiplicateurs
+- **Adapter le design hi-fi Claude Design à la grille 12/9** — l'export Claude Design (`design_handoff/`) décrit 11 rangs / 3–13 picots, nous sommes en 12 rangs / 9 cases. Matthieu relancera un prompt côté Claude Design pour refaire l'export avec notre grille réelle
+- **Demo ball magenta step 3** — le design ref montre une bille qui tombe avec trail dashed pendant le step plateau, pas encore implémentée
+- **Alignement layout callout avec design ref** — dots de progression à mettre en bas-gauche de la callout (actuellement haut-droite), ajouter eyebrow "HOW TO PLAY" (ou équivalent FR)
 
 ### Tech Post-MVP
 - Transmission récompense → marque : webhook ou API pull ?
@@ -111,8 +126,8 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 |---|---|---|
 | Game Design | 🟢 Build 49 validé | 9 cases, multi `10·2·0.5·0.1·0.1·0.1·0.5·2·10` (échelle réduite) |
 | Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire, cases découplées |
-| Design & UI | 🟢 Build 54 | Direction Deep Arcade livrée (fond noir, picots blancs, cases fin néon, bille magenta). Contrôles mise/billes en bas. Trajectoires à régénérer. VFX Phase 2 à faire |
-| Dev | 🟢 Build 54 | Contrôles mise + nombre de billes, tap-to-launch retiré, bet dynamique |
+| Design & UI | 🟢 Build 59 | Landing + onboarding 4 steps (coachmark ring cyan sec, dim 4-rects, callout glass clampée). Typo Space Grotesk/JetBrains Mono sur landing+coachmark uniquement, à propager |
+| Dev | 🟢 Build 59 | Route landing → jeu, `hasSeenTour` en SharedPreferences, bouton retour top-left, GlobalKeys pour targets du tour |
 | CI/CD | 🟢 Done | Auto-deploy gh-pages |
 | Test mobile (web) | 🟢 OK | Safari/Chrome iPhone via GitHub Pages |
 | Flutter local | 🟢 OK | v3.41.6 Windows (Git CMD) |
@@ -120,4 +135,4 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-*Dernière mise à jour : 2026-04-18 — Build 54 : direction Deep Arcade livrée (fond noir, picots blancs, cases fin néon, bille magenta, titre overlay Flutter) + refonte multiplicateurs échelle réduite + contrôles UI mise/billes en bas remplaçant le tap-to-launch.*
+*Dernière mise à jour : 2026-04-19 — Build 56→59 : landing screen + onboarding tour 4 steps (coachmark réutilisable spotlight + callout docké + progress bar). Dim via 4 rectangles (fiable cross-renderer), contour ring pur (pas de halo qui teinte l'écran). Space Grotesk + JetBrains Mono sur landing+coachmark seulement — passe typo globale reportée session suivante.*

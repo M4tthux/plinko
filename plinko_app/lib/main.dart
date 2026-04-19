@@ -5,10 +5,13 @@ import 'package:flutter/services.dart';
 import 'data/trajectory_loader.dart';
 import 'game/plinko_game.dart';
 import 'ui/config_panel.dart';
+import 'ui/landing_screen.dart';
+import 'ui/onboarding/coachmark.dart';
+import 'ui/onboarding/tour_overlay.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-18 · build 55';
+const String kBuildTime = '2026-04-19 · build 59';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -40,13 +43,27 @@ class PlinkoApp extends StatelessWidget {
       title: 'Plinko',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const PlinkoScreen(),
+      home: Builder(
+        builder: (ctx) => LandingScreen(
+          onPlay: () => _openGame(ctx, startTour: false),
+          onHowItWorks: () => _openGame(ctx, startTour: true),
+        ),
+      ),
+    );
+  }
+
+  void _openGame(BuildContext context, {required bool startTour}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlinkoScreen(startTour: startTour),
+      ),
     );
   }
 }
 
 class PlinkoScreen extends StatefulWidget {
-  const PlinkoScreen({super.key});
+  final bool startTour;
+  const PlinkoScreen({super.key, this.startTour = false});
 
   @override
   State<PlinkoScreen> createState() => _PlinkoScreenState();
@@ -59,10 +76,24 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   /// Popups "+X€" actifs à l'écran (multi-ball → plusieurs simultanés possibles).
   final List<_GainPopupData> _popups = [];
 
+  /// Clés pour cibler les éléments UI depuis le tour d'onboarding.
+  final GlobalKey _wordmarkKey = GlobalKey();
+  final GlobalKey _boardKey = GlobalKey();
+  final GlobalKey _betRowKey = GlobalKey();
+  final GlobalKey _ballsRowKey = GlobalKey();
+
+  bool _tourActive = false;
+
   @override
   void initState() {
     super.initState();
     _game = PlinkoGame();
+    if (widget.startTour) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _tourActive = true);
+      });
+    }
     TrajectoryLoader.load().then((_) {
       debugPrint('[Plinko] Trajectoires chargées');
     }).catchError((e) {
@@ -95,13 +126,61 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isDesktop = constraints.maxWidth >= kDesktopBreakpoint;
+      body: Stack(
+        children: [
+          Positioned.fill(child: _buildResponsiveGame()),
 
-          final gameContainer = _buildGameContainer();
+          // Overlay tour — plein viewport (couvre tout, y compris les panels
+          // desktop) pour que le spotlight dim soit homogène.
+          if (_tourActive)
+            Positioned.fill(child: _buildTourOverlay()),
+        ],
+      ),
+    );
+  }
 
-          if (isDesktop) {
+  Widget _buildTourOverlay() {
+    return TourOverlay(
+      onFinished: () {
+        if (!mounted) return;
+        setState(() => _tourActive = false);
+      },
+      targets: [
+        TourTarget(
+          key: _wordmarkKey,
+          title: 'Comment fonctionne Plinko',
+          body:
+              'Lâche des billes depuis le haut. Chaque bille atterrit dans une case à multiplicateur.',
+        ),
+        TourTarget(
+          key: _boardKey,
+          title: 'Le plateau',
+          body:
+              'Les picots aléatoirisent la trajectoire. Cases extérieures = gros gains. Cases centrales = petits gains.',
+          holePadding: CoachmarkTokens.holePaddingBoard,
+        ),
+        TourTarget(
+          key: _betRowKey,
+          title: 'Mise par bille',
+          body: 'Choisis combien coûte chaque bille. Déduit de ton solde.',
+        ),
+        TourTarget(
+          key: _ballsRowKey,
+          title: 'Billes par lancer',
+          body: 'De 1 à 10 billes. Coût total = mise × billes.',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResponsiveGame() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= kDesktopBreakpoint;
+
+        final gameContainer = _buildGameContainer();
+
+        if (isDesktop) {
             // Layout desktop : 3 colonnes 240 / 500 / 240 avec gap 20, total 1020, centré.
             return Center(
               child: SizedBox(
@@ -136,8 +215,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
               child: gameContainer,
             ),
           );
-        },
-      ),
+      },
     );
   }
 
@@ -167,13 +245,39 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 backgroundBuilder: (_) => Container(color: const Color(0xFF08080F)),
               ),
 
+              // Zone cible du tour pour le step "Plateau" — overlay invisible
+              // resserré sur la pyramide + rangée multiplicateurs. Le
+              // GameWidget entier serait trop grand et ne laisserait pas de
+              // place pour la callout. On utilise LayoutBuilder pour se
+              // baser sur la hauteur du container (pas du viewport) : ça
+              // colle proprement en mobile comme en desktop.
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: LayoutBuilder(
+                    builder: (_, c) => Padding(
+                      padding: EdgeInsets.only(
+                        top: c.maxHeight * 0.30,
+                        bottom: c.maxHeight * 0.25,
+                      ),
+                      child: KeyedSubtree(
+                        key: _boardKey,
+                        child: const SizedBox.expand(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
               // Titre PLINKO — overlay Flutter, top + taille responsives
               // pour éviter le chevauchement avec le plateau sur petits écrans.
               Positioned(
                 left: 0,
                 right: 0,
                 top: _titleTop(context),
-                child: _PlinkoTitleOverlay(fontSize: _titleFontSize(context)),
+                child: _PlinkoTitleOverlay(
+                  key: _wordmarkKey,
+                  fontSize: _titleFontSize(context),
+                ),
               ),
 
               // Rangées de boutons : mise + nombre de billes
@@ -181,7 +285,11 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 bottom: 26,
                 left: 12,
                 right: 12,
-                child: _BottomControls(game: _game),
+                child: _BottomControls(
+                  game: _game,
+                  betRowKey: _betRowKey,
+                  ballsRowKey: _ballsRowKey,
+                ),
               ),
 
               // Badge version — DEBUG (discret, tout en bas)
@@ -201,10 +309,19 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 ),
               ),
 
-              // Balance — coin haut-gauche, card rose néon
+              // Bouton retour vers l'écran d'accueil — top-left
               Positioned(
                 top: 16,
                 left: 16,
+                child: _BackButton(
+                  onTap: () => Navigator.of(context).maybePop(),
+                ),
+              ),
+
+              // Balance — coin haut-gauche, à droite du bouton retour
+              Positioned(
+                top: 16,
+                left: 64,
                 child: ValueListenableBuilder<double>(
                   valueListenable: _game.balanceNotifier,
                   builder: (context, balance, _) {
@@ -279,6 +396,41 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
             ConfigPanel(game: _game),
           ],
         );
+  }
+}
+
+/// Petit bouton discret top-left — retour à l'écran d'accueil.
+class _BackButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _BackButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0A0A14).withOpacity(0.75),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.18),
+              width: 1,
+            ),
+          ),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xCCFFFFFF),
+            size: 16,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -391,7 +543,7 @@ class _DashedBorderPainter extends CustomPainter {
 
 class _PlinkoTitleOverlay extends StatelessWidget {
   final double fontSize;
-  const _PlinkoTitleOverlay({this.fontSize = 42});
+  const _PlinkoTitleOverlay({super.key, this.fontSize = 42});
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +585,13 @@ class _PlinkoTitleOverlay extends StatelessWidget {
 
 class _BottomControls extends StatelessWidget {
   final PlinkoGame game;
-  const _BottomControls({required this.game});
+  final Key? betRowKey;
+  final Key? ballsRowKey;
+  const _BottomControls({
+    required this.game,
+    this.betRowKey,
+    this.ballsRowKey,
+  });
 
   static const _betOptions = <double>[1, 2, 5, 10];
   static const _countOptions = <int>[1, 2, 5, 10];
@@ -448,6 +606,7 @@ class _BottomControls extends StatelessWidget {
           valueListenable: game.betAmountNotifier,
           builder: (_, bet, __) {
             return Row(
+              key: betRowKey,
               children: [
                 for (int i = 0; i < _betOptions.length; i++) ...[
                   if (i > 0) const SizedBox(width: 8),
@@ -470,6 +629,7 @@ class _BottomControls extends StatelessWidget {
           builder: (_, inFlight, __) {
             final disabled = inFlight > 0;
             return Row(
+              key: ballsRowKey,
               children: [
                 for (int i = 0; i < _countOptions.length; i++) ...[
                   if (i > 0) const SizedBox(width: 8),
