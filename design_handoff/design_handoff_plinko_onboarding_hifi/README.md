@@ -1,7 +1,55 @@
-# Handoff: Plinko Onboarding — Hi-Fi
+# Handoff: Plinko Onboarding — Hi-Fi (PLINKO → DROPL)
 
 ## Overview
-5-step first-time-user onboarding for the Plinko minigame. Approach chosen: **spotlight coachmarks** on a dimmed game board, with a bottom-docked glass callout card. The final hi-fi prototype lives at `Plinko Onboarding Hifi.html` at the root of this bundle.
+5-step first-time-user onboarding for the **DROPL** minigame (rebrand of PLINKO → DROPL, 5 letters). Approach: **spotlight coachmarks** on a dimmed game board, with a bottom-docked glass callout card. Hi-fi prototype: `Plinko Onboarding Hifi.html`. Final wordmark lockup: `DROPL Wordmark In-Context.html`.
+
+## Wordmark — DROPL (final)
+
+**Concept: Chute.** A lowered "O" is the only ornament in the wordmark. The word reads as DROPL first; the drop cue is a vertical micro-event inside the word, not a decoration around it.
+
+### Construction
+- **Typeface**: Space Grotesk 700
+- **Letter-spacing**: scaled to size. At 52px → -2.4px. At 40px → -1.85px. Proportional: `letter-spacing = size × -0.046`.
+- **Kerning groups**: DR | O | PL — rendered as three separate `<text>` nodes so the O can shift on its Y axis without affecting the rest of the word.
+- **Baseline offset**: The O sits **+10 SVG units** below the DR/PL baseline (at font-size 52 that's ~10px, at font-size 40 that's ~8px). The offset is proportional to font-size, roughly 19% of the cap-height.
+- **Horizontal position of O**: optically centered between DR and PL. In the 52px isolated layout (viewBox 220): DR center 58, O center 110, PL center 160.
+- **No ornaments**: no underline, no trail, no glow, no color accents. Pure white on dark.
+
+### SVG reference (isolated, 52px)
+```html
+<svg viewBox="0 0 220 72" aria-label="DROPL">
+  <g text-anchor="middle" font-family="Space Grotesk" font-weight="700"
+     font-size="52" letter-spacing="-2.4" fill="#fff">
+    <text x="58"  y="50">DR</text>
+    <text x="110" y="60">O</text>   <!-- +10 vs baseline 50 -->
+    <text x="160" y="50">PL</text>
+  </g>
+</svg>
+```
+
+### SVG reference (in-screen, 40px)
+```html
+<svg viewBox="0 0 160 56" aria-label="DROPL">
+  <g text-anchor="middle" font-family="Space Grotesk" font-weight="700"
+     font-size="40" letter-spacing="-1.85" fill="#fff">
+    <text x="42"  y="38">DR</text>
+    <text x="80"  y="46">O</text>   <!-- +8 vs baseline 38 -->
+    <text x="116" y="38">PL</text>
+  </g>
+</svg>
+```
+
+### Rules
+- **Do not** substitute another typeface; the O-drop reads only because the rest of the word is tightly set Space Grotesk 700.
+- **Do not** animate the O during normal display. An entrance animation (O falls in from -20px) is acceptable on app launch / splash only.
+- **Do not** add color to the O. It must remain the same white as DR/PL.
+- **Minimum size**: 28px. Below that the lowered O reads as a baseline error. Use flat `DROPL` (no drop) below 28px.
+
+### App-icon / splash
+- Use the 52px lockup centered on a `#050510` canvas with the standard background recipe (see Background below).
+- App icon: single letter "D" at 64% canvas height, same typeface and weight, centered. The full wordmark doesn't scale to icon size.
+
+## Overview (continued)
 
 ## About the design files
 The HTML/JSX files in this bundle are **design references**, not production code. Recreate them in your app's real stack (React / React Native / SwiftUI / Compose, etc.) using your existing component library and design tokens. Match the look, behavior, and copy — not the file structure.
@@ -19,9 +67,9 @@ The HTML/JSX files in this bundle are **design references**, not production code
 - Ghost link: **How does it work?** — triggers the tour (tourStep=2)
 
 ### 02 — Intro (spotlight on wordmark)
-- Dim overlay at 62% black, SVG-masked hole around the PLINKO wordmark
+- Dim overlay at 62% black, SVG-masked hole around the **DROPL** wordmark
 - Cyan ring + glow on the spotlight
-- Callout docked below the wordmark: title "How Plinko works" · body "Drop balls from the top. Each ball lands in a multiplier slot."
+- Callout docked below the wordmark: title "How DROPL works" · body "Drop balls from the top. Each ball lands in a multiplier slot."
 
 ### 03 — The board
 - Spotlight covers the full 11-row peg pyramid
@@ -72,7 +120,9 @@ linear-gradient(180deg, #0a0a18 0%, #07070f 100%)
 ```
 Primary:  Space Grotesk 400/500/600/700
 Mono:     JetBrains Mono 400/500  (microcopy, build stamp, uppercase labels)
-Wordmark: Space Grotesk 700, 44px, letter-spacing 8px, text-shadow two-ring cyan glow
+Wordmark: Space Grotesk 700 — see "Wordmark — DROPL" section above
+          Header lockup: 40px, letter-spacing -1.85, lowered-O construction
+          Splash/isolated: 52px, letter-spacing -2.4, same construction
 Body:     14–15px, line-height 1.4–1.45
 Eyebrow:  11px uppercase, letter-spacing 2–2.5px
 ```
@@ -200,7 +250,8 @@ hasSeenTour: boolean   // persist to user profile
 5. Do we want the multiplier cell to flash/highlight when the demo ball lands?
 
 ## Files in this bundle
-- `Plinko Onboarding Hifi.html` — root prototype
+- `Plinko Onboarding Hifi.html` — root prototype (onboarding flow)
+- `DROPL Wordmark In-Context.html` — final wordmark lockup, isolated + in-context
 - `hifi/ios-frame.jsx` — iPhone frame (can be dropped — your app runs natively)
 - `hifi/plinko-board.jsx` — pegs, ball, multipliers, demo-drop engine
 - `hifi/plinko-screen.jsx` — full game screen (header, wordmark, board, chips)
@@ -209,4 +260,4 @@ hasSeenTour: boolean   // persist to user profile
 - `Plinko Onboarding Wireframes.html` — the lo-fi wireframes that kicked off the flow (keep as "why we ended up here" context)
 
 ## Prompt to give Claude Code
-> Implement the onboarding flow described in `README.md`. The HTML/JSX files are design references; recreate the screens in our existing stack (React Native — use our `<Screen>`, `<GlassCard>`, and `<PrimaryButton>` components). The tour overlay (spotlight + callout) should be a reusable `<Coachmark>` component driven by a target `ref` prop and a `step` prop. Copy all colors, spacing, and motion durations from the "Design tokens" section of the README exactly. Ship behind a `hasSeenTour` flag on the user profile.
+> Implement the onboarding flow and the **DROPL** wordmark described in `README.md`. The HTML/JSX files are design references; recreate the screens in our existing stack (React Native — use our `<Screen>`, `<GlassCard>`, and `<PrimaryButton>` components). The wordmark is a three-`<text>` SVG construct with a lowered O (see "Wordmark — DROPL" section); implement as a reusable `<Wordmark size={40|52} />` component. The tour overlay (spotlight + callout) should be a reusable `<Coachmark>` component driven by a target `ref` prop and a `step` prop. Copy all colors, spacing, and motion durations from the "Design tokens" section of the README exactly. Ship the tour behind a `hasSeenTour` flag on the user profile.

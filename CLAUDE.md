@@ -228,6 +228,10 @@ Statuts : Backlog / En cours / En test / Done / Bloqué
 - 🎱 Benchmark Physique Bille — `https://www.notion.so/336d826db45981049295d99d645aa8b0`
 - 🎨 Design UI — `https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c` (miroir Git : `design-ui-spec.md`)
 
+### Naming — DROPL vs Plinko
+**Marque/produit affiché = DROPL** (rebrand wordmark 2026-04-20, "O abaissé" — voir §2bis `design-ui-spec.md`).
+**"Plinko" = identifiant tech interne** : repo `M4tthux/plinko`, dossier `plinko_app/`, classe `PlinkoGame`, clé prefs `plinko_has_seen_tour`, URL `m4tthux.github.io/plinko`, équipe `Balleck Team`. **Ne pas renommer le code / repo au MVP.**
+
 ---
 
 ## Environnement dev

@@ -1,8 +1,10 @@
-# 🎨 Design UI — Plinko
+# 🎨 Design UI — DROPL (ex-Plinko)
 
 > **Spec UI vivante.** Source de vérité : [page Notion](https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c).
 > Ce fichier Markdown est le miroir versionné (copier-coller dans Notion en cas de MAJ).
 > Assets lourds (PNG de ref, prototypes HTML/JSX) : `design_handoff/design_handoff_plinko_onboarding_hifi/`. ⚠️ Les `.html` et `.jsx` sont des **prototypes de référence uniquement** — la production est en Flutter/Dart.
+>
+> **Rebrand 2026-04-20** : le wordmark passe de **PLINKO** → **DROPL** (5 lettres, "lowered O" comme cue de chute). Le nom de produit affiché est désormais DROPL ; "Plinko" reste l'identifiant tech interne (repo, package, dossier `plinko_app/`, clés `plinko_*`). Voir §2bis "Wordmark — DROPL" et §7 pour les décalages spec ↔ code (le wordmark "PLINKO" est encore rendu dans `landing_screen.dart` — refonte code en session dédiée).
 
 ---
 
@@ -59,9 +61,64 @@ linear-gradient(180deg, #0a0a18 0%, #07070f 100%)
 |---|---|---|
 | Primary | Space Grotesk | 400 / 500 / 600 / 700 |
 | Mono | JetBrains Mono | 400 / 500 — microcopy, build stamp, labels uppercase |
-| Wordmark | Space Grotesk 700 | 44px, letter-spacing **8px**, text-shadow double anneau cyan |
+| Wordmark | Space Grotesk 700 | **DROPL** — voir §2bis. Lockup header 40px / letter-spacing −1.85, splash 52px / letter-spacing −2.4, "lowered-O" construction. ⚠ Ancien wordmark PLINKO (44px, ls 8px, halo cyan) **abandonné**. |
 | Body | Space Grotesk | 14–15px, line-height 1.4–1.45 |
 | Eyebrow | Space Grotesk / Mono uppercase | 11px, letter-spacing 2–2.5px |
+
+---
+
+## 2bis. Wordmark — DROPL (final)
+
+**Concept : Chute.** Un "O" abaissé est le seul ornement du wordmark. Le mot se lit DROPL en premier ; le cue de chute est un micro-événement vertical *à l'intérieur* du mot, pas une décoration autour.
+
+### Construction
+
+- **Police** : Space Grotesk 700
+- **Letter-spacing** : proportionnel à la taille — `letter-spacing = size × −0.046`. À 52px → −2.4px. À 40px → −1.85px.
+- **Groupes de kerning** : `DR | O | PL` rendus comme **trois `<text>` SVG distincts**, pour que le O puisse se déplacer en Y sans affecter le reste du mot.
+- **Baseline offset** : le O est positionné **+10 unités SVG sous la baseline** de DR/PL (≈ 19 % de la cap-height, soit ~10px à 52px et ~8px à 40px).
+- **Position horizontale du O** : optiquement centré entre DR et PL. Au lockup 52px (viewBox 220) : DR center 58, O center 110, PL center 160.
+- **Pas d'ornement** : pas de soulignement, pas de trail, pas de glow, pas d'accent couleur. Blanc pur sur fond sombre.
+
+### SVG de référence (lockup isolé, 52px — splash / app icon)
+
+```html
+<svg viewBox="0 0 220 72" aria-label="DROPL">
+  <g text-anchor="middle" font-family="Space Grotesk" font-weight="700"
+     font-size="52" letter-spacing="-2.4" fill="#fff">
+    <text x="58"  y="50">DR</text>
+    <text x="110" y="60">O</text>   <!-- +10 vs baseline 50 -->
+    <text x="160" y="50">PL</text>
+  </g>
+</svg>
+```
+
+### SVG de référence (in-screen, 40px — header de jeu)
+
+```html
+<svg viewBox="0 0 160 56" aria-label="DROPL">
+  <g text-anchor="middle" font-family="Space Grotesk" font-weight="700"
+     font-size="40" letter-spacing="-1.85" fill="#fff">
+    <text x="42"  y="38">DR</text>
+    <text x="80"  y="46">O</text>   <!-- +8 vs baseline 38 -->
+    <text x="116" y="38">PL</text>
+  </g>
+</svg>
+```
+
+### Règles d'usage
+
+- ❌ **Ne pas** substituer une autre police — le "O qui tombe" ne se lit que parce que le reste est en Space Grotesk 700 serré.
+- ❌ **Ne pas** animer le O en affichage normal. Animation d'entrée (le O tombe depuis −20px) **uniquement sur splash / app launch**.
+- ❌ **Ne pas** colorer le O — il reste du même blanc que DR / PL.
+- 📏 **Taille minimum** : **28px**. En dessous, le O abaissé se lit comme une erreur de baseline. Utiliser un `DROPL` plat (sans drop) sous 28px.
+
+### App-icon / splash
+
+- Lockup 52px centré sur canvas `#050510` avec la background recipe standard (voir §2).
+- App icon : un seul "D" à 64 % de la hauteur du canvas, même police / weight, centré. Le wordmark complet ne descend pas à la taille d'icône.
+
+> **Implémentation Flutter prévue** : composant réutilisable `<Wordmark size={40|52} />` dans `plinko_app/lib/ui/widgets/dropl_wordmark.dart`. Voir §7 — pas encore implémenté (Build 59 affiche encore "PLINKO" via `Text` standard).
 
 ---
 
@@ -159,10 +216,10 @@ Caché au step final (le CTA "Terminer" fait la fin naturelle)
 - Ghost link : **Comment ça marche ?** — lance le tour (tourStep = 2)
 
 ### 02 — Intro (spotlight sur le wordmark)
-- Overlay dim 62 % noir, trou SVG-mask autour du wordmark PLINKO
+- Overlay dim 62 % noir, trou SVG-mask autour du wordmark **DROPL** (voir §2bis)
 - Ring cyan + glow sur le spotlight
 - Callout docké sous le wordmark :
-  - Title : *"Comment fonctionne Plinko"*
+  - Title : *"Comment fonctionne DROPL"*
   - Body : *"Lâche des billes depuis le haut. Chaque bille atterrit dans une case à multiplicateur."*
 
 ### 03 — Le plateau
@@ -252,6 +309,8 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 | **Eyebrow "HOW TO PLAY"** | Spec | **Absent** | À ajouter (équivalent FR "COMMENT JOUER"). |
 | **Auto-launch tour** | fresh user + !hasSeenTour | **Manuel uniquement** (via "Comment ça marche ?") | `hasSeenTour` persisté mais non-gating pour l'instant. |
 | **Typo globale** | Space Grotesk + JetBrains Mono partout | **Landing + coachmark seulement** | Passe typo globale prévue prochaine session. |
+| **Wordmark DROPL** | Lockup 3 `<text>` SVG, O abaissé +10 unités, ls −2.4 (52px) / −1.85 (40px) | **Affiche encore "PLINKO"** dans `landing_screen.dart` (Text standard, ls 8px, halo cyan) | Rebrand spec 2026-04-20 — refonte code en session dédiée (création `<DroplWordmark>`, MAJ landing + step 02 du tour, MAJ texte callout "Comment fonctionne DROPL"). |
+| **Identifiants tech** | — | Repo `M4tthux/plinko`, dossier `plinko_app/`, classe `PlinkoGame`, clé prefs `plinko_has_seen_tour`, URL `m4tthux.github.io/plinko` | **Décision** : DROPL = nom de marque/produit affiché. "Plinko" reste l'ID tech interne (pas de rename repo / package au MVP). À reconsidérer Post-MVP si la marque DROPL se consolide. |
 
 ---
 
@@ -260,9 +319,10 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 ### Handoff Claude Design (GitHub)
 `design_handoff/design_handoff_plinko_onboarding_hifi/`
 
-- `README.md` — brief original (EN, source de cette spec)
+- `README.md` — brief original (EN, source de cette spec — version 2026-04-20 incluant rebrand DROPL)
 - `reference-hifi.png` — screenshot de référence visuelle
-- `Plinko Onboarding Hifi.html` — prototype hi-fi (référence, pas code prod)
+- `Plinko Onboarding Hifi.html` — prototype hi-fi onboarding (référence, pas code prod)
+- `DROPL Wordmark In-Context.html` — lockup wordmark final (isolé 52px + in-context 40px) — voir §2bis
 - `Plinko Onboarding Wireframes.html` — wireframes lo-fi initiaux
 - `hifi/*.jsx` — composants React de référence (board, screen, tour, frame)
 
