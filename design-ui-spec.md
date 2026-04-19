@@ -1,0 +1,299 @@
+# 🎨 Design UI — Plinko
+
+> **Spec UI vivante.** Source de vérité : [page Notion](https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c).
+> Ce fichier Markdown est le miroir versionné (copier-coller dans Notion en cas de MAJ).
+> Assets lourds (PNG de ref, prototypes HTML/JSX) : `design_handoff/design_handoff_plinko_onboarding_hifi/`.
+
+---
+
+## 1. Direction artistique — Deep Arcade (Neon Noir)
+
+**Principe central :** *80 % de l'écran sombre et mat pour que les 20 % lumineux aient du poids. Si on retire la bille et les picots, le fond doit être presque ennuyeux.*
+
+- **Anti-pattern** : gros contours épais uniformes. Vrai néon = trait fin + halo large.
+- **Fond noir #050510 / #08080F** neutre, pas de gradient violet, pas d'étoiles, pas de grille perspective.
+- **Picots blancs purs** — halo discret au repos, amplifié au hit.
+- **Bille magenta `#FF3EA5`** — c'est l'élément qui doit briller sans rivaliser avec les cases jackpot.
+- **Cases rectangles verticaux contour fin néon** — hiérarchie par la chaleur, pas la taille. x0.1 gris neutre, jamais rouge ni punitif.
+- **Cyan = accent** (contour, ring, CTA primaire), **magenta = action** (bille, boutons billes).
+
+Validée Build 47→54 après benchmark multi-agents (benchmark / game-designer / designer).
+
+---
+
+## 2. Design tokens
+
+### Couleurs
+
+| Token | Hex | Usage |
+|---|---|---|
+| `--bg-base` | `#050510` | Fond principal |
+| `--bg-mid` | `#0b0b1c` | Élévation 1 (cards, panels) |
+| `--accent-cyan` | `#22e4d9` | Contour ring, CTA primaire, accents UI |
+| `--accent-magenta` | `#ff3ea5` | Bille, hot multipliers, boutons billes |
+| `--accent-green` | `#47e57a` | Alt (réservé succès / futur) |
+| `--mult-x10` | `#ff3ea5` | Case x10 (edge) |
+| `--mult-x2` | `#c64aff` | Case x2 |
+| `--mult-x0.5` | `#5b6cff` | Case x0.5 |
+| `--mult-x0.1` | `#2a2d4a` | Case x0.1 (neutre) |
+| `--text` | `#ffffff` | Texte principal |
+| `--text-muted` | `rgba(255,255,255,0.55)` | Texte secondaire |
+| `--text-ghost` | `rgba(255,255,255,0.3)` | Ghost links |
+| `--spotlight-dim` | `rgba(0,0,0,0.62)` | Overlay onboarding |
+
+### Background recipe (écran de jeu)
+
+```
+radial-gradient(ellipse 80% 40% at 50% 0%,   <accent>18 0%, transparent 60%),
+radial-gradient(ellipse 120% 60% at 50% 110%, #ff3ea514 0%, transparent 55%),
+linear-gradient(180deg, #0a0a18 0%, #07070f 100%)
++ SVG fractal-noise overlay, opacity 0.6, mix-blend overlay
++ 135° diagonal 2px/5px repeating lines, rgba(255,255,255,0.012)
+```
+
+### Typographie
+
+| Rôle | Police | Specs |
+|---|---|---|
+| Primary | Space Grotesk | 400 / 500 / 600 / 700 |
+| Mono | JetBrains Mono | 400 / 500 — microcopy, build stamp, labels uppercase |
+| Wordmark | Space Grotesk 700 | 44px, letter-spacing **8px**, text-shadow double anneau cyan |
+| Body | Space Grotesk | 14–15px, line-height 1.4–1.45 |
+| Eyebrow | Space Grotesk / Mono uppercase | 11px, letter-spacing 2–2.5px |
+
+---
+
+## 3. Composants
+
+### Board & pegs (spec hi-fi)
+
+```
+Grid:      11 rows, count = r + 3 pegs per row (3…13)   ⚠ voir §7 "Décalage grille"
+Spacing:   7 viewBox units (viewBox 100×110)
+Peg outer: r=1.1, white radial glow, opacity 0.35 (0.7 sur spotlight step 3)
+Peg core:  r=0.55, solid white
+Ball core: r=1.4, #ff3ea5
+Ball glow: r=2.2, radial-gradient #ff7cc8 → #ff3ea5 → transparent, blur 1.2, opacity 0.75
+Ball hi:   r=0.45, white 0.75, offset (-0.4, -0.4) (spéculaire)
+Trail:     stroke #ff3ea5, width 0.4, dash 0.8 / 0.6, opacity 0.5
+```
+
+### Chips — rangée mise / rangée billes
+
+```
+Stake chip  42h, radius 10
+  idle     : 1px white/15, bg white/4
+  selected : 1px cyan,     bg linear(cyan22 → cyan44), shadow glow + inset
+Ball chip   40h, radius 10
+  idle     : 1px magenta55, bg magenta 0a → 14
+  selected : 1px magenta,   bg magenta33 → 55, shadow glow + inset
+```
+
+### Cases multiplicateur
+
+```
+Row flex, gap 3, padding 0 1%
+Chaque cellule : radius 6, 1px solid <color>,
+                 bg linear(color22 → color44), padding 5px 0
+Texte : 11 / 700 Space Grotesk, text-shadow de la couleur
+Edges (x10) : outer glow 12px + 4px supplémentaire
+```
+
+### Callout coachmark (onboarding)
+
+```
+Position : auto — below si spot dans moitié haute, above sinon
+Width    : phone-width − 36 (18 margin latérale)
+Padding  : 14 16 14
+Radius   : 16
+Bg       : linear(180°, rgba(20,20,36,0.92), rgba(12,12,24,0.92))
+Border   : 1px cyan/40%
+Backdrop : blur(20px) saturate(140%)
+Shadow   : 0 10 30 rgba(0,0,0,0.5), 0 0 20 cyan/27, inset 0 1 0 white/8
+Title    : 20 / 700, tracking -0.3
+Body     : 13, line 1.45, white/75
+CTA      : 8×18, radius 10, bg linear(cyan → cyanCC), text #0a0a18, 13/700
+Step pill: "<n> / 4" en cyan, 20h, radius 10
+Dots     : 4 dots — active 16×5 cyan, idle 5×5 white/20
+Anim     : fade + 8px rise, 420ms cubic-bezier(0.2, 0.8, 0.2, 1)
+```
+
+### Spotlight
+
+```
+Mask   : SVG <mask> rect blanc + trou rounded-rect noir sur target
+Ring   : 1.5px cyan, radius 14, box-shadow 16px cyan/53 + 32px cyan/33 + inset 16px cyan/20
+Padding: 6px autour de la cible (10px sur step 3 — le plateau)
+Motion : transition 420ms same ease
+```
+
+> ⚠ **Décalage d'implémentation** (Build 59) : en Flutter Web, le ring est une bordure **2px cyan sèche sans halo** et le dim est fait via **4 rectangles** autour du trou (pas `Path.combine` ni `BlendMode.clear`). Voir §7.
+
+### Progress bar (toujours visible pendant le tour)
+
+```
+Top: 58, height 3, radius 3, bg white/10
+Fill: ((step-1)/4) × 100%, cyan + 8px cyan shadow
+```
+
+### Skip button
+
+```
+Top-right of phone, 64,16
+Padding 6×12, radius 14, 12px
+Bg rgba(0,0,0,0.4), backdrop-blur 8, border 1px white/20
+Caché au step final (le CTA "Terminer" fait la fin naturelle)
+```
+
+---
+
+## 4. Onboarding — flow 5 steps
+
+### 01 — Landing
+- Game UI derrière un gradient vertical fade-to-black bas
+- Headline : **"Tombe. Rebondit. Gagne."** (26px / 700 / tracking −0.5)
+- Sous-titre : *"Mini-jeu physique. Chaque lancer, un chemin différent."* (14px, 65 % white)
+- CTA primaire : **Jouer** (dégradé cyan, 52h, radius 14, glow)
+- Ghost link : **Comment ça marche ?** — lance le tour (tourStep = 2)
+
+### 02 — Intro (spotlight sur le wordmark)
+- Overlay dim 62 % noir, trou SVG-mask autour du wordmark PLINKO
+- Ring cyan + glow sur le spotlight
+- Callout docké sous le wordmark :
+  - Title : *"Comment fonctionne Plinko"*
+  - Body : *"Lâche des billes depuis le haut. Chaque bille atterrit dans une case à multiplicateur."*
+
+### 03 — Le plateau
+- Spotlight couvre toute la pyramide de picots
+- **Demo ball** tombe automatiquement 500ms après l'entrée du step, trajectoire aléatoire, trail dashed magenta
+- Callout sous le plateau :
+  - Title : *"Le plateau"*
+  - Body : *"Les picots randomisent la trajectoire. Les cases extérieures paient plus, les centrales moins."*
+
+### 04 — Mise (€ / bille)
+- Spotlight = bande horizontale autour de la rangée mise (€1 / €2 / €5 / €10)
+- Callout dockée **au-dessus** du spotlight (proche du bas)
+- Title : *"Mise par bille"* · Body : *"Choisis combien coûte chaque bille. Débité de ton solde."*
+- Première chip (€1) en état sélectionné
+
+### 05 — Billes par lancer (final)
+- Spotlight sur la rangée billes (1 / 2 / 5 / 10)
+- Callout dockée **au-dessus**
+- Title : *"Billes par lancer"* · Body : *"Choisis 1 à 10. Coût total = mise × billes."*
+- CTA passe de **"Suivant"** → **"Terminer"** ; tap = fin du tour
+
+---
+
+## 5. Interactions & state machine
+
+### Tour state machine
+
+```
+tourStep    : 1..5   (1 = landing, 2..5 = tour)
+hasSeenTour : boolean   // persisté en SharedPreferences
+
+// entry points
+  fresh user + !hasSeenTour  → tourStep = 2 (non-gating actuellement, voir §7)
+  ghost "Comment ça marche ?" → tourStep = 2
+  primary "Jouer"             → tourStep = 1 (no tour ; set hasSeenTour)
+
+// transitions
+  Suivant   → tourStep = min(5, tourStep+1)
+  Passer    → tourStep = 1, hasSeenTour = true
+  Terminer  → tourStep = 1, hasSeenTour = true
+```
+
+### Demo ball (step 3)
+- Se lance une fois à l'entrée step 3, délai 500ms
+- 11 rebonds, L/R aléatoire par rang, ~140ms par rebond
+- Trail magenta dashed qui s'accumule
+- En fin de course, atterrit dans une case (option : flash de la cellule)
+
+### Selection state qui évolue
+- Step 4+ : première chip mise (€1) en sélection
+- Step 5 : 2e chip billes (2) en sélection
+- Purement visuel pendant le tour ; la vraie sélection = input utilisateur post-tour
+
+### Keyboard (dev only — retirer avant prod)
+- ← / → naviguer entre steps
+- R relance depuis step 1
+
+### Persistence
+- Design/prototype : `localStorage` (`plinko-step`, `plinko-tweaks`)
+- Production : `SharedPreferences` → clé `plinko_has_seen_tour`
+
+---
+
+## 6. Motion spec
+
+| Élément | Durée | Easing | Détail |
+|---|---|---|---|
+| Spotlight hole + ring | 420ms | `cubic-bezier(0.2, 0.8, 0.2, 1)` | position + size |
+| Callout | 420ms | same | 8px rise + opacity fade au change de step |
+| Progress bar fill | 420ms | same | — |
+| Dot pill (active) | 200ms | — | length + color crossfade |
+| Demo ball | 140ms / peg | linear | snappy ; swap pour easing si physique compatible |
+
+---
+
+## 7. Décalages connus — spec vs code actuel (Build 59)
+
+> Historique complet dans `decisions-log.md` et `sessions/2026-04-19_onboarding-landing-session.md`.
+
+| Sujet | Spec (handoff) | Code actuel | Raison du décalage |
+|---|---|---|---|
+| **Grille plateau** | 11 rangs, 3…13 picots | **12 rangs, 9 cases** | Décision produit Build 45. Handoff à refaire avec la grille réelle (prompt à relancer côté Claude Design). |
+| **Dim overlay** | SVG mask `<mask>` | **4 rectangles** autour du trou | `Path.combine(difference)` / `saveLayer + BlendMode.clear` rendent de façon incohérente sur le renderer HTML Flutter Web. |
+| **Ring spotlight** | 1.5px + halo 16/32/inset | **2px sèche, aucun halo** | Cumul des `BoxShadow` cyan (ring + callout + progress) teintait tout l'écran. Cyan réservé au contour. |
+| **Demo ball step 3** | Spec | **Pas encore implémentée** | À faire. |
+| **Dots progression** | Bas-gauche callout | **Haut-droite callout** | À aligner. |
+| **Eyebrow "HOW TO PLAY"** | Spec | **Absent** | À ajouter (équivalent FR "COMMENT JOUER"). |
+| **Auto-launch tour** | fresh user + !hasSeenTour | **Manuel uniquement** (via "Comment ça marche ?") | `hasSeenTour` persisté mais non-gating pour l'instant. |
+| **Typo globale** | Space Grotesk + JetBrains Mono partout | **Landing + coachmark seulement** | Passe typo globale prévue prochaine session. |
+
+---
+
+## 8. Sources & assets
+
+### Handoff Claude Design (GitHub)
+`design_handoff/design_handoff_plinko_onboarding_hifi/`
+
+- `README.md` — brief original (EN, source de cette spec)
+- `reference-hifi.png` — screenshot de référence visuelle
+- `Plinko Onboarding Hifi.html` — prototype hi-fi (référence, pas code prod)
+- `Plinko Onboarding Wireframes.html` — wireframes lo-fi initiaux
+- `hifi/*.jsx` — composants React de référence (board, screen, tour, frame)
+
+### Sessions de référence
+
+- `sessions/2026-04-18_design-deep-arcade.md` — définition de la DA
+- `sessions/2026-04-19_onboarding-landing-session.md` — implémentation onboarding
+
+### Fichiers de code impactés
+
+- `plinko_app/lib/ui/landing_screen.dart`
+- `plinko_app/lib/ui/onboarding/coachmark.dart`
+- `plinko_app/lib/ui/onboarding/tour_overlay.dart`
+- `plinko_app/lib/services/onboarding_prefs.dart`
+- `plinko_app/lib/config/plinko_config.dart` (tokens concrets : `slotMultipliers`, `pegRadius`, `ballRadius`…)
+
+---
+
+## 9. Questions ouvertes (héritées du handoff)
+
+1. Le jeu tracke-t-il déjà un flag "first-time" ? Si oui, quelle clé ?
+2. Tour auto au 1er open, ou manuel via "Comment ça marche ?" uniquement ? *(actuellement : manuel)*
+3. Cibles de localisation — wireframe FR, hi-fi EN. Autres locales au launch ?
+4. La demo ball step 3 doit-elle atterrir dans une case précise (ex. toujours x0.5) ou vraiment aléatoire ?
+5. La cellule mult doit-elle flasher / highlight quand la demo ball atterrit ?
+
+---
+
+## 10. Règle source de vérité
+
+- **Intention + tokens évolutifs** → cette page Notion
+- **Valeurs exactes en prod** → `plinko_app/lib/config/plinko_config.dart`
+- **Assets binaires + prototypes** → `design_handoff/` sur GitHub
+- **Historique des décisions** → `decisions-log.md` + `sessions/`
+
+En cas de conflit entre cette page et le code : le code gagne pour les valeurs, la page gagne pour l'intention. Toute divergence doit être tracée dans §7.
