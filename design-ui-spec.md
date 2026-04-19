@@ -30,7 +30,7 @@ Validée Build 47→54 après benchmark multi-agents (benchmark / game-designer 
 | `--bg-base` | `#050510` | Fond principal |
 | `--bg-mid` | `#0b0b1c` | Élévation 1 (cards, panels) |
 | `--accent-cyan` | `#22e4d9` | Contour ring, CTA primaire, accents UI |
-| `--accent-magenta` | `#ff3ea5` | Bille, hot multipliers, boutons billes |
+| `--accent-magenta` | `#FF2EB4` | Bille (ball.dart), boutons lancer (main.dart), extrémités cases. Note : landing_screen.dart utilise `#FF3EA5` pour le dégradé ambiant fond uniquement. |
 | `--accent-green` | `#47e57a` | Alt (réservé succès / futur) |
 | `--mult-x10` | `#ff3ea5` | Case x10 (edge) |
 | `--mult-x2` | `#c64aff` | Case x2 |
@@ -74,10 +74,10 @@ Grid:      10 rows visibles (12 logiques, startRow=2), count = r + 3 pegs per ro
 Spacing:   7 viewBox units (viewBox 100×110)
 Peg outer: r=1.1, white radial glow, opacity 0.35 (0.7 sur spotlight step 3)
 Peg core:  r=0.55, solid white
-Ball core: r=1.4, #ff3ea5
-Ball glow: r=2.2, radial-gradient #ff7cc8 → #ff3ea5 → transparent, blur 1.2, opacity 0.75
+Ball core: r=1.4, #FF2EB4 (magenta prod — ball.dart)
+Ball glow: r=2.2, radial-gradient #ff7cc8 → #FF2EB4 → transparent, blur 1.2, opacity 0.75
 Ball hi:   r=0.45, white 0.75, offset (-0.4, -0.4) (spéculaire)
-Trail:     stroke #ff3ea5, width 0.4, dash 0.8 / 0.6, opacity 0.5
+Trail:     stroke #FF2EB4, width 0.4, dash 0.8 / 0.6, opacity 0.5
 ```
 
 ### Chips — rangée mise / rangée billes

@@ -5,7 +5,7 @@ import '../models/prize_lot.dart';
 ///
 /// Mécanique Plinko (standard industrie) :
 ///   - Grille triangulaire : rangée R a R+1 picots
-///   - rows=18, startRow=2 → 16 rangées affichées, last row = 18 picots → 17 cases
+///   - rows=12, startRow=2 → 10 rangées affichées, last row = 12 picots → 9 cases
 ///   - Proportions style Stake : picots petits, bille ~1.33× picot, quasi-équilatéral
 ///   - worldWidth = largeur exacte de la dernière rangée de picots
 ///   - Cases entre les picots de la dernière rangée
@@ -90,15 +90,15 @@ class PlinkoConfig {
   /// Palette Deep Arcade (Build 48) : magenta aux extrémités → dégradé froid au centre.
   /// Principe : chaleur code la désirabilité, neutre au centre (x0.1 ≠ punition).
   static const List<int> _slotColorValues = [
-    0xFFFF2EB4, // x100 magenta vif
-    0xFFB847FF, // x25  violet
-    0xFF6B4FFF, // x10  indigo
-    0xFF4A5A8A, // x2   bleu gris
+    0xFFFF2EB4, // x10  magenta vif
+    0xFFB847FF, // x2   violet
+    0xFF6B4FFF, // x0.5 indigo
+    0xFF4A5A8A, // x0.1 bleu gris
     0xFF3A3A4A, // x0.1 gris neutre (centre)
-    0xFF4A5A8A, // x2   bleu gris
-    0xFF6B4FFF, // x10  indigo
-    0xFFB847FF, // x25  violet
-    0xFFFF2EB4, // x100 magenta vif
+    0xFF4A5A8A, // x0.1 bleu gris
+    0xFF6B4FFF, // x0.5 indigo
+    0xFFB847FF, // x2   violet
+    0xFFFF2EB4, // x10  magenta vif
   ];
 
   /// Formate un multiplicateur en label affiché ("x100", "x0.1"…).
