@@ -87,6 +87,7 @@ EOF
 | `plinko_app/lib/game/ball.dart` | Bille — physique + replay frame par frame |
 | `plinko_app/lib/game/board.dart` | Plateau visuel + overlay zones DEBUG |
 | `plinko_app/lib/ui/config_panel.dart` | Sliders live + debug + sauvegarde configs |
+| `plinko_app/lib/ui/widgets/dropl_wordmark.dart` | Wordmark DROPL réutilisable (CustomPainter, 3 TextPainter DR/O/PL) — Build 60 |
 | `plinko_app/lib/data/trajectory_loader.dart` | Lecture JSON + sélection trajectoire |
 | `plinko_app/lib/models/prize_lot.dart` | Table de lots (PrizeLot + LandedResult) |
 | `plinko_app/lib/models/trajectory.dart` | Modèle de données trajectoire |

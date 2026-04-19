@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'widgets/dropl_wordmark.dart';
 
-/// Écran d'accueil — wordmark PLINKO, CTA Jouer, ghost link "Comment ça marche ?".
+/// Écran d'accueil — wordmark DROPL, CTA Jouer, ghost link "Comment ça marche ?".
 ///
 /// `onPlay` = démarre la partie sans tour.
 /// `onHowItWorks` = démarre la partie avec le tour actif.
@@ -73,8 +74,8 @@ class LandingScreen extends StatelessWidget {
               children: [
                 const Spacer(flex: 3),
 
-                // Wordmark
-                _Wordmark(),
+                // Wordmark — DROPL (splash size 52, voir §2bis design-ui-spec.md)
+                const DroplWordmark(size: 52),
 
                 const Spacer(flex: 1),
 
@@ -121,27 +122,6 @@ class LandingScreen extends StatelessWidget {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Wordmark extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    const accent = Color(0xFF22E4D9);
-    return Text(
-      'PLINKO',
-      style: GoogleFonts.spaceGrotesk(
-        color: Colors.white,
-        fontSize: 44,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 8,
-        height: 1.0,
-        shadows: [
-          Shadow(color: accent.withOpacity(0.9), blurRadius: 10),
-          Shadow(color: accent.withOpacity(0.55), blurRadius: 24),
         ],
       ),
     );

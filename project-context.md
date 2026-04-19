@@ -34,7 +34,10 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 - **Hiérarchie docs** (Phase 1 refacto 2026-04-17) — project-context.md = source de vérité (vision + décisions + statut), CLAUDE.md = quick ref technique pure, decisions-log.md = historique immuable. Vision uniquement dans project-context.md, §Projet retiré de CLAUDE.md pour supprimer le doublon.
 - **Phase 2 différée** — refonte hook + skill plinko-context-loader (aujourd'hui ils doublonnent : hook lit project-context + dernier log, skill relit tout + Notion). À faire après 2 sessions de test Phase 1.
 - **Spec UI Design consolidée** (2026-04-19) — ajout page Notion 🎨 Design UI (`https://www.notion.so/Design-UI-347d826db45980498628dfd5b720a15c`) + miroir versionné `design-ui-spec.md` à la racine. Consolide DA Deep Arcade + handoff onboarding Claude Design en un seul doc. Règle : **intention + tokens évolutifs** sur Notion, **valeurs exactes** dans `plinko_config.dart`, **assets binaires** dans `design_handoff/`. Décalages spec vs code tracés en §7 du doc. Prochaine étape : consolider les multiples versions de design historiques (assets Gemini → refonte → Deep Arcade → handoff onboarding) et archiver les périmées.
-- **Rebrand wordmark PLINKO → DROPL** (2026-04-20, handoff Claude Design v2) — nouveau wordmark 5 lettres avec "O abaissé" comme cue de chute (Space Grotesk 700, 3 `<text>` SVG distincts DR/O/PL, baseline offset +10 unités, ls −2.4 à 52px / −1.85 à 40px, blanc pur sans ornement). **Décision périmètre** : DROPL = nom de marque/produit affiché. *"Plinko"* reste l'**identifiant tech interne** (repo `M4tthux/plinko`, dossier `plinko_app/`, classe `PlinkoGame`, clé prefs `plinko_has_seen_tour`, URL `m4tthux.github.io/plinko`) — **pas de rename code/repo au MVP**. À reconsidérer Post-MVP si la marque DROPL se consolide. Docs et assets MAJ ; **refonte code différée** (session dev dédiée). Spec : §2bis de `design-ui-spec.md`. Assets : `design_handoff/.../DROPL Wordmark In-Context.html` + README v2.
+- **Rebrand wordmark PLINKO → DROPL** (2026-04-20, handoff Claude Design v2) — nouveau wordmark 5 lettres avec "O abaissé" comme cue de chute (Space Grotesk 700, 3 `<text>` SVG distincts DR/O/PL, baseline offset +10 unités, ls −2.4 à 52px / −1.85 à 40px, blanc pur sans ornement). **Décision périmètre** : DROPL = nom de marque/produit affiché. *"Plinko"* reste l'**identifiant tech interne** (repo `M4tthux/plinko`, dossier `plinko_app/`, classe `PlinkoGame`, clé prefs `plinko_has_seen_tour`, URL `m4tthux.github.io/plinko`) — **pas de rename code/repo au MVP**. À reconsidérer Post-MVP si la marque DROPL se consolide. Spec : §2bis de `design-ui-spec.md`. Assets : `design_handoff/.../DROPL Wordmark In-Context.html` + README v2.
+- **Implémentation DROPL wordmark** (Build 60, 2026-04-20) — composant Flutter `DroplWordmark(size)` créé (`plinko_app/lib/ui/widgets/dropl_wordmark.dart`) via `CustomPainter` + 3 `TextPainter` (DR / O / PL) mappant fidèlement le viewBox SVG de référence (220×72 à 52px). Centrage optique `text-anchor=middle` implémenté par calcul `centerX - width/2`, baseline via `computeDistanceToActualBaseline`. Remplace `_Wordmark` dans `landing_screen.dart` (size 52, splash) et `_PlinkoTitleOverlay` dans `main.dart` (size 40 responsive, header in-screen) — halo cyan + soulignement supprimés conformément à §2bis. In-game wordmark wrappé dans `Center` pour centrage horizontal tout en conservant la `GlobalKey _wordmarkKey` sur le widget tight (préserve la taille du spotlight step 02). Callout step 02 du tour : *"Comment fonctionne Plinko"* → *"Comment fonctionne DROPL"*. Pas de dépendance ajoutée (pas de `flutter_svg`). `§7` du spec : décalage wordmark résolu, à mettre à jour.
+- **Skill `plinko-mobile-preview`** (2026-04-20) — nouveau skill pour tester le build Flutter sur iPhone via WiFi LAN sans passer par `git push` + CI gh-pages. `flutter build web --release` (bundle léger ~2 Mo, vs ~20 Mo en debug que Safari iOS refuse) + `python -m http.server 8082 --bind 0.0.0.0`, URL LAN `http://<IP>:8082` à ouvrir sur le mobile. Pare-feu Windows → ouvrir port 8082 en admin. Complémentaire à `flutter run -d chrome` (port 8081, PC seulement). Rebuild requis après chaque modif code (pas de hot reload).
+- **Règle "skill créé → ajout Glossaire Notion"** (2026-04-20) — tout `SKILL.md` créé/modifié en session doit être enregistré dans la base Notion 📚 Glossaire des Skills (`28d8e8e639fe410fa59f6a435bf96c32`). Le fichier local seul ne suffit pas — Matthieu s'en est rendu compte quand `plinko-mobile-preview` n'apparaissait pas dans le glossaire post-création. Étape 4bis ajoutée dans `plinko-session-close` pour rattraper tout oubli.
 
 ### Tech
 - **Flame + physique manuelle** — Forge2D supprimé car incompatible Flutter Web
@@ -98,21 +101,13 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ---
 
-## Questions ouvertes
+## Questions ouvertes (produit uniquement)
+
+> ⚠️ Questions produit non-tranchées uniquement. Les tâches actionnables vivent sur la board Notion → https://www.notion.so/6c1e7a3c58094cadac6313c3a57bbda7. Ne jamais ajouter de tâche ici.
 
 ### Game Design
 - Écran d'intro : animation bille ou simple logo marque ? (basse priorité)
 - Équilibrage multiplicateurs x100 : probabilité réelle vs ressenti joueur à monitorer
-
-### Design / Dev
-- **🔥 Implémenter wordmark DROPL** (rebrand 2026-04-20) — créer composant Flutter réutilisable `<DroplWordmark size={40|52}>` (3 `<text>` SVG via `flutter_svg` ou `CustomPainter`, O abaissé +10 unités), remplacer "PLINKO" dans `landing_screen.dart` + step 02 du tour (`coachmark` cible `wordmarkKey`), MAJ texte callout *"Comment fonctionne DROPL"*, MAJ headline si besoin. Spec complète : §2bis `design-ui-spec.md`.
-- **VFX Phase 2** — flash case, screen shake, scale pulse
-- **LaunchZoneOverlay DEBUG** (Z0–Z4) — à retirer avant prod
-- **Régénérer trajectoires** pour la nouvelle grille 12 rangs / 9 cases (aujourd'hui obsolètes, masquées par `forcePhysicsMode = true`)
-- **Passe typo globale** (Space Grotesk UI + JetBrains Mono labels) — actuellement seulement appliquée sur landing + coachmark. À propager sur balance, build stamp, boutons bet/billes, popups gain, multiplicateurs
-- **Adapter le design hi-fi Claude Design à la grille 12/9** — l'export Claude Design (`design_handoff/`) décrit 11 rangs / 3–13 picots, nous sommes en 12 rangs / 9 cases. Matthieu relancera un prompt côté Claude Design pour refaire l'export avec notre grille réelle
-- **Demo ball magenta step 3** — le design ref montre une bille qui tombe avec trail dashed pendant le step plateau, pas encore implémentée
-- **Alignement layout callout avec design ref** — dots de progression à mettre en bas-gauche de la callout (actuellement haut-droite), ajouter eyebrow "HOW TO PLAY" (ou équivalent FR)
 
 ### Tech Post-MVP
 - Transmission récompense → marque : webhook ou API pull ?
@@ -125,17 +120,11 @@ Destiné à être intégré comme expérience d'engagement pour des marques clie
 
 ## État d'avancement
 
-| Domaine | Statut | Notes |
-|---|---|---|
-| Game Design | 🟢 Build 49 validé | 9 cases, multi `10·2·0.5·0.1·0.1·0.1·0.5·2·10` (échelle réduite) |
-| Tech & Architecture | 🟢 Stabilisé | Sub-stepping, physique pure, grille triangulaire, cases découplées |
-| Design & UI | 🟢 Build 59 | Landing + onboarding 4 steps (coachmark ring cyan sec, dim 4-rects, callout glass clampée). Typo Space Grotesk/JetBrains Mono sur landing+coachmark uniquement, à propager |
-| Dev | 🟢 Build 59 | Route landing → jeu, `hasSeenTour` en SharedPreferences, bouton retour top-left, GlobalKeys pour targets du tour |
-| CI/CD | 🟢 Done | Auto-deploy gh-pages |
-| Test mobile (web) | 🟢 OK | Safari/Chrome iPhone via GitHub Pages |
-| Flutter local | 🟢 OK | v3.41.6 Windows (Git CMD) |
-| Build natif iOS/Android | 🔴 Bloqué | Mac + Xcode requis |
+👉 Source de vérité : board Notion → https://www.notion.so/6c1e7a3c58094cadac6313c3a57bbda7
+Plus de tableau de statuts dans ce fichier (évite la dérive). Build + config plateau : CLAUDE.md.
 
 ---
 
-*Dernière mise à jour : 2026-04-20 — Sync handoff Claude Design v2 (`plinko design (2).zip`) : rebrand wordmark **PLINKO → DROPL** (5 lettres, O abaissé). Docs et assets mis à jour (`design-ui-spec.md` §2bis, `decisions-log.md`, `CLAUDE.md`, README handoff v2 + nouveau `DROPL Wordmark In-Context.html`). "Plinko" reste l'ID tech interne (pas de rename code/repo). Refonte code wordmark (`landing_screen.dart` + step 02 du tour) **différée à une session dev dédiée**.*
+*Dernière mise à jour : 2026-04-20 — Refactor docs : la board Notion devient la SEULE source de vérité pour les tâches actionnables. §Questions ouvertes ramenée aux questions produit non-tranchées (sous-section Design/Dev supprimée, items migrés sur la board). §État d'avancement remplacée par un pointeur vers la board (plus de tableau de statuts). Skills `plinko-session-close` et `plinko-context-loader` mis à jour en conséquence.*
+
+*Session 2026-04-20 (Build 60) — Implémentation wordmark DROPL (composant Flutter `DroplWordmark` via CustomPainter + 3 TextPainter, remplace le wordmark landing + in-game, callout step 02 MAJ). Nouveau skill `plinko-mobile-preview` pour tester sur iPhone via WiFi LAN sans push gh-pages. Règle "skill créé → ajout Glossaire Notion" formalisée (Étape 4bis du session-close + mémoire feedback).*

@@ -8,10 +8,11 @@ import 'ui/config_panel.dart';
 import 'ui/landing_screen.dart';
 import 'ui/onboarding/coachmark.dart';
 import 'ui/onboarding/tour_overlay.dart';
+import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-19 · build 59';
+const String kBuildTime = '2026-04-20 · build 60';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -148,7 +149,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
       targets: [
         TourTarget(
           key: _wordmarkKey,
-          title: 'Comment fonctionne Plinko',
+          title: 'Comment fonctionne DROPL',
           body:
               'Lâche des billes depuis le haut. Chaque bille atterrit dans une case à multiplicateur.',
         ),
@@ -274,9 +275,11 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 left: 0,
                 right: 0,
                 top: _titleTop(context),
-                child: _PlinkoTitleOverlay(
-                  key: _wordmarkKey,
-                  fontSize: _titleFontSize(context),
+                child: Center(
+                  child: _PlinkoTitleOverlay(
+                    key: _wordmarkKey,
+                    fontSize: _titleFontSize(context),
+                  ),
                 ),
               ),
 
@@ -538,44 +541,16 @@ class _DashedBorderPainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// _PlinkoTitleOverlay — titre "PLINKO" blanc + soulignement cyan
+// _PlinkoTitleOverlay — wordmark DROPL en header in-screen (voir §2bis spec)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _PlinkoTitleOverlay extends StatelessWidget {
   final double fontSize;
-  const _PlinkoTitleOverlay({super.key, this.fontSize = 42});
+  const _PlinkoTitleOverlay({super.key, this.fontSize = 40});
 
   @override
   Widget build(BuildContext context) {
-    const cyan = Color(0xFF00D9FF);
-    // Soulignement scalé sur la taille du titre (ratio d'origine 110/42).
-    final underlineWidth = fontSize * (110 / 42);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'PLINKO',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: fontSize,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 3.5,
-            height: 1.0,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: underlineWidth,
-          height: 2,
-          decoration: BoxDecoration(
-            color: cyan,
-            boxShadow: [
-              BoxShadow(color: cyan.withOpacity(0.7), blurRadius: 6),
-            ],
-          ),
-        ),
-      ],
-    );
+    return DroplWordmark(size: fontSize);
   }
 }
 

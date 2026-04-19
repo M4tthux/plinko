@@ -28,21 +28,40 @@ Ce bilan sert de base à TOUTES les étapes suivantes. Ne pas être vague.
 
 ---
 
-## Étape 2 — Mettre à jour project-context.md
+## Étape 2 — Mettre à jour la board Notion [SOURCE DE VÉRITÉ DES TÂCHES]
+
+URL : `https://www.notion.so/6c1e7a3c58094cadac6313c3a57bbda7`
+
+La board Notion est **la seule** source de vérité pour les tâches actionnables. À faire **avant** toute autre update de docs.
+
+Pour chaque tâche touchée cette session :
+- Terminée et validée → **Done**
+- Commencée, non finie → **En cours**
+- Testée, non validée → **En test**
+- Bloquée → **Bloqué**
+
+Créer les nouvelles tâches identifiées pendant la session (VFX, nettoyage, régénération trajectoires, etc.) directement ici — **jamais** dans `project-context.md`.
+
+---
+
+## Étape 3 — Mettre à jour project-context.md
 
 Fichier : `Plinko/project-context.md`
 
+> ⚠️ **INTERDIT** : ne jamais écrire une tâche actionnable dans `project-context.md`. Toute tâche (à faire, en cours, en test, bloquée) va sur la board Notion uniquement (cf. Étape 2).
+> - §Questions ouvertes = questions **produit non-tranchées** uniquement (arbitrages game design, choix archi Post-MVP). Pas de "à faire".
+> - §État d'avancement = pointeur vers la board, pas un tableau de statuts.
+
 Mettre à jour :
-1. **§ État d'avancement** — tableau de statuts, build actuel
-2. **§ Décisions actives** — ajouter toute nouvelle décision prise cette session (avec la date)
-3. **§ Questions ouvertes** — ajouter les nouvelles, retirer celles résolues
-4. **Pied de page** — date + résumé de la session
+1. **§ Décisions actives** — ajouter toute nouvelle décision prise cette session (avec la date + le *pourquoi*)
+2. **§ Questions ouvertes (produit uniquement)** — ajouter les nouvelles questions **produit non-tranchées**, retirer celles résolues
+3. **Pied de page** — date + résumé de la session
 
 > ⚠️ Ne pas dupliquer ce qui est déjà dans CLAUDE.md. project-context.md = le *pourquoi*, CLAUDE.md = le *comment*.
 
 ---
 
-## Étape 3 — Mettre à jour decisions-log.md
+## Étape 4 — Mettre à jour decisions-log.md
 
 Fichier : `Plinko/decisions-log.md`
 
@@ -56,7 +75,7 @@ Le decisions-log est **immuable** : on ajoute uniquement, on ne modifie jamais l
 
 ---
 
-## Étape 4 — Mettre à jour les pages Notion specs [OBLIGATOIRE]
+## Étape 5 — Mettre à jour les pages Notion specs [OBLIGATOIRE]
 
 Pour chaque page ci-dessous, répondre à la question : **"La session a-t-elle touché ce domaine ?"**
 Si oui → mettre à jour la page Notion **maintenant**, avant de continuer.
@@ -80,7 +99,22 @@ Mettre à jour le footer de chaque page modifiée :
 
 ---
 
-## Étape 5 — Écrire le log de session
+## Étape 5bis — Enregistrer les nouveaux skills dans le glossaire Notion
+
+Scanner la session : y a-t-il eu création ou modification substantielle d'un fichier `**/.claude/skills/**/SKILL.md` (n'importe quel scope — projet Plinko ou user global) ?
+
+- **Oui** → pour chaque skill créé, ajouter une page dans le glossaire :
+  - Base Notion : `28d8e8e639fe410fa59f6a435bf96c32` (📚 Glossaire des Skills)
+  - Data source : `e9b45a46-6831-40f3-8032-3a77609bea6f`
+  - Propriétés obligatoires : `Nom`, `Famille` (📄 Documents / 🤖 Automatisation / 💡 Productivité / ⚙️ Meta), `Créé par` = `Moi`, `Type` (Skill / Agent), `Statut` = `✅ Actif`, `Description courte`, `Déclencheurs`, `Étapes` (résumé chronologique des étapes du SKILL.md).
+- **Modifié seulement** → mettre à jour l'entrée existante si Déclencheurs / Étapes / Description ont changé.
+- **Non** → passer à l'étape suivante.
+
+**Règle absolue : créer un SKILL.md sans l'enregistrer dans le glossaire = skill invisible dans le système Claude. Cette étape rattrape tout oubli en cours de session.**
+
+---
+
+## Étape 6 — Écrire le log de session
 
 Créer `Plinko/sessions/[YYYY-MM-DD]_[domaine]-session.md` :
 
@@ -105,7 +139,7 @@ Créer `Plinko/sessions/[YYYY-MM-DD]_[domaine]-session.md` :
 
 ---
 
-## Étape 6 — Vérifier la cohérence CLAUDE.md
+## Étape 7 — Vérifier la cohérence CLAUDE.md
 
 Si la session a modifié la config plateau (pegRadius, ballRadius, rows, multiplicateurs, build…) :
 → Mettre à jour le tableau **§ Config plateau actuelle** dans `CLAUDE.md`.
@@ -114,7 +148,7 @@ Règle : CLAUDE.md = quick ref technique. Si une valeur a changé dans le code, 
 
 ---
 
-## Étape 7 — Committer et pusher
+## Étape 8 — Committer et pusher
 
 ```bash
 git add [fichiers modifiés — jamais git add -A]
@@ -131,18 +165,6 @@ git push origin master
 ```
 
 Le push est **obligatoire** — sans lui, le mobile ne voit pas les mises à jour.
-
----
-
-## Étape 8 — Mettre à jour la board Notion
-
-URL : `https://www.notion.so/6c1e7a3c58094cadac6313c3a57bbda7`
-
-Pour chaque tâche concernée :
-- Terminée et validée → **Done**
-- Commencée → **En cours**
-- Testée, non validée → **En test**
-- Bloquée → **Bloqué**
 
 ---
 
@@ -169,12 +191,13 @@ Pour chaque tâche concernée :
 
 Avant de confirmer la clôture, vérifier que :
 
-- [ ] project-context.md mis à jour (décisions + état + date)
+- [ ] **Board Notion mise à jour** (Étape 2 — AVANT les docs, source de vérité des tâches)
+- [ ] project-context.md mis à jour (décisions produit + questions produit + date) — **aucune tâche actionnable écrite dedans**
 - [ ] decisions-log.md complété (nouvelles décisions ajoutées)
 - [ ] Pages Notion specs vérifiées et mises à jour si impactées
+- [ ] Nouveaux skills créés cette session enregistrés dans le Glossaire Notion
 - [ ] design-ui-spec.md synchronisé avec Notion Design UI (si design touché)
 - [ ] CLAUDE.md à jour si config plateau changée
 - [ ] Log de session créé dans sessions/
 - [ ] Commit propre créé
 - [ ] git push origin master exécuté
-- [ ] Board Notion mise à jour

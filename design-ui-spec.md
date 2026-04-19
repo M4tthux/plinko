@@ -118,7 +118,7 @@ linear-gradient(180deg, #0a0a18 0%, #07070f 100%)
 - Lockup 52px centré sur canvas `#050510` avec la background recipe standard (voir §2).
 - App icon : un seul "D" à 64 % de la hauteur du canvas, même police / weight, centré. Le wordmark complet ne descend pas à la taille d'icône.
 
-> **Implémentation Flutter prévue** : composant réutilisable `<Wordmark size={40|52} />` dans `plinko_app/lib/ui/widgets/dropl_wordmark.dart`. Voir §7 — pas encore implémenté (Build 59 affiche encore "PLINKO" via `Text` standard).
+> **Implémenté Build 60** : `DroplWordmark(size)` dans `plinko_app/lib/ui/widgets/dropl_wordmark.dart`. CustomPainter + 3 `TextPainter` (DR / O / PL), `text-anchor=middle` via `centerX - width/2`, baseline via `computeDistanceToActualBaseline`. Pas de dépendance `flutter_svg` ajoutée.
 
 ---
 
@@ -309,7 +309,7 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 | **Eyebrow "HOW TO PLAY"** | Spec | **Absent** | À ajouter (équivalent FR "COMMENT JOUER"). |
 | **Auto-launch tour** | fresh user + !hasSeenTour | **Manuel uniquement** (via "Comment ça marche ?") | `hasSeenTour` persisté mais non-gating pour l'instant. |
 | **Typo globale** | Space Grotesk + JetBrains Mono partout | **Landing + coachmark seulement** | Passe typo globale prévue prochaine session. |
-| **Wordmark DROPL** | Lockup 3 `<text>` SVG, O abaissé +10 unités, ls −2.4 (52px) / −1.85 (40px) | **Affiche encore "PLINKO"** dans `landing_screen.dart` (Text standard, ls 8px, halo cyan) | Rebrand spec 2026-04-20 — refonte code en session dédiée (création `<DroplWordmark>`, MAJ landing + step 02 du tour, MAJ texte callout "Comment fonctionne DROPL"). |
+| **Wordmark DROPL** | Lockup 3 `<text>` SVG, O abaissé +10 unités, ls −2.4 (52px) / −1.85 (40px) | **✅ Résolu Build 60** : `DroplWordmark(size)` dans `plinko_app/lib/ui/widgets/dropl_wordmark.dart` (CustomPainter + 3 TextPainter, mapping fidèle du viewBox). Remplace landing (size 52) + `_PlinkoTitleOverlay` in-game (size 40 responsive). Callout step 02 : "Comment fonctionne DROPL". | — |
 | **Identifiants tech** | — | Repo `M4tthux/plinko`, dossier `plinko_app/`, classe `PlinkoGame`, clé prefs `plinko_has_seen_tour`, URL `m4tthux.github.io/plinko` | **Décision** : DROPL = nom de marque/produit affiché. "Plinko" reste l'ID tech interne (pas de rename repo / package au MVP). À reconsidérer Post-MVP si la marque DROPL se consolide. |
 
 ---
