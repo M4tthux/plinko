@@ -12,7 +12,7 @@ import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-20 · build 60';
+const String kBuildTime = '2026-04-20 · build 61';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -312,19 +312,10 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                 ),
               ),
 
-              // Bouton retour vers l'écran d'accueil — top-left
+              // Balance — coin haut-gauche (aligné sur bottom controls)
               Positioned(
                 top: 16,
-                left: 16,
-                child: _BackButton(
-                  onTap: () => Navigator.of(context).maybePop(),
-                ),
-              ),
-
-              // Balance — coin haut-gauche, à droite du bouton retour
-              Positioned(
-                top: 16,
-                left: 64,
+                left: 12,
                 child: ValueListenableBuilder<double>(
                   valueListenable: _game.balanceNotifier,
                   builder: (context, balance, _) {
@@ -399,41 +390,6 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
             ConfigPanel(game: _game),
           ],
         );
-  }
-}
-
-/// Petit bouton discret top-left — retour à l'écran d'accueil.
-class _BackButton extends StatelessWidget {
-  final VoidCallback onTap;
-  const _BackButton({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          width: 36,
-          height: 36,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: const Color(0xFF0A0A14).withOpacity(0.75),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.18),
-              width: 1,
-            ),
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: Color(0xCCFFFFFF),
-            size: 16,
-          ),
-        ),
-      ),
-    );
   }
 }
 

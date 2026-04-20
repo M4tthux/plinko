@@ -208,7 +208,7 @@ class _ConfigPanelState extends State<ConfigPanel> {
         // ── Bouton flottant ────────────────────────────────────────────────
         Positioned(
           top: 16,
-          right: 16,
+          right: 12,
           child: GestureDetector(
             onTap: () => setState(() {
               _open = !_open;
@@ -244,7 +244,7 @@ class _ConfigPanelState extends State<ConfigPanel> {
         if (_open)
           Positioned(
             top: 64,
-            right: 16,
+            right: 12,
             bottom: 16,
             child: Material(
               color: Colors.transparent,
