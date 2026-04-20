@@ -13,7 +13,7 @@ import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-21 · build 65';
+const String kBuildTime = '2026-04-21 · build 66';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;

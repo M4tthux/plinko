@@ -126,22 +126,6 @@ class Coachmark extends StatelessWidget {
               ),
             ),
 
-            // Progress bar top
-            Positioned(
-              top: 58,
-              left: 18,
-              right: 18,
-              child: _ProgressBar(step: step, total: totalSteps),
-            ),
-
-            // Skip top-right
-            if (showSkip && onSkip != null)
-              Positioned(
-                top: 16,
-                right: 16,
-                child: _SkipButton(onTap: onSkip!),
-              ),
-
             // Callout docké
             _DockedCallout(
               hole: hole,
@@ -152,6 +136,8 @@ class Coachmark extends StatelessWidget {
               body: body,
               ctaLabel: ctaLabel,
               onNext: onNext,
+              onSkip: onSkip,
+              showSkip: showSkip,
             ),
           ],
         );
@@ -160,42 +146,9 @@ class Coachmark extends StatelessWidget {
   }
 }
 
-class _ProgressBar extends StatelessWidget {
-  final int step;
-  final int total;
-  const _ProgressBar({required this.step, required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    final fill = (step / total).clamp(0.0, 1.0);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(3),
-      child: Container(
-        height: 3,
-        color: Colors.white.withOpacity(0.10),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: fill, end: fill),
-            duration: const Duration(milliseconds: CoachmarkTokens.animMs),
-            curve: CoachmarkTokens.animCurve,
-            builder: (_, v, __) => FractionallySizedBox(
-              widthFactor: v,
-              heightFactor: 1,
-              child: Container(
-                color: CoachmarkTokens.accent,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SkipButton extends StatelessWidget {
+class _SkipLink extends StatelessWidget {
   final VoidCallback onTap;
-  const _SkipButton({required this.onTap});
+  const _SkipLink({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -203,29 +156,15 @@ class _SkipButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.20),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                'Passer',
-                style: GoogleFonts.spaceGrotesk(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Text(
+            'Passer',
+            style: GoogleFonts.spaceGrotesk(
+              color: Colors.white.withOpacity(0.60),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -243,6 +182,8 @@ class _DockedCallout extends StatelessWidget {
   final String body;
   final String ctaLabel;
   final VoidCallback onNext;
+  final VoidCallback? onSkip;
+  final bool showSkip;
 
   const _DockedCallout({
     required this.hole,
@@ -253,6 +194,8 @@ class _DockedCallout extends StatelessWidget {
     required this.body,
     required this.ctaLabel,
     required this.onNext,
+    this.onSkip,
+    this.showSkip = true,
   });
 
   @override
@@ -314,6 +257,8 @@ class _DockedCallout extends StatelessWidget {
           body: body,
           ctaLabel: ctaLabel,
           onNext: onNext,
+          onSkip: onSkip,
+          showSkip: showSkip,
         ),
       ),
     );
@@ -328,6 +273,8 @@ class _CalloutCard extends StatelessWidget {
   final String body;
   final String ctaLabel;
   final VoidCallback onNext;
+  final VoidCallback? onSkip;
+  final bool showSkip;
 
   const _CalloutCard({
     required this.maxWidth,
@@ -337,6 +284,8 @@ class _CalloutCard extends StatelessWidget {
     required this.body,
     required this.ctaLabel,
     required this.onNext,
+    this.onSkip,
+    this.showSkip = true,
   });
 
   @override
@@ -401,9 +350,15 @@ class _CalloutCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _NextButton(label: ctaLabel, onTap: onNext),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (showSkip && onSkip != null) ...[
+                      _SkipLink(onTap: onSkip!),
+                      const SizedBox(width: 8),
+                    ],
+                    _NextButton(label: ctaLabel, onTap: onNext),
+                  ],
                 ),
               ],
             ),
