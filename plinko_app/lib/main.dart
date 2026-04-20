@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'data/trajectory_loader.dart';
 import 'game/plinko_game.dart';
 import 'ui/config_panel.dart';
@@ -12,7 +13,7 @@ import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-20 · build 62';
+const String kBuildTime = '2026-04-21 · build 63';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -296,15 +297,15 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
               ),
 
               // Badge version — DEBUG (discret, tout en bas)
-              const Positioned(
+              Positioned(
                 bottom: 4,
                 left: 0,
                 right: 0,
                 child: Text(
                   kBuildTime,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0x55FFFFFF),
+                  style: GoogleFonts.jetBrainsMono(
+                    color: const Color(0x55FFFFFF),
                     fontSize: 9,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.6,
@@ -342,7 +343,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                         children: [
                           Text(
                             '€',
-                            style: TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               color: accent,
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
@@ -352,7 +353,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                           const SizedBox(width: 8),
                           Text(
                             balance.toStringAsFixed(2),
-                            style: const TextStyle(
+                            style: GoogleFonts.spaceGrotesk(
                               color: Colors.white,
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
@@ -619,7 +620,7 @@ class _BetButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: TextStyle(
+          style: GoogleFonts.spaceGrotesk(
             color: selected ? Colors.white : const Color(0xCCFFFFFF),
             fontSize: 15,
             fontWeight: FontWeight.w800,
@@ -669,7 +670,7 @@ class _LaunchButton extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.spaceGrotesk(
               color: disabled ? const Color(0x77FFFFFF) : Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -809,7 +810,7 @@ class _GainPopupState extends State<_GainPopup>
               scale: _scale.value,
               child: Text(
                 text,
-                style: TextStyle(
+                style: GoogleFonts.spaceGrotesk(
                   fontSize: style.fontSize,
                   fontWeight: FontWeight.w900,
                   color: style.color,

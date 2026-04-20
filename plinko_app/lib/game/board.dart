@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' show Colors, TextStyle, FontWeight, TextSpan, TextPainter, TextDirection, Color, RadialGradient, LinearGradient, Alignment, Shadow;
+import 'package:google_fonts/google_fonts.dart';
 import '../config/plinko_config.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -271,10 +272,10 @@ class SlotLabel extends PositionComponent {
     final tp = TextPainter(
       text: TextSpan(
         text: label,
-        style: TextStyle(
+        style: GoogleFonts.spaceGrotesk(
           color:      Colors.white,
           fontSize:   fontSize,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           height:     1.0,
           letterSpacing: -0.02,
           shadows: [

@@ -18,6 +18,7 @@
 
 ## Règles de session
 
+- **Spec avant code** — aucune ligne de code sans spec validée par Matthieu. Utiliser le skill `plinko-spec` pour toute nouvelle feature ou modification non triviale.
 - **Un problème = une session** — ne pas traiter plusieurs bugs dans la même session
 - **Commit propre en fin de chaque session** — toujours committer avant de clore
 - **Workflow hybride** : Claude Code pour dev/fichiers/terminal/Git/Flutter/trajectoires — Chat (Claude.ai) pour design visuel, screenshots, game design
