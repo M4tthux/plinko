@@ -101,13 +101,15 @@ class PlinkoConfig {
     0xFFFF2EB4, // x10  magenta vif
   ];
 
-  /// Formate un multiplicateur en label affiché ("x100", "x0.1"…).
-  static String slotMultiplierLabel(int i) {
-    final m = slotMultipliers[i];
-    // Entier si pas de décimale, sinon 1 chiffre après la virgule
-    final text = (m == m.roundToDouble()) ? m.toStringAsFixed(0) : m.toString();
-    return 'x$text';
+  /// Formate un multiplicateur en label affiché ("x10", "x.1"…).
+  /// Pour m < 1, on affiche ".1" / ".5" (le "." signifie "moins que 1 ×").
+  static String formatMultiplier(double m) {
+    if (m == m.roundToDouble()) return 'x${m.toStringAsFixed(0)}';
+    if (m < 1) return 'x${m.toString().substring(1)}'; // "0.1" → ".1"
+    return 'x$m';
   }
+
+  static String slotMultiplierLabel(int i) => formatMultiplier(slotMultipliers[i]);
 
   static double slotMultiplierAt(int i) => slotMultipliers[i];
   static String slotLabelAt(int i) => slotMultiplierLabel(i);
