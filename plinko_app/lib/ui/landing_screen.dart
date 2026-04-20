@@ -86,7 +86,7 @@ class LandingScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Tombe. Rebondit. Gagne.',
+                        'Lâche. Prie. Encaisse.',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.spaceGrotesk(
                           color: Colors.white,
@@ -94,17 +94,6 @@ class LandingScreen extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.5,
                           height: 1.1,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Mini-jeu physique. Chaque chute est différente.',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.spaceGrotesk(
-                          color: Colors.white.withOpacity(0.65),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          height: 1.45,
                         ),
                       ),
                       const SizedBox(height: 32),

@@ -13,7 +13,7 @@ import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-21 · build 64';
+const String kBuildTime = '2026-04-21 · build 65';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -152,24 +152,23 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
           key: _wordmarkKey,
           title: 'Comment fonctionne DROPL',
           body:
-              'Lâche des billes depuis le haut. Chaque bille atterrit dans une case à multiplicateur.',
+              'La bille tombe, rebondit et atterrit dans une case qui détermine ton gain.',
         ),
         TourTarget(
           key: _boardKey,
-          title: 'Le plateau',
-          body:
-              'Les picots aléatoirisent la trajectoire. Cases extérieures = gros gains. Cases centrales = petits gains.',
+          title: 'Valeur des cases',
+          body: 'Les bords paient gros. Le centre, bien moins.',
           holePadding: CoachmarkTokens.holePaddingBoard,
         ),
         TourTarget(
           key: _betRowKey,
           title: 'Mise par bille',
-          body: 'Choisis combien coûte chaque bille. Déduit de ton solde.',
+          body: 'Choisis la valeur de chaque bille.',
         ),
         TourTarget(
           key: _ballsRowKey,
-          title: 'Billes par lancer',
-          body: 'De 1 à 10 billes. Coût total = mise × billes.',
+          title: 'Nombre de billes',
+          body: 'De 1 à 10 billes par lancer.',
         ),
       ],
     );
