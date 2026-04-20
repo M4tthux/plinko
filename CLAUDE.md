@@ -101,7 +101,7 @@ EOF
 
 ## Config plateau actuelle
 
-> Build **54** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. **Direction Deep Arcade** (fond noir, picots blancs, cases fin néon, bille magenta). **Contrôles mise + nombre de billes** en bas (tap-to-launch retiré). Responsive mobile + desktop inchangé depuis Build 46.
+> Build **64** — `m4tthux.github.io/plinko`. Grille 10 rangées visibles / 12 picots bas / **9 cases découplées**. **Direction Deep Arcade** (fond noir, picots blancs, cases fin néon, bille magenta). **Contrôles mise + nombre de billes** en bas (tap-to-launch retiré). **Typo globale** Space Grotesk + JetBrains Mono (Build 63). **HUD top aligné 40px** balance + (?) + ⚙ sur une ligne, bouton (?) relance le tour à tout moment (Build 64). Responsive mobile + desktop inchangé depuis Build 46.
 
 | Paramètre | Valeur | Notes |
 |---|---|---|

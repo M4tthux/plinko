@@ -13,7 +13,7 @@ import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-21 · build 63';
+const String kBuildTime = '2026-04-21 · build 64';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -314,6 +314,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
               ),
 
               // Balance — coin haut-gauche (aligné sur bottom controls)
+              // Hauteur fixe 40px pour s'aligner sur les boutons (?) et ⚙ top-right.
               Positioned(
                 top: 16,
                 left: 12,
@@ -325,7 +326,9 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                         ? const Color(0xFF00D9FF)         // cyan Deep Arcade
                         : const Color(0xFFFF4466);        // rouge si négatif
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: const Color(0xFF0A0A14).withOpacity(0.75),
                         borderRadius: BorderRadius.circular(10),
@@ -386,6 +389,18 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                   ),
                 ),
               ),
+
+            // Bouton (?) — relance le tour d'onboarding (top-right, à gauche du burger ⚙)
+            Positioned(
+              top: 16,
+              right: 62,
+              child: _HelpButton(
+                onTap: () {
+                  if (!mounted || _tourActive) return;
+                  setState(() => _tourActive = true);
+                },
+              ),
+            ),
 
             // Panneau de config DEBUG (icône ⚙ en haut à droite)
             ConfigPanel(game: _game),
@@ -508,6 +523,47 @@ class _PlinkoTitleOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DroplWordmark(size: fontSize);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _HelpButton — 40×40 icône help_outline, même visuel que le burger ⚙.
+// Tap = relance le tour d'onboarding (step 1/4). Ne touche pas à hasSeenTour.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _HelpButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _HelpButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0A14).withOpacity(0.75),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: const Color(0xFF00D9FF).withOpacity(0.85),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00D9FF).withOpacity(0.35),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.help_outline,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+    );
   }
 }
 

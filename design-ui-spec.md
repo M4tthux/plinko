@@ -204,6 +204,22 @@ Bg rgba(0,0,0,0.4), backdrop-blur 8, border 1px white/20
 Caché au step final (le CTA "Terminer" fait la fin naturelle)
 ```
 
+### Help button (?) — relance du tour (Build 64)
+
+```
+Position : top:16, right:62 (40 + 10 gap + 12 marge burger à droite)
+Size     : 40×40 (strictement aligné sur le burger ⚙ et la balance)
+Radius   : 10
+Bg       : #0A0A14 @ 0.75
+Border   : 1px cyan #00D9FF @ 0.85
+Shadow   : cyan @ 0.35, blur 10
+Icon     : Icons.help_outline, white, 20px
+Tap      : setState(_tourActive = true) → relance au step 1/4 (wordmark DROPL)
+           hasSeenTour inchangé — le bouton est un déclencheur, pas un reset
+```
+
+> Source de vérité tailles HUD top = burger ⚙ actuel. Balance wrappée en `height:40 + alignment:center` pour aligner visuellement sur la même ligne.
+
 ---
 
 ## 4. Onboarding — flow 5 steps
@@ -254,6 +270,7 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 // entry points
   fresh user + !hasSeenTour  → tourStep = 2 (non-gating actuellement, voir §7)
   ghost "Comment ça marche ?" → tourStep = 2
+  in-game help button (?)     → tourStep = 2 (Build 64, relance à tout moment ; hasSeenTour inchangé)
   primary "Jouer"             → tourStep = 1 (no tour ; set hasSeenTour)
 
 // transitions
@@ -308,7 +325,7 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 | **Dots progression** | Bas-gauche callout | **Haut-droite callout** | À aligner. |
 | **Eyebrow "HOW TO PLAY"** | Spec | **Absent** | À ajouter (équivalent FR "COMMENT JOUER"). |
 | **Auto-launch tour** | fresh user + !hasSeenTour | **Manuel uniquement** (via "Comment ça marche ?") | `hasSeenTour` persisté mais non-gating pour l'instant. |
-| **Typo globale** | Space Grotesk + JetBrains Mono partout | **Landing + coachmark seulement** | Passe typo globale prévue prochaine session. |
+| **Typo globale** | Space Grotesk + JetBrains Mono partout | ✅ **Résolu Build 63** : Space Grotesk appliqué sur balance, boutons bet, boutons lancer, popup gain, labels multiplicateurs cases. JetBrains Mono sur build stamp (microcopy). Labels cases w700 (match spec §3). Seul reste non typé : `_SidePanelPlaceholder` desktop (hors scope — placeholder temporaire). | — |
 | **Wordmark DROPL** | Lockup 3 `<text>` SVG, O abaissé +10 unités, ls −2.4 (52px) / −1.85 (40px) | **✅ Résolu Build 60** : `DroplWordmark(size)` dans `plinko_app/lib/ui/widgets/dropl_wordmark.dart` (CustomPainter + 3 TextPainter, mapping fidèle du viewBox). Remplace landing (size 52) + `_PlinkoTitleOverlay` in-game (size 40 responsive). Callout step 02 : "Comment fonctionne DROPL". | — |
 | **Identifiants tech** | — | Repo `M4tthux/plinko`, dossier `plinko_app/`, classe `PlinkoGame`, clé prefs `plinko_has_seen_tour`, URL `m4tthux.github.io/plinko` | **Décision** : DROPL = nom de marque/produit affiché. "Plinko" reste l'ID tech interne (pas de rename repo / package au MVP). À reconsidérer Post-MVP si la marque DROPL se consolide. |
 
