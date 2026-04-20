@@ -158,7 +158,7 @@ Texte : 11 / 700 Space Grotesk, text-shadow de la couleur
 Edges (x10) : outer glow 12px + 4px supplémentaire
 ```
 
-### Callout coachmark (onboarding)
+### Callout coachmark (onboarding) — minimaliste (Builds 66-69)
 
 ```
 Position : auto — below si spot dans moitié haute, above sinon
@@ -169,12 +169,16 @@ Bg       : linear(180°, rgba(20,20,36,0.92), rgba(12,12,24,0.92))
 Border   : 1px cyan/40%
 Backdrop : blur(20px) saturate(140%)
 Shadow   : 0 10 30 rgba(0,0,0,0.5), 0 0 20 cyan/27, inset 0 1 0 white/8
-Title    : 20 / 700, tracking -0.3
-Body     : 13, line 1.45, white/75
+Title    : 20 / 700, tracking -0.3 — PORTE TOUTE L'EXPLICATION (pas de body)
+Footer   : Row end-aligned, gap 8px — [Passer ghost link] + [CTA plein]
 CTA      : 8×18, radius 10, bg linear(cyan → cyanCC), text #0a0a18, 13/700
-Step pill: "<n> / 4" en cyan, 20h, radius 10
-Dots     : 4 dots — active 16×5 cyan, idle 5×5 white/20
+Passer   : ghost link inline, 13/500, white @ 0.60, padding 8×8
+           → absent au step 4 (Terminer suffit)
 Anim     : fade + 8px rise, 420ms cubic-bezier(0.2, 0.8, 0.2, 1)
+
+⚠ RETIRÉS (Builds 66-69) : progress bar top, step pill "<n> / 4",
+  dots breadcrumb, body/sous-titre, bouton « Passer » flottant top-right.
+  Le tour affiche désormais callout (titre + CTAs) + spot ring uniquement.
 ```
 
 ### Spotlight
@@ -182,27 +186,20 @@ Anim     : fade + 8px rise, 420ms cubic-bezier(0.2, 0.8, 0.2, 1)
 ```
 Mask   : SVG <mask> rect blanc + trou rounded-rect noir sur target
 Ring   : 1.5px cyan, radius 14, box-shadow 16px cyan/53 + 32px cyan/33 + inset 16px cyan/20
-Padding: 6px autour de la cible (10px sur step 3 — le plateau)
+Padding: 6px autour de la cible (10px sur les steps plateau/multiplicateurs)
 Motion : transition 420ms same ease
+
+Target rects (Flutter) — Positioned(left/right/top/bottom) explicite
+  _boardKey       : left 2%, right 2%, top 22%, bottom 25%  (step 1)
+  _multipliersKey : left 2%, right 2%, top 66%, bottom 23%  (step 2)
+  _betRowKey, _ballsRowKey : GlobalKey sur les widgets des rangées boutons bas
 ```
 
 > ⚠ **Décalage d'implémentation** (Build 59) : en Flutter Web, le ring est une bordure **2px cyan sèche sans halo** et le dim est fait via **4 rectangles** autour du trou (pas `Path.combine` ni `BlendMode.clear`). Voir §7.
 
-### Progress bar (toujours visible pendant le tour)
+### Progress bar — **RETIRÉE Build 66**
 
-```
-Top: 58, height 3, radius 3, bg white/10
-Fill: ((step-1)/4) × 100%, cyan + 8px cyan shadow
-```
-
-### Skip button
-
-```
-Top-right of phone, 64,16
-Padding 6×12, radius 14, 12px
-Bg rgba(0,0,0,0.4), backdrop-blur 8, border 1px white/20
-Caché au step final (le CTA "Terminer" fait la fin naturelle)
-```
+### Skip button — **RETIRÉ Build 66** (remplacé par ghost link inline dans la callout, voir ci-dessus)
 
 ### Help button (?) — relance du tour (Build 64)
 
@@ -222,40 +219,37 @@ Tap      : setState(_tourActive = true) → relance au step 1/4 (wordmark DROPL)
 
 ---
 
-## 4. Onboarding — flow 5 steps
+## 4. Onboarding — flow (révision Builds 65-71)
 
 ### 01 — Landing
 - Game UI derrière un gradient vertical fade-to-black bas
-- Headline : **"Tombe. Rebondit. Gagne."** (26px / 700 / tracking −0.5)
-- Sous-titre : *"Mini-jeu physique. Chaque lancer, un chemin différent."* (14px, 65 % white)
+- Headline : **« Lâche. Prie. Encaisse. »** (26px / 700 / tracking −0.5) — Build 65
+- Sous-titre : **RETIRÉ Build 65**
 - CTA primaire : **Jouer** (dégradé cyan, 52h, radius 14, glow)
 - Ghost link : **Comment ça marche ?** — lance le tour (tourStep = 2)
 
-### 02 — Intro (spotlight sur le wordmark)
-- Overlay dim 62 % noir, trou SVG-mask autour du wordmark **DROPL** (voir §2bis)
-- Ring cyan + glow sur le spotlight
-- Callout docké sous le wordmark :
-  - Title : *"Comment fonctionne DROPL"*
-  - Body : *"Lâche des billes depuis le haut. Chaque bille atterrit dans une case à multiplicateur."*
+### Step 1 — Le plateau (target `_boardKey`)
+- Spotlight couvre le plateau entier (bille + pyramide de picots + rangée multiplicateurs)
+- Callout dock dessus/dessous selon la place
+- Title : **« La bille tombe, rebondit et atterrit dans une case. »**
+- Note : le spot peut masquer le wordmark DROPL si docke au-dessus — accepté
 
-### 03 — Le plateau
-- Spotlight couvre toute la pyramide de picots
-- **Demo ball** tombe automatiquement 500ms après l'entrée du step, trajectoire aléatoire, trail dashed magenta
-- Callout sous le plateau :
-  - Title : *"Le plateau"*
-  - Body : *"Les picots randomisent la trajectoire. Les cases extérieures paient plus, les centrales moins."*
+### Step 2 — Valeur des cases (target `_multipliersKey`)
+- Spotlight = bande horizontale sur la rangée multiplicateurs uniquement
+- Callout dockée **au-dessus** du plateau picots (par l'algo de docking)
+- Title : **« Les bords paient gros. Le centre, bien moins. »**
 
-### 04 — Mise (€ / bille)
+### Step 3 — Mise par bille (target `_betRowKey`)
 - Spotlight = bande horizontale autour de la rangée mise (€1 / €2 / €5 / €10)
-- Callout dockée **au-dessus** du spotlight (proche du bas)
-- Title : *"Mise par bille"* · Body : *"Choisis combien coûte chaque bille. Débité de ton solde."*
+- Callout dockée **au-dessus** du spotlight
+- Title : **« Sélectionne la valeur de chaque bille. »**
 - Première chip (€1) en état sélectionné
 
-### 05 — Billes par lancer (final)
+### Step 4 — Nombre de billes (target `_ballsRowKey`) — final
 - Spotlight sur la rangée billes (1 / 2 / 5 / 10)
 - Callout dockée **au-dessus**
-- Title : *"Billes par lancer"* · Body : *"Choisis 1 à 10. Coût total = mise × billes."*
-- CTA passe de **"Suivant"** → **"Terminer"** ; tap = fin du tour
+- Title : **« Tu peux choisir entre 1 et 10 billes par lancer. »**
+- CTA passe à **Terminer** ; pas de « Passer »
 
 ---
 
@@ -376,3 +370,7 @@ hasSeenTour : boolean   // persisté en SharedPreferences
 - **Historique des décisions** → `decisions-log.md` + `sessions/`
 
 En cas de conflit entre cette page et le code : le code gagne pour les valeurs, la page gagne pour l'intention. Toute divergence doit être tracée dans §7.
+
+---
+
+*Dernière mise à jour : 2026-04-21 (Build 71) — Refonte onboarding : landing punchline « Lâche. Prie. Encaisse. » + sous-titre retiré. Callouts minimalistes (titre seul qui porte l'explication, plus de body/progress/pill/dots). « Passer » devient ghost link inline à gauche de Suivant. Step 4 : uniquement Terminer. Targets : step 1 = plateau entier (`_boardKey`), step 2 = rangée multiplicateurs seule (`_multipliersKey`), positionnés via `Positioned(left/right/top/bottom)` explicite pour éviter le débordement iOS Safari observé sur les versions `Padding` heuristiques.*
