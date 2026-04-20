@@ -13,7 +13,7 @@ import 'ui/widgets/dropl_wordmark.dart';
 
 /// Timestamp de build — mis à jour à chaque hot reload.
 /// Permet de vérifier que Flutter a bien pris les dernières modifs.
-const String kBuildTime = '2026-04-21 · build 66';
+const String kBuildTime = '2026-04-21 · build 67';
 
 /// Breakpoint unique entre mode mobile (plein cadre centré) et desktop (3 colonnes).
 const double kDesktopBreakpoint = 1024.0;
@@ -81,6 +81,7 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
   /// Clés pour cibler les éléments UI depuis le tour d'onboarding.
   final GlobalKey _wordmarkKey = GlobalKey();
   final GlobalKey _boardKey = GlobalKey();
+  final GlobalKey _multipliersKey = GlobalKey();
   final GlobalKey _betRowKey = GlobalKey();
   final GlobalKey _ballsRowKey = GlobalKey();
 
@@ -149,13 +150,14 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
       },
       targets: [
         TourTarget(
-          key: _wordmarkKey,
+          key: _boardKey,
           title: 'Comment fonctionne DROPL',
           body:
               'La bille tombe, rebondit et atterrit dans une case qui détermine ton gain.',
+          holePadding: CoachmarkTokens.holePaddingBoard,
         ),
         TourTarget(
-          key: _boardKey,
+          key: _multipliersKey,
           title: 'Valeur des cases',
           body: 'Les bords paient gros. Le centre, bien moins.',
           holePadding: CoachmarkTokens.holePaddingBoard,
@@ -262,6 +264,27 @@ class _PlinkoScreenState extends State<PlinkoScreen> {
                       ),
                       child: KeyedSubtree(
                         key: _boardKey,
+                        child: const SizedBox.expand(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Zone cible pour le step "Valeur des cases" — bande horizontale
+              // resserrée sur la rangée multiplicateurs tout en bas du plateau.
+              // Le % est calé sur la géométrie actuelle (slots ~85-92% de la
+              // zone board, qui elle-même occupe 30-75% du container).
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: LayoutBuilder(
+                    builder: (_, c) => Padding(
+                      padding: EdgeInsets.only(
+                        top: c.maxHeight * 0.66,
+                        bottom: c.maxHeight * 0.23,
+                      ),
+                      child: KeyedSubtree(
+                        key: _multipliersKey,
                         child: const SizedBox.expand(),
                       ),
                     ),
